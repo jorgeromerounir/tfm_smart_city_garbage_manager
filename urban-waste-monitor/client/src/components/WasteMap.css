@@ -1,9 +1,0 @@
-@keyframes dash {
-  to {
-    stroke-dashoffset: -15px;
-  }
-}
-
-.animated-route {
-  animation: dash 2s linear infinite;
-}
