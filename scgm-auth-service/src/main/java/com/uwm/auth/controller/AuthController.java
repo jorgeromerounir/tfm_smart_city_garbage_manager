@@ -1,0 +1,36 @@
+package com.uwm.auth.controller;
+
+import com.uwm.auth.dto.AuthResponse;
+import com.uwm.auth.dto.RefreshRequest;
+import com.uwm.auth.dto.SignInRequest;
+import com.uwm.auth.service.AuthService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+@RestController
+@RequestMapping("/auth")
+@CrossOrigin(origins = "*")
+public class AuthController {
+    
+    @Autowired
+    private AuthService authService;
+    
+    @PostMapping("/signin")
+    public ResponseEntity<AuthResponse> signIn(@RequestBody SignInRequest request) {
+        AuthResponse response = authService.signIn(request.email(), request.password());
+        return ResponseEntity.ok(response);
+    }
+    
+    @PostMapping("/refresh")
+    public ResponseEntity<AuthResponse> refresh(@RequestBody RefreshRequest request) {
+        AuthResponse response = authService.refreshToken(request.refreshToken());
+        return ResponseEntity.ok(response);
+    }
+    
+    @PostMapping("/logout")
+    public ResponseEntity<Void> logout(@RequestBody RefreshRequest request) {
+        authService.logout(request.refreshToken());
+        return ResponseEntity.ok().build();
+    }
+}
