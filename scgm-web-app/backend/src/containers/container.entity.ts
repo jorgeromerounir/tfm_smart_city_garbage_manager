@@ -1,4 +1,10 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn } from 'typeorm';
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
+} from 'typeorm'
 
 export enum WasteLevel {
   LIGHT = 'light',
@@ -9,33 +15,33 @@ export enum WasteLevel {
 @Entity()
 export class Container {
   @PrimaryGeneratedColumn('uuid')
-  id: string;
+  id: string
 
   @Column({ type: 'decimal', precision: 10, scale: 7 })
-  latitude: number;
+  latitude: number
 
   @Column({ type: 'decimal', precision: 10, scale: 7 })
-  longitude: number;
+  longitude: number
 
   @Column({
     type: 'text',
     enum: WasteLevel,
     default: WasteLevel.LIGHT,
   })
-  wasteLevel: WasteLevel;
+  wasteLevel: WasteLevel
 
   @Column({ type: 'decimal', precision: 5, scale: 2 })
-  temperature: number;
+  temperature: number
 
   @Column({ type: 'text', nullable: true })
-  address: string;
+  address: string
 
   @Column({ type: 'text', nullable: true })
-  city: string;
+  city: string
 
   @CreateDateColumn()
-  createdAt: Date;
+  createdAt: Date
 
   @UpdateDateColumn()
-  updatedAt: Date;
+  updatedAt: Date
 }

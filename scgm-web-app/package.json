@@ -16,11 +16,12 @@
     "test:backend": "cd backend && npm test",
     "test:frontend": "cd frontend && npm test",
     "dev": "concurrently \"npm run start:backend\" \"npm run start:frontend\" \"npm run start:simulator\"",
-    "lint": "cd backend && npm run lint && cd ../frontend && npm run lint"
+    "lint": "cd backend && npm run lint && cd ../frontend && npm run lint && cd ../sensor-simulator && npm run lint",
+    "format": "cd backend && npm run format && cd ../frontend && npm run format && cd ../sensor-simulator && npm run format",
+    "check": "cd backend && npm run check && cd ../frontend && npm run check && cd ../sensor-simulator && npm run check"
   },
   "keywords": [
     "urban-waste",
-    "iot",
     "monitoring",
     "route-optimization",
     "smart-city",

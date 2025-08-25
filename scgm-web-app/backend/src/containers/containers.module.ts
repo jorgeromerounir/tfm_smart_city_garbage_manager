@@ -1,9 +1,9 @@
-import { Module, forwardRef } from '@nestjs/common';
-import { TypeOrmModule } from '@nestjs/typeorm';
-import { ContainersController } from './containers.controller';
-import { ContainersService } from './containers.service';
-import { Container } from './container.entity';
-import { WebsocketModule } from '../websocket/websocket.module';
+import { forwardRef, Module } from '@nestjs/common'
+import { TypeOrmModule } from '@nestjs/typeorm'
+import { WebsocketModule } from '../websocket/websocket.module'
+import { Container } from './container.entity'
+import { ContainersController } from './containers.controller'
+import { ContainersService } from './containers.service'
 
 @Module({
   imports: [

@@ -1,28 +1,34 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn } from 'typeorm';
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
+} from 'typeorm'
 
 @Entity('cities')
 export class City {
   @PrimaryGeneratedColumn()
-  id: number;
+  id: number
 
   @Column()
-  name: string;
+  name: string
 
   @Column()
-  country: string;
+  country: string
 
   @Column('decimal', { precision: 10, scale: 7 })
-  latitude: number;
+  latitude: number
 
   @Column('decimal', { precision: 10, scale: 7 })
-  longitude: number;
+  longitude: number
 
   @Column({ default: true })
-  active: boolean;
+  active: boolean
 
   @CreateDateColumn()
-  createdAt: Date;
+  createdAt: Date
 
   @UpdateDateColumn()
-  updatedAt: Date;
+  updatedAt: Date
 }

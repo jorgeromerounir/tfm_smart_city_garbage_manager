@@ -1,24 +1,30 @@
-import { IsArray, IsEnum, IsNumber, IsOptional, IsString } from 'class-validator';
-import { WasteLevel } from '../../containers/container.entity';
+import {
+  IsArray,
+  IsEnum,
+  IsNumber,
+  IsOptional,
+  IsString,
+} from 'class-validator'
+import { WasteLevel } from '../../containers/container.entity'
 
 export class OptimizeRouteDto {
   @IsNumber()
-  startLat: number;
+  startLat: number
 
   @IsNumber()
-  startLng: number;
+  startLng: number
 
   @IsNumber()
-  endLat: number;
+  endLat: number
 
   @IsNumber()
-  endLng: number;
+  endLng: number
 
   @IsString()
-  city: string;
+  city: string
 
   @IsArray()
   @IsEnum(WasteLevel, { each: true })
   @IsOptional()
-  wasteTypes?: WasteLevel[];
+  wasteTypes?: WasteLevel[]
 }

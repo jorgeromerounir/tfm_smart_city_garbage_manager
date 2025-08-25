@@ -1,6 +1,6 @@
-import { Controller, Post, Body } from '@nestjs/common';
-import { RoutesService } from './routes.service';
-import { OptimizeRouteDto } from './dto/optimize-route.dto';
+import { Body, Controller, Post } from '@nestjs/common'
+import type { OptimizeRouteDto } from './dto/optimize-route.dto'
+import type { RoutesService } from './routes.service'
 
 @Controller('routes')
 export class RoutesController {
@@ -8,6 +8,6 @@ export class RoutesController {
 
   @Post('optimize')
   async optimizeRoute(@Body() data: OptimizeRouteDto) {
-    return this.routesService.optimizeRoute(data);
+    return this.routesService.optimizeRoute(data)
   }
 }

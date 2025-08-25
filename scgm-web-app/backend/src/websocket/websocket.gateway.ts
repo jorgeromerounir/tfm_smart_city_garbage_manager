@@ -1,6 +1,6 @@
-import { WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
-import { Server } from 'socket.io';
-import { Container } from '../containers/container.entity';
+import { WebSocketGateway, WebSocketServer } from '@nestjs/websockets'
+import type { Server } from 'socket.io'
+import type { Container } from '../containers/container.entity'
 
 @WebSocketGateway({
   cors: {
@@ -10,7 +10,7 @@ import { Container } from '../containers/container.entity';
 })
 export class WebsocketGateway {
   @WebSocketServer()
-  server: Server;
+  server: Server
 
   emitStatusUpdate(container: Container) {
     this.server.emit('containerStatusUpdate', {
@@ -20,10 +20,10 @@ export class WebsocketGateway {
       latitude: container.latitude,
       longitude: container.longitude,
       updatedAt: container.updatedAt,
-    });
+    })
   }
 
   emitRouteUpdate(route: any) {
-    this.server.emit('routeUpdate', route);
+    this.server.emit('routeUpdate', route)
   }
 }
