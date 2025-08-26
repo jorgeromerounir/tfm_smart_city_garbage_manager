@@ -6,12 +6,9 @@ import {
 	Button,
 	Card,
 	CardContent,
-	Checkbox,
 	Chip,
 	CircularProgress,
 	FormControl,
-	FormControlLabel,
-	FormGroup,
 	Grid,
 	InputLabel,
 	MenuItem,
@@ -24,313 +21,38 @@ import {
 	ToggleButtonGroup,
 	Typography,
 } from '@mui/material'
-import React, { useEffect, useState } from 'react'
+import React from 'react'
 import MapView from '../components/MapView'
 import { useAuth } from '../contexts/AuthContext'
-import { citiesApi, containerApi, routeApi } from '../services/api'
-import {
-	City,
-	Container,
-	OptimizedRoute,
-	RoutePoint,
-	SavedRoute,
-	WasteLevel,
-} from '../types'
-
-interface CityWithLocations extends City {
-	center: [number, number]
-	locations: Array<{ name: string; lat: number; lng: number }>
-}
-
-const defaultLocations = {
-	'Bogotá D.C.': [
-		{ name: 'Plaza Bolívar', lat: 4.5981, lng: -74.0758 },
-		{ name: 'Zona Rosa', lat: 4.6698, lng: -74.0531 },
-		{ name: 'Centro Andino', lat: 4.6736, lng: -74.0574 },
-		{ name: 'Terminal de Transporte', lat: 4.6392, lng: -74.1069 },
-		{ name: 'Aeropuerto El Dorado', lat: 4.7016, lng: -74.1469 },
-		{ name: 'Universidad Nacional', lat: 4.6356, lng: -74.0834 },
-	],
-	Madrid: [
-		{ name: 'Puerta del Sol', lat: 40.4168, lng: -3.7038 },
-		{ name: 'Plaza Mayor', lat: 40.4155, lng: -3.7074 },
-		{ name: 'Retiro Park', lat: 40.4153, lng: -3.6844 },
-		{ name: 'Atocha Station', lat: 40.4063, lng: -3.6906 },
-		{ name: 'Barajas Airport', lat: 40.4719, lng: -3.5626 },
-		{ name: 'Santiago Bernabéu', lat: 40.453, lng: -3.6883 },
-	],
-}
+import useContainers from '../hooks/useContainers.ts'
+import useRoutes from '../hooks/useRoutes.ts'
 
 const RoutesPage: React.FC = () => {
 	const { user } = useAuth()
-	const [containers, setContainers] = useState<Container[]>([])
-	const [cities, setCities] = useState<CityWithLocations[]>([])
-	const [selectedCity, setSelectedCity] = useState<CityWithLocations | null>(
-		null,
-	)
-	const [startLocation, setStartLocation] = useState('')
-	const [endLocation, setEndLocation] = useState('')
-	const [selectedWasteTypes, setSelectedWasteTypes] = useState<WasteLevel[]>([
-		WasteLevel.HEAVY,
-		WasteLevel.MEDIUM,
-	])
-	const [optimizedRoute, setOptimizedRoute] = useState<OptimizedRoute | null>(
-		null,
-	)
-	const [loading, setLoading] = useState(false)
-	const [routeName, setRouteName] = useState('')
-	const [savedRoutes, setSavedRoutes] = useState<SavedRoute[]>([])
-	const [tabValue, setTabValue] = useState(0)
-	const [notification, setNotification] = useState<{
-		open: boolean
-		message: string
-		severity: 'success' | 'error' | 'warning'
-	}>({ open: false, message: '', severity: 'success' })
-
-	useEffect(() => {
-		const fetchCities = async () => {
-			try {
-				const citiesData: City[] = await citiesApi.getAll()
-
-				const citiesWithLocations: CityWithLocations[] = citiesData
-					.filter((city) => city.active)
-					.map((city) => ({
-						...city,
-						center: [city.latitude, city.longitude] as [number, number],
-						locations:
-							defaultLocations[city.name as keyof typeof defaultLocations] ||
-							[],
-					}))
-
-				setCities(citiesWithLocations)
-
-				const defaultCity =
-					citiesWithLocations.find(
-						(c) =>
-							(user?.country === 'Colombia' && c.country === 'Colombia') ||
-							(user?.country === 'Spain' && c.country === 'Spain'),
-					) || citiesWithLocations[0]
-
-				setSelectedCity(defaultCity)
-			} catch (error) {
-				console.error('Failed to fetch cities:', error)
-			}
-		}
-
-		fetchCities()
-
-		const loadSavedRoutes = () => {
-			const routes = JSON.parse(localStorage.getItem('savedRoutes') || '[]')
-			setSavedRoutes(routes)
-		}
-		loadSavedRoutes()
-	}, [user?.country])
-
-	useEffect(() => {
-		const fetchContainers = async () => {
-			try {
-				const data = await containerApi.getAll(user?.country)
-				setContainers(data)
-			} catch (error) {
-				console.error('Failed to fetch containers:', error)
-			}
-		}
-
-		fetchContainers()
-	}, [user?.country])
-
-	useEffect(() => {
-		if (selectedCity) {
-			setStartLocation('')
-			setEndLocation('')
-			setOptimizedRoute(null)
-			const loadSavedRoutes = () => {
-				const routes = JSON.parse(localStorage.getItem('savedRoutes') || '[]')
-				setSavedRoutes(
-					routes.filter(
-						(r: SavedRoute) =>
-							r.city === `${selectedCity.name}, ${selectedCity.country}`,
-					),
-				)
-			}
-			loadSavedRoutes()
-		}
-	}, [selectedCity])
-
-	const handleWasteTypeChange = (wasteType: WasteLevel) => {
-		setSelectedWasteTypes((prev) =>
-			prev.includes(wasteType)
-				? prev.filter((type) => type !== wasteType)
-				: [...prev, wasteType],
-		)
-	}
-
-	const handleOptimizeRoute = async () => {
-		if (!startLocation || !endLocation) {
-			setNotification({
-				open: true,
-				message: 'Please select start and end locations',
-				severity: 'warning',
-			})
-			return
-		}
-
-		if (!selectedCity) {
-			setNotification({
-				open: true,
-				message: 'Please select a city first',
-				severity: 'error',
-			})
-			return
-		}
-
-		const startLoc = selectedCity.locations.find(
-			(loc) => loc.name === startLocation,
-		)
-		const endLoc = selectedCity.locations.find(
-			(loc) => loc.name === endLocation,
-		)
-
-		if (!startLoc || !endLoc) {
-			setNotification({
-				open: true,
-				message: 'Invalid location selection',
-				severity: 'error',
-			})
-			return
-		}
-
-		setLoading(true)
-		try {
-			const route = await routeApi.optimize({
-				startLat: startLoc.lat,
-				startLng: startLoc.lng,
-				endLat: endLoc.lat,
-				endLng: endLoc.lng,
-				city: `${selectedCity.name}, ${selectedCity.country}`,
-				wasteTypes:
-					selectedWasteTypes.length > 0 ? selectedWasteTypes : undefined,
-			})
-			setOptimizedRoute(route)
-		} catch (error) {
-			console.error('Failed to optimize route:', error)
-			setNotification({
-				open: true,
-				message: 'Failed to optimize route',
-				severity: 'error',
-			})
-		} finally {
-			setLoading(false)
-		}
-	}
-
-	const handleSaveRoute = () => {
-		if (!routeName || !optimizedRoute) {
-			setNotification({
-				open: true,
-				message: 'Please enter a route name and optimize a route first',
-				severity: 'warning',
-			})
-			return
-		}
-
-		if (!selectedCity) return
-
-		const allRoutes = JSON.parse(localStorage.getItem('savedRoutes') || '[]')
-		const cityName = `${selectedCity.name}, ${selectedCity.country}`
-		const existingRoute = allRoutes.find(
-			(r: SavedRoute) => r.name === routeName && r.city === cityName,
-		)
-
-		if (existingRoute) {
-			const confirmed = window.confirm(
-				`A route named "${routeName}" already exists for ${selectedCity.name}. Do you want to replace it?`,
-			)
-			if (!confirmed) return
-
-			// Remove existing route
-			const updatedRoutes = allRoutes.filter(
-				(r: SavedRoute) => !(r.name === routeName && r.city === cityName),
-			)
-
-			const newRoute: SavedRoute = {
-				id: Date.now().toString(),
-				name: routeName,
-				city: cityName,
-				...optimizedRoute,
-				createdAt: new Date().toISOString(),
-			}
-
-			updatedRoutes.push(newRoute)
-			localStorage.setItem('savedRoutes', JSON.stringify(updatedRoutes))
-
-			const cityRoutes = updatedRoutes.filter(
-				(r: SavedRoute) => r.city === cityName,
-			)
-			setSavedRoutes(cityRoutes)
-
-			setNotification({
-				open: true,
-				message: 'Route replaced successfully!',
-				severity: 'success',
-			})
-		} else {
-			const newRoute: SavedRoute = {
-				id: Date.now().toString(),
-				name: routeName,
-				city: cityName,
-				...optimizedRoute,
-				createdAt: new Date().toISOString(),
-			}
-
-			allRoutes.push(newRoute)
-			localStorage.setItem('savedRoutes', JSON.stringify(allRoutes))
-
-			const cityRoutes = allRoutes.filter(
-				(r: SavedRoute) => r.city === cityName,
-			)
-			setSavedRoutes(cityRoutes)
-
-			setNotification({
-				open: true,
-				message: 'Route saved successfully!',
-				severity: 'success',
-			})
-		}
-
-		setRouteName('')
-	}
-
-	const handleLoadRoute = (route: SavedRoute) => {
-		setOptimizedRoute({
-			route: route.route,
-			totalDistance: route.totalDistance,
-			containerCount: route.containerCount,
-			estimatedTime: route.estimatedTime,
-		})
-		setTabValue(0)
-	}
-
-	const handleDeleteRoute = (routeId: string) => {
-		const allRoutes = JSON.parse(localStorage.getItem('savedRoutes') || '[]')
-		const updatedRoutes = allRoutes.filter((r: SavedRoute) => r.id !== routeId)
-		localStorage.setItem('savedRoutes', JSON.stringify(updatedRoutes))
-
-		if (!selectedCity) return
-		const cityRoutes = updatedRoutes.filter(
-			(r: SavedRoute) =>
-				r.city === `${selectedCity.name}, ${selectedCity.country}`,
-		)
-		setSavedRoutes(cityRoutes)
-	}
-
-	const filteredContainers = containers.filter((container) => {
-		const matchesFilter =
-			selectedWasteTypes.length === 0 ||
-			selectedWasteTypes.includes(container.wasteLevel)
-
-		return matchesFilter
-	})
+	const { filteredContainers, selectedWasteTypes, setSelectedWasteTypes } =
+		useContainers(user?.country)
+	const {
+		tabValue,
+		cities,
+		selectedCity,
+		setRouteName,
+		setSelectedCity,
+		setTabValue,
+		routeName,
+		loading,
+		optimizedRoute,
+		setStartLocation,
+		setEndLocation,
+		startLocation,
+		endLocation,
+		handleDeleteRoute,
+		notification,
+		handleOptimizeRoute,
+		handleLoadRoute,
+		handleSaveRoute,
+		setNotification,
+		savedRoutes,
+	} = useRoutes(user ?? undefined, selectedWasteTypes)
 
 	return (
 		<Box>
@@ -361,11 +83,11 @@ const RoutesPage: React.FC = () => {
 								<Box>
 									<Autocomplete
 										options={cities
-											.filter((city) => {
+											.filter(city => {
 												if (user?.profile === 'ADMIN') return true
 												return city.country === user?.country
 											})
-											.map((city) => `${city.name}, ${city.country}`)}
+											.map(city => `${city.name}, ${city.country}`)}
 										value={
 											selectedCity
 												? `${selectedCity.name}, ${selectedCity.country}`
@@ -374,13 +96,13 @@ const RoutesPage: React.FC = () => {
 										onChange={(_, newValue) => {
 											if (newValue) {
 												const city = cities.find(
-													(c) => `${c.name}, ${c.country}` === newValue,
+													c => `${c.name}, ${c.country}` === newValue,
 												)
 												if (city) setSelectedCity(city)
 											}
 										}}
 										disabled={user?.profile !== 'ADMIN'}
-										renderInput={(params) => (
+										renderInput={params => (
 											<TextField
 												{...params}
 												label="City"
@@ -398,9 +120,9 @@ const RoutesPage: React.FC = () => {
 											labelId="start-location-label"
 											value={startLocation}
 											label="Start Location"
-											onChange={(e) => setStartLocation(e.target.value)}
+											onChange={e => setStartLocation(e.target.value)}
 										>
-											{selectedCity?.locations.map((location) => (
+											{selectedCity?.locations.map(location => (
 												<MenuItem key={location.name} value={location.name}>
 													{location.name}
 												</MenuItem>
@@ -416,9 +138,9 @@ const RoutesPage: React.FC = () => {
 											labelId="end-location-label"
 											value={endLocation}
 											label="End Location"
-											onChange={(e) => setEndLocation(e.target.value)}
+											onChange={e => setEndLocation(e.target.value)}
 										>
-											{selectedCity?.locations.map((location) => (
+											{selectedCity?.locations.map(location => (
 												<MenuItem key={location.name} value={location.name}>
 													{location.name}
 												</MenuItem>
@@ -516,7 +238,7 @@ const RoutesPage: React.FC = () => {
 											<TextField
 												label="Route Name"
 												value={routeName}
-												onChange={(e) => setRouteName(e.target.value)}
+												onChange={e => setRouteName(e.target.value)}
 												fullWidth
 												margin="normal"
 												size="small"
@@ -553,7 +275,7 @@ const RoutesPage: React.FC = () => {
 											No saved routes for {selectedCity?.name}
 										</Typography>
 									) : (
-										savedRoutes.map((route) => (
+										savedRoutes.map(route => (
 											<Card
 												key={route.id}
 												sx={{
@@ -646,11 +368,11 @@ const RoutesPage: React.FC = () => {
 			<Snackbar
 				open={notification.open}
 				autoHideDuration={4000}
-				onClose={() => setNotification((prev) => ({ ...prev, open: false }))}
+				onClose={() => setNotification(prev => ({ ...prev, open: false }))}
 				anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
 			>
 				<Alert
-					onClose={() => setNotification((prev) => ({ ...prev, open: false }))}
+					onClose={() => setNotification(prev => ({ ...prev, open: false }))}
 					severity={notification.severity}
 					sx={{ width: '100%', borderRadius: 2 }}
 				>

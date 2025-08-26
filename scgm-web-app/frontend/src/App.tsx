@@ -1,7 +1,7 @@
 import { Box } from '@mui/material'
 import { useSnackbar } from 'notistack'
 import React, { useEffect } from 'react'
-import { Navigate, Route, Routes } from 'react-router-dom'
+import { Route, Routes } from 'react-router-dom'
 import Navbar from './components/Navbar'
 import ProtectedRoute from './components/ProtectedRoute'
 import { AuthProvider, useAuth } from './contexts/AuthContext'
@@ -20,7 +20,7 @@ const AppContent: React.FC = () => {
 
 	useEffect(() => {
 		if (isAuthenticated) {
-			const socket = socketService.connect()
+			socketService.connect()
 
 			socketService.onContainerUpdate((container: Container) => {
 				enqueueSnackbar(

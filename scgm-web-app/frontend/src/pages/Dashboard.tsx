@@ -29,7 +29,7 @@ const Dashboard: React.FC = () => {
 			}
 		}
 
-		fetchStatus()
+		void fetchStatus()
 		const interval = setInterval(fetchStatus, 60000) // Update every minute
 
 		return () => clearInterval(interval)

@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 import type { Repository } from 'typeorm'
-import { Container, WasteLevel } from '../containers/container.entity'
+import { Container } from '../containers/container.entity'
 import type { OptimizeRouteDto } from './dto/optimize-route.dto'
 
 export interface Point {

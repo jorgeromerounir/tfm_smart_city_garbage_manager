@@ -1,6 +1,6 @@
 import { Body, Controller, Post } from '@nestjs/common'
 import type { OptimizeRouteDto } from './dto/optimize-route.dto'
-import type { RoutesService } from './routes.service'
+import { RoutesService } from './routes.service'
 
 @Controller('routes')
 export class RoutesController {

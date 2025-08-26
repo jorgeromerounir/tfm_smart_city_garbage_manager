@@ -15,6 +15,7 @@ import { WebsocketModule } from './websocket/websocket.module'
       database: 'uwm.db',
       entities: [Container, City],
       synchronize: true,
+      autoLoadEntities: true
     }),
     ScheduleModule.forRoot(),
     ContainersModule,

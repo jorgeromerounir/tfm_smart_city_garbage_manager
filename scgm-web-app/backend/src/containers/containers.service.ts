@@ -2,7 +2,7 @@ import { Injectable, type OnModuleInit } from '@nestjs/common'
 import { Cron, CronExpression } from '@nestjs/schedule'
 import { InjectRepository } from '@nestjs/typeorm'
 import type { Repository } from 'typeorm'
-import type { WebsocketGateway } from '../websocket/websocket.gateway'
+import { WebsocketGateway } from '../websocket/websocket.gateway'
 import { Container, WasteLevel } from './container.entity'
 import type { SensorDataDto } from './dto/sensor-data.dto'
 
@@ -11,7 +11,7 @@ export class ContainersService implements OnModuleInit {
   constructor(
     @InjectRepository(Container)
     private containerRepository: Repository<Container>,
-    private websocketGateway: WebsocketGateway,
+    private websocketGateway: WebsocketGateway
   ) {}
 
   async onModuleInit() {
@@ -33,7 +33,7 @@ export class ContainersService implements OnModuleInit {
         {
           lat: 4.675,
           lng: -74.06,
-          address: 'Carrera 7 #85-30, Chapinero Norte',
+          address: 'Carrera 7 #85-30, Chapinero Norte'
         },
         // Avenida Caracas
         { lat: 4.61, lng: -74.085, address: 'Av. Caracas #22-10, Santa Fe' },
@@ -57,13 +57,13 @@ export class ContainersService implements OnModuleInit {
         {
           lat: 4.69,
           lng: -74.055,
-          address: 'Calle 100 #11-80, Chapinero Norte',
+          address: 'Calle 100 #11-80, Chapinero Norte'
         },
         {
           lat: 4.69,
           lng: -74.065,
-          address: 'Calle 100 #18-45, Chapinero Norte',
-        },
+          address: 'Calle 100 #18-45, Chapinero Norte'
+        }
       ],
       madrid: [
         // Gran Vía
@@ -78,29 +78,29 @@ export class ContainersService implements OnModuleInit {
         {
           lat: 40.43,
           lng: -3.695,
-          address: 'P. de la Castellana, 15, Salamanca',
+          address: 'P. de la Castellana, 15, Salamanca'
         },
         {
           lat: 40.44,
           lng: -3.692,
-          address: 'P. de la Castellana, 45, Chamartín',
+          address: 'P. de la Castellana, 45, Chamartín'
         },
         {
           lat: 40.45,
           lng: -3.689,
-          address: 'P. de la Castellana, 75, Chamartín',
+          address: 'P. de la Castellana, 75, Chamartín'
         },
         // Calle de Serrano
         {
           lat: 40.425,
           lng: -3.685,
-          address: 'Calle de Serrano, 25, Salamanca',
+          address: 'Calle de Serrano, 25, Salamanca'
         },
         { lat: 40.43, lng: -3.683, address: 'Calle de Serrano, 45, Salamanca' },
         {
           lat: 40.435,
           lng: -3.681,
-          address: 'Calle de Serrano, 65, Salamanca',
+          address: 'Calle de Serrano, 65, Salamanca'
         },
         // Paseo del Prado
         { lat: 40.408, lng: -3.692, address: 'Paseo del Prado, 8, Cortes' },
@@ -115,14 +115,14 @@ export class ContainersService implements OnModuleInit {
         {
           lat: 40.425,
           lng: -3.708,
-          address: 'Calle de Fuencarral, 25, Malasaña',
+          address: 'Calle de Fuencarral, 25, Malasaña'
         },
         {
           lat: 40.428,
           lng: -3.707,
-          address: 'Calle de Fuencarral, 45, Malasaña',
-        },
-      ],
+          address: 'Calle de Fuencarral, 45, Malasaña'
+        }
+      ]
     }
 
     for (let i = 0; i < 200; i++) {
@@ -138,7 +138,7 @@ export class ContainersService implements OnModuleInit {
         wasteLevel: Object.values(WasteLevel)[Math.floor(Math.random() * 3)],
         temperature: Math.round((Math.random() * 40 + 10) * 100) / 100,
         address: location.address,
-        city: isBogota ? 'Bogotá D.C., Colombia' : 'Madrid, Spain',
+        city: isBogota ? 'Bogotá D.C., Colombia' : 'Madrid, Spain'
       })
       containers.push(container)
     }
@@ -149,7 +149,7 @@ export class ContainersService implements OnModuleInit {
 
   async updateSensorData(data: SensorDataDto) {
     const container = await this.containerRepository.findOne({
-      where: { id: data.containerId },
+      where: { id: data.containerId }
     })
 
     if (!container) {
@@ -184,14 +184,14 @@ export class ContainersService implements OnModuleInit {
     const whereClause = city ? { city } : {}
     const [light, medium, heavy] = await Promise.all([
       this.containerRepository.count({
-        where: { ...whereClause, wasteLevel: WasteLevel.LIGHT },
+        where: { ...whereClause, wasteLevel: WasteLevel.LIGHT }
       }),
       this.containerRepository.count({
-        where: { ...whereClause, wasteLevel: WasteLevel.MEDIUM },
+        where: { ...whereClause, wasteLevel: WasteLevel.MEDIUM }
       }),
       this.containerRepository.count({
-        where: { ...whereClause, wasteLevel: WasteLevel.HEAVY },
-      }),
+        where: { ...whereClause, wasteLevel: WasteLevel.HEAVY }
+      })
     ])
 
     return { light, medium, heavy, total: light + medium + heavy }

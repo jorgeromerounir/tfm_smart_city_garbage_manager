@@ -86,7 +86,7 @@ const CreateUserForm: React.FC<CreateUserFormProps> = ({
 						fullWidth
 						label="Name"
 						value={name}
-						onChange={(e) => setName(e.target.value)}
+						onChange={e => setName(e.target.value)}
 						margin="normal"
 						required
 					/>
@@ -96,7 +96,7 @@ const CreateUserForm: React.FC<CreateUserFormProps> = ({
 						label="Email"
 						type="email"
 						value={email}
-						onChange={(e) => setEmail(e.target.value)}
+						onChange={e => setEmail(e.target.value)}
 						margin="normal"
 						required
 					/>
@@ -106,7 +106,7 @@ const CreateUserForm: React.FC<CreateUserFormProps> = ({
 						label="Password"
 						type="password"
 						value={password}
-						onChange={(e) => setPassword(e.target.value)}
+						onChange={e => setPassword(e.target.value)}
 						margin="normal"
 						required
 					/>
@@ -115,10 +115,10 @@ const CreateUserForm: React.FC<CreateUserFormProps> = ({
 						<InputLabel>Profile</InputLabel>
 						<Select
 							value={profile}
-							onChange={(e) => setProfile(e.target.value as Profile)}
+							onChange={e => setProfile(e.target.value as Profile)}
 							label="Profile"
 						>
-							{availableProfiles().map((prof) => (
+							{availableProfiles().map(prof => (
 								<MenuItem key={prof} value={prof}>
 									{prof}
 								</MenuItem>

@@ -30,7 +30,7 @@ const accountsApi = axios.create({
 })
 
 // Add auth token to requests
-accountsApi.interceptors.request.use((config) => {
+accountsApi.interceptors.request.use(config => {
 	const token = localStorage.getItem('accessToken')
 	if (token) {
 		config.headers.Authorization = `Bearer ${token}`
@@ -39,14 +39,16 @@ accountsApi.interceptors.request.use((config) => {
 })
 
 export const containerApi = {
-	getAll: (city?: string): Promise<Container[]> => {
+	getAll: async (city?: string): Promise<Container[]> => {
 		const params = city ? { city } : {}
-		return api.get('/containers', { params }).then((res) => res.data)
+		const res = await api.get('/containers', { params })
+		return res.data
 	},
 
-	getStatus: (city?: string): Promise<StatusSummary> => {
+	getStatus: async (city?: string): Promise<StatusSummary> => {
 		const params = city ? { city } : {}
-		return api.get('/containers/status', { params }).then((res) => res.data)
+		const res = await api.get('/containers/status', { params })
+		return res.data
 	},
 }
 
@@ -59,41 +61,41 @@ export const routeApi = {
 		city: string
 		wasteTypes?: WasteLevel[]
 	}): Promise<OptimizedRoute> =>
-		api.post('/routes/optimize', data).then((res) => res.data),
+		api.post('/routes/optimize', data).then(res => res.data),
 }
 
 export const authService = {
 	signIn: (data: SignInRequest): Promise<AuthResponse> =>
-		authApi.post('/auth/signin', data).then((res) => res.data),
+		authApi.post('/auth/signin', data).then(res => res.data),
 
 	refresh: (refreshToken: string): Promise<AuthResponse> =>
-		authApi.post('/auth/refresh', { refreshToken }).then((res) => res.data),
+		authApi.post('/auth/refresh', { refreshToken }).then(res => res.data),
 
 	logout: (refreshToken: string): Promise<void> =>
-		authApi.post('/auth/logout', { refreshToken }).then((res) => res.data),
+		authApi.post('/auth/logout', { refreshToken }).then(res => res.data),
 }
 
 export const userApi = {
 	getAll: (): Promise<User[]> =>
-		accountsApi.get('/accounts').then((res) => res.data),
+		accountsApi.get('/accounts').then(res => res.data),
 
 	getById: (id: number): Promise<User> =>
-		accountsApi.get(`/accounts/${id}`).then((res) => res.data),
+		accountsApi.get(`/accounts/${id}`).then(res => res.data),
 
 	create: (data: CreateUserRequest): Promise<User> =>
-		accountsApi.post('/accounts', data).then((res) => res.data),
+		accountsApi.post('/accounts', data).then(res => res.data),
 
 	update: (id: number, data: Partial<CreateUserRequest>): Promise<User> =>
-		accountsApi.put(`/accounts/${id}`, data).then((res) => res.data),
+		accountsApi.put(`/accounts/${id}`, data).then(res => res.data),
 
 	delete: (id: number): Promise<void> =>
-		accountsApi.delete(`/accounts/${id}`).then((res) => res.data),
+		accountsApi.delete(`/accounts/${id}`).then(res => res.data),
 }
 
 export const citiesApi = {
-	getAll: () => api.get('/cities').then((res) => res.data),
-	create: (data: any) => api.post('/cities', data).then((res) => res.data),
+	getAll: () => api.get('/cities').then(res => res.data),
+	create: (data: any) => api.post('/cities', data).then(res => res.data),
 	update: (id: number, data: any) =>
-		api.put(`/cities/${id}`, data).then((res) => res.data),
-	delete: (id: number) => api.delete(`/cities/${id}`).then((res) => res.data),
+		api.put(`/cities/${id}`, data).then(res => res.data),
+	delete: (id: number) => api.delete(`/cities/${id}`).then(res => res.data),
 }

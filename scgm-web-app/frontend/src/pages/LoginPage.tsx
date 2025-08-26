@@ -85,7 +85,7 @@ const LoginPage: React.FC = () => {
 								label="Email"
 								type="email"
 								value={email}
-								onChange={(e) => setEmail(e.target.value)}
+								onChange={e => setEmail(e.target.value)}
 								margin="normal"
 								required
 								autoFocus
@@ -96,7 +96,7 @@ const LoginPage: React.FC = () => {
 								label="Password"
 								type="password"
 								value={password}
-								onChange={(e) => setPassword(e.target.value)}
+								onChange={e => setPassword(e.target.value)}
 								margin="normal"
 								required
 							/>

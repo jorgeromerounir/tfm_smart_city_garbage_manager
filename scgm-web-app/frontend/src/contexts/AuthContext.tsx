@@ -42,14 +42,14 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 		const userEmail = localStorage.getItem('userEmail')
 
 		if (token && userEmail) {
-			fetchUserByEmail(userEmail)
+			void fetchUserByEmail(userEmail)
 		}
 	}, [])
 
 	const fetchUserByEmail = async (email: string) => {
 		try {
 			const users = await userApi.getAll()
-			const currentUser = users.find((u) => u.email === email)
+			const currentUser = users.find(u => u.email === email)
 			if (currentUser) {
 				setUser(currentUser)
 				setIsAuthenticated(true)
@@ -95,14 +95,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 			return true
 		}
 
-		if (
-			user.profile === Profile.SUPERVISOR &&
-			targetRole === Profile.OPERATOR
-		) {
-			return true
-		}
-
-		return false
+		return (
+			user.profile === Profile.SUPERVISOR && targetRole === Profile.OPERATOR
+		)
 	}
 
 	return (

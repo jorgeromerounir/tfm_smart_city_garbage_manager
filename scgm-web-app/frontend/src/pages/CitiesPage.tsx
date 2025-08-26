@@ -6,7 +6,6 @@ import {
 	Button,
 	CircularProgress,
 	Dialog,
-	DialogActions,
 	DialogContent,
 	DialogTitle,
 	FormControlLabel,
@@ -23,7 +22,7 @@ import {
 	Typography,
 } from '@mui/material'
 import React, { useEffect, useState } from 'react'
-import { AVAILABLE_CITIES, CityOption } from '../data/cities'
+import { AVAILABLE_CITIES } from '../data/cities'
 import { citiesApi } from '../services/api'
 import { City } from '../types'
 
@@ -43,7 +42,7 @@ const CitiesPage: React.FC = () => {
 	})
 
 	useEffect(() => {
-		fetchCities()
+		void fetchCities()
 	}, [])
 
 	const fetchCities = async () => {
@@ -89,7 +88,7 @@ const CitiesPage: React.FC = () => {
 
 	const handleCitySelect = (cityKey: string) => {
 		const cityOption = AVAILABLE_CITIES.find(
-			(c) => `${c.name}, ${c.country}` === cityKey,
+			c => `${c.name}, ${c.country}` === cityKey,
 		)
 		if (cityOption) {
 			setFormData({
@@ -194,7 +193,7 @@ const CitiesPage: React.FC = () => {
 									</TableCell>
 								</TableRow>
 							) : (
-								cities.map((city) => (
+								cities.map(city => (
 									<TableRow key={city.id}>
 										<TableCell>{city.name}</TableCell>
 										<TableCell>{city.country}</TableCell>
@@ -224,14 +223,14 @@ const CitiesPage: React.FC = () => {
 					{!editingCity && (
 						<Autocomplete
 							options={AVAILABLE_CITIES.map(
-								(city) => `${city.name}, ${city.country}`,
+								city => `${city.name}, ${city.country}`,
 							)}
 							value={selectedCityOption}
 							onChange={(_, newValue) => {
 								setSelectedCityOption(newValue || '')
 								if (newValue) handleCitySelect(newValue)
 							}}
-							renderInput={(params) => (
+							renderInput={params => (
 								<TextField
 									{...params}
 									label="Select City"
@@ -246,7 +245,7 @@ const CitiesPage: React.FC = () => {
 						fullWidth
 						label="City Name"
 						value={formData.name}
-						onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+						onChange={e => setFormData({ ...formData, name: e.target.value })}
 						margin="normal"
 						disabled={!editingCity}
 					/>
@@ -254,7 +253,7 @@ const CitiesPage: React.FC = () => {
 						fullWidth
 						label="Country"
 						value={formData.country}
-						onChange={(e) =>
+						onChange={e =>
 							setFormData({ ...formData, country: e.target.value })
 						}
 						margin="normal"
@@ -265,7 +264,7 @@ const CitiesPage: React.FC = () => {
 						label="Latitude"
 						type="number"
 						value={formData.latitude}
-						onChange={(e) =>
+						onChange={e =>
 							setFormData({ ...formData, latitude: parseFloat(e.target.value) })
 						}
 						margin="normal"
@@ -276,7 +275,7 @@ const CitiesPage: React.FC = () => {
 						label="Longitude"
 						type="number"
 						value={formData.longitude}
-						onChange={(e) =>
+						onChange={e =>
 							setFormData({
 								...formData,
 								longitude: parseFloat(e.target.value),
@@ -289,7 +288,7 @@ const CitiesPage: React.FC = () => {
 						control={
 							<Switch
 								checked={formData.active}
-								onChange={(e) =>
+								onChange={e =>
 									setFormData({ ...formData, active: e.target.checked })
 								}
 							/>

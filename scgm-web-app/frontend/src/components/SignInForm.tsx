@@ -55,7 +55,7 @@ const SignInForm: React.FC<SignInFormProps> = ({ open, onClose }) => {
 						label="Email"
 						type="email"
 						value={email}
-						onChange={(e) => setEmail(e.target.value)}
+						onChange={e => setEmail(e.target.value)}
 						margin="normal"
 						required
 					/>
@@ -65,7 +65,7 @@ const SignInForm: React.FC<SignInFormProps> = ({ open, onClose }) => {
 						label="Password"
 						type="password"
 						value={password}
-						onChange={(e) => setPassword(e.target.value)}
+						onChange={e => setPassword(e.target.value)}
 						margin="normal"
 						required
 					/>

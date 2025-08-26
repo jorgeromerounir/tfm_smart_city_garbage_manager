@@ -5,16 +5,15 @@ export enum WasteLevel {
 }
 
 export interface Container {
-	id: string // dkaihrkjsandkndksad || BOG000125
-	latitude: number // 1738174832
-	longitude: number // 23643267432
+	id: string
+	latitude: number
+	longitude: number
 	wasteLevel: WasteLevel
 	temperature: number
 	address?: string
 	city?: string
-	createdAt: string // cuano se instaló
-	updatedAt: string // cuando se actulaiza el estado
-	// container separated by 500mt
+	createdAt: string
+	updatedAt: string
 }
 
 export interface StatusSummary {

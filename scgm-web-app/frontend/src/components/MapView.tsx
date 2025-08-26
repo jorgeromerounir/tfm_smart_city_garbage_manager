@@ -40,11 +40,11 @@ const MapView: React.FC<MapViewProps> = ({
 	const [mapKey, setMapKey] = useState(0)
 
 	useEffect(() => {
-		setMapKey((prev) => prev + 1)
+		setMapKey(prev => prev + 1)
 	}, [center])
 
 	const routePositions: LatLngExpression[] =
-		route?.map((point) => [point.lat, point.lng]) || []
+		route?.map(point => [point.lat, point.lng]) || []
 
 	return (
 		<Box sx={{ height: '700px', width: '100%', position: 'relative' }}>
@@ -59,7 +59,7 @@ const MapView: React.FC<MapViewProps> = ({
 					url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
 				/>
 
-				{containers.map((container) => (
+				{containers.map(container => (
 					<Marker
 						key={container.id}
 						position={[container.latitude, container.longitude]}

@@ -1,5 +1,5 @@
 import { Body, Controller, Delete, Get, Param, Post, Put } from '@nestjs/common'
-import type { CitiesService } from './cities.service'
+import { CitiesService } from './cities.service'
 import type { City } from './city.entity'
 
 @Controller('cities')

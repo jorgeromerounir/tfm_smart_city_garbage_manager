@@ -7,7 +7,7 @@ import {
   Post,
   Query,
 } from '@nestjs/common'
-import type { ContainersService } from './containers.service'
+import { ContainersService } from './containers.service'
 import type { SensorDataDto } from './dto/sensor-data.dto'
 
 @Controller('containers')

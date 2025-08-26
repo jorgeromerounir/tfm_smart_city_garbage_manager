@@ -8,10 +8,11 @@ import { ContainersService } from './containers.service'
 @Module({
   imports: [
     TypeOrmModule.forFeature([Container]),
-    forwardRef(() => WebsocketModule),
+    forwardRef(() => WebsocketModule)
   ],
   controllers: [ContainersController],
   providers: [ContainersService],
-  exports: [ContainersService],
+  exports: [ContainersService]
 })
-export class ContainersModule {}
+export class ContainersModule {
+}
