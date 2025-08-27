@@ -10,6 +10,7 @@ import lombok.AllArgsConstructor;
 import org.apache.commons.lang.StringUtils;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Pattern;
 import java.time.Instant;
 
 @Entity
@@ -22,49 +23,50 @@ import java.time.Instant;
 @Builder
 public class CustomerEntity {
 
+    private static final Pattern INJECTION_PATTERN = Pattern.compile("^[a-zA-Z0-9\\s.,!?#@_'-]*$");
+
     @Id
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "customers_seq_gen")
+    @SequenceGenerator(name = "customers_seq_gen", sequenceName = "customers_seq", allocationSize = 1)
     @Column(name = "id")
     private Long id;
 
-    @Column(name = "name", length = 200)
+    @Column(name = "name", length = 200, nullable = false)
     private String name;
 
     @Column(name = "description", columnDefinition = "TEXT")
     private String description;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "city_id", referencedColumnName = "id")
+    @JoinColumn(name = "city_id", referencedColumnName = "id", nullable = false)
     private CityEntity city;
 
-    @Column(name = "created_at")
+    @Column(name = "created_at", nullable = false)
     private Instant createdAt;
 
-    @Column(name = "updated_at")
+    @Column(name = "updated_at", nullable = false)
     private Instant updatedAt;
 
-    @Column(name = "active")
+    @Column(name = "active", nullable = false)
     private Boolean active;
 
     public List<String> validate() {
         List<String> listErrors = new ArrayList<>();
-        if (getId() == null) {
-            listErrors.add("id: is required");
-        }
-        if (StringUtils.isEmpty(getName())) {
+        if (StringUtils.isEmpty(getName()))
             listErrors.add("name: cannot be empty");
-        }
-        if (getName() != null && getName().length() > 200) {
+        if (!StringUtils.isEmpty(getName()) && getName().length() > 200) {
             listErrors.add("name: must not exceed 200 characters");
+        } else if (!StringUtils.isEmpty(getName()) && !INJECTION_PATTERN.matcher(name).matches()) {
+            listErrors.add("name: invalid format");
         }
-        if (getCity() == null) {
+        if (description != null && !INJECTION_PATTERN.matcher(description).matches())
+            listErrors.add("description: invalid format");
+        if (getCity() == null)
             listErrors.add("city: is required");
-        }
-        if (getCity() != null && !getCity().isValid()) {
+        if (getCity() != null && !getCity().isValid())
             listErrors.add("city: invalid city entity");
-        }
-        if (getActive() == null) {
+        if (getActive() == null)
             listErrors.add("active: is required");
-        }
         return listErrors;
     }
 }

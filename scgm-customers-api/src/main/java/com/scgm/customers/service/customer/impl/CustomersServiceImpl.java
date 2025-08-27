@@ -29,20 +29,21 @@ public class CustomersServiceImpl implements CustomersService {
     private final CityRepository cityRepository;
 
     @Override
-    public Optional<CustomerDto> add(CustomerAddReq customerAddReq) {
-        var customerEntity = CustomerAddReq.toEntity(customerAddReq);
-        var listErrors = customerEntity.validate();
-        if (!listErrors.isEmpty()) {
-            throw new CustomerValidationException("Trying to add: error customer entity validation", listErrors);
-        }
+    public CustomerDto add(CustomerAddReq customerAddReq) {
         Optional<CityEntity> cityOptional = cityRepository.findById(customerAddReq.getCityId());
         if (cityOptional.isEmpty()) {
             var message = String.format("The city: %s doesn't exists", customerAddReq.getCityId());
             throw new CustomerValidationException(message);
         }
+        var customerEntity = CustomerAddReq.toEntity(customerAddReq);
+        customerEntity.setCity(cityOptional.get());
+        var listErrors = customerEntity.validate();
+        if (!listErrors.isEmpty()) {
+            throw new CustomerValidationException("Trying to add: error customer entity validation", listErrors);
+        }
         try {
             CustomerEntity savedCustomer = customerRepository.save(customerEntity);
-            return Optional.of(CustomerDto.toDto(savedCustomer));
+            return CustomerDto.toDto(savedCustomer);
         } catch (Exception e) {
             log.error("Error trying to save customer with name: {}", customerEntity.getName(), e);
             throw new CustomerDatabaseException("Error trying to save customer", e);
@@ -69,4 +70,12 @@ public class CustomersServiceImpl implements CustomersService {
                 .map(CustomerDto::toDto)
                 .collect(Collectors.toList());
     }
+
+    @Override
+    public List<CustomerDto> findAll() {
+        return customerRepository.findAll().stream()
+                .map(CustomerDto::toDto)
+                .collect(Collectors.toList());
+    }
+
 }

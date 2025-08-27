@@ -16,7 +16,6 @@ import com.scgm.customers.entity.customer.CustomerEntity;
 @Builder
 public class CustomerAddReq {
 
-    private Long id;
     private String name;
     private String description;
     private Long cityId;
@@ -25,10 +24,8 @@ public class CustomerAddReq {
     public static CustomerEntity toEntity(CustomerAddReq customerDto) {
         Instant currentInstant = Instant.now();
         return CustomerEntity.builder()
-                .id(customerDto.getId())
                 .name(customerDto.getName())
                 .description(customerDto.getDescription())
-                .city(customerDto.getCityId() != null ? CityEntity.builder().id(customerDto.getCityId()).build() : null)
                 .createdAt(currentInstant)
                 .updatedAt(currentInstant)
                 .active(customerDto.getActive())
