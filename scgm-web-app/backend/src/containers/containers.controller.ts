@@ -37,3 +37,7 @@ export class ContainersController {
     return this.containersService.getStatusSummary(city)
   }
 }
+
+-> CUSTOMER (CUSTOMER SERVICE) ->
+
+  -> ACCOUNTS (EMAIL, PASSWORD, SUPERVISOR)

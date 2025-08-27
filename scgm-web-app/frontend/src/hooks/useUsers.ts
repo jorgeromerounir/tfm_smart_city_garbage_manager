@@ -19,10 +19,10 @@ export default function useUsers() {
 			// Filter users based on role permissions
 			const filteredUsers = allUsers.filter(u => {
 				if (user?.profile === Profile.ADMIN) {
-					return u.profile === Profile.SUPERVISOR
+					return true // Admins can see all users
 				}
 				if (user?.profile === Profile.SUPERVISOR) {
-					return u.profile === Profile.OPERATOR
+					return u.profile === Profile.OPERATOR || u.profile === Profile.SUPERVISOR
 				}
 				return false
 			})

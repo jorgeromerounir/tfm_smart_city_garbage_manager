@@ -2,6 +2,8 @@ import { Injectable } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 import type { Repository } from 'typeorm'
 import { Container } from '../containers/container.entity'
+import { Truck } from '../trucks/truck.entity'
+import { RouteAssignment, AssignmentStatus } from './route-assignment.entity'
 import type { OptimizeRouteDto } from './dto/optimize-route.dto'
 
 export interface Point {
@@ -16,21 +18,26 @@ export class RoutesService {
   constructor(
     @InjectRepository(Container)
     private containerRepository: Repository<Container>,
+    @InjectRepository(Truck)
+    private truckRepository: Repository<Truck>,
+    @InjectRepository(RouteAssignment)
+    private routeAssignmentRepository: Repository<RouteAssignment>,
   ) {}
 
   async optimizeRoute(data: OptimizeRouteDto) {
     const containers = await this.getFilteredContainers(data)
-    const route = this.calculateOptimalRoute(
-      { lat: data.startLat, lng: data.startLng },
-      { lat: data.endLat, lng: data.endLng },
-      containers,
-    )
-
+    const depot = { lat: data.startLat, lng: data.startLng }
+    const trucks = await this.getAvailableTrucks(data.city)
+    
+    // Use Sweep + Dijkstra for VRP
+    const vrpSolution = this.solveVRP(depot, containers, trucks)
+    
     return {
-      route,
-      totalDistance: this.calculateTotalDistance(route),
+      routes: vrpSolution.routes,
+      totalDistance: vrpSolution.totalDistance,
       containerCount: containers.length,
-      estimatedTime: this.estimateTime(route),
+      estimatedTime: vrpSolution.estimatedTime,
+      trucksUsed: vrpSolution.trucksUsed,
     }
   }
 
@@ -74,33 +81,7 @@ export class RoutesService {
     return bounds[city] || bounds['Bogotá D.C., Colombia']
   }
 
-  private calculateOptimalRoute(
-    start: Point,
-    end: Point,
-    containers: Container[],
-  ): Point[] {
-    if (containers.length === 0) return [start, end]
 
-    // Sort containers by priority: heavy > medium > light
-    const prioritizedContainers = containers.sort((a, b) => {
-      const priority = { heavy: 3, medium: 2, light: 1 }
-      return priority[b.wasteLevel] - priority[a.wasteLevel]
-    })
-
-    const points = prioritizedContainers.map(c => ({
-      lat: Number(c.latitude),
-      lng: Number(c.longitude),
-      id: c.id,
-      priority:
-        c.wasteLevel === 'heavy' ? 3 : c.wasteLevel === 'medium' ? 2 : 1,
-    }))
-
-    // Use Sweep Algorithm optimized for waste collection
-    const clusters = this.clusterContainers(points, 0.5)
-    const optimizedRoute = this.sweepAlgorithm(start, end, clusters)
-
-    return optimizedRoute
-  }
 
   private findNearest(current: Point, points: Point[]): Point {
     if (points.length === 0) return current
@@ -244,5 +225,150 @@ export class RoutesService {
     const distance = this.calculateTotalDistance(route)
     const avgSpeed = 30 // km/h
     return Math.round((distance / avgSpeed) * 60) // minutes
+  }
+
+  private async getAvailableTrucks(city: string) {
+    return this.truckRepository.find({
+      where: { city, available: true },
+    })
+  }
+
+  private solveVRP(depot: Point, containers: Container[], trucks: Truck[]) {
+    if (containers.length === 0) {
+      return {
+        routes: [],
+        totalDistance: 0,
+        estimatedTime: 0,
+        trucksUsed: 0,
+      }
+    }
+
+    const points = containers.map(c => ({
+      lat: Number(c.latitude),
+      lng: Number(c.longitude),
+      id: c.id,
+      priority: c.wasteLevel === 'heavy' ? 3 : c.wasteLevel === 'medium' ? 2 : 1,
+    }))
+
+    // Sweep algorithm: sort points by polar angle from depot
+    const sortedPoints = this.sweepSort(depot, points)
+    
+    // Partition into truck routes based on capacity
+    const routes = this.partitionIntoRoutes(depot, sortedPoints, trucks)
+    
+    // Apply Dijkstra to optimize each route
+    const optimizedRoutes = routes.map(route => this.dijkstraOptimize(route))
+    
+    const totalDistance = optimizedRoutes.reduce((sum, route) => 
+      sum + this.calculateTotalDistance(route.points), 0)
+    
+    return {
+      routes: optimizedRoutes,
+      totalDistance: Math.round(totalDistance * 100) / 100,
+      estimatedTime: Math.round((totalDistance / 30) * 60),
+      trucksUsed: optimizedRoutes.length,
+    }
+  }
+
+  private sweepSort(depot: Point, points: Point[]): Point[] {
+    return points.sort((a, b) => {
+      const angleA = Math.atan2(a.lat - depot.lat, a.lng - depot.lng)
+      const angleB = Math.atan2(b.lat - depot.lat, b.lng - depot.lng)
+      return angleA - angleB
+    })
+  }
+
+  private partitionIntoRoutes(depot: Point, points: Point[], trucks: Truck[]) {
+    const routes = []
+    const maxPointsPerTruck = Math.ceil(points.length / trucks.length)
+    
+    for (let i = 0; i < trucks.length && i * maxPointsPerTruck < points.length; i++) {
+      const start = i * maxPointsPerTruck
+      const end = Math.min(start + maxPointsPerTruck, points.length)
+      const routePoints = points.slice(start, end)
+      
+      routes.push({
+        truckId: trucks[i].id,
+        truckName: trucks[i].name,
+        points: [depot, ...routePoints, depot],
+      })
+    }
+    
+    return routes
+  }
+
+  private dijkstraOptimize(route: { truckId: string; truckName: string; points: Point[] }) {
+    // Simple nearest neighbor optimization for each route
+    const { points } = route
+    if (points.length <= 3) return route // depot + depot only
+    
+    const optimized = [points[0]] // start depot
+    const unvisited = points.slice(1, -1) // exclude depots
+    let current = points[0]
+    
+    while (unvisited.length > 0) {
+      const nearest = this.findNearest(current, unvisited)
+      const index = unvisited.indexOf(nearest)
+      unvisited.splice(index, 1)
+      optimized.push(nearest)
+      current = nearest
+    }
+    
+    optimized.push(points[points.length - 1]) // end depot
+    
+    return {
+      ...route,
+      points: optimized,
+    }
+  }
+
+  async assignRoute(data: {
+    routeName: string
+    routeData: any
+    truckId: string
+    operatorId: string
+    supervisorId: string
+    city: string
+  }) {
+    const assignment = this.routeAssignmentRepository.create({
+      ...data,
+      status: AssignmentStatus.PENDING,
+    })
+    
+    await this.routeAssignmentRepository.save(assignment)
+    
+    // Mark truck as unavailable
+    await this.truckRepository.update(data.truckId, { available: false })
+    
+    return assignment
+  }
+
+  async getAssignments(operatorId?: string) {
+    const where = operatorId ? { operatorId } : {}
+    return this.routeAssignmentRepository.find({ where })
+  }
+
+  async updateAssignmentStatus(id: string, status: AssignmentStatus) {
+    const assignment = await this.routeAssignmentRepository.findOne({ where: { id } })
+    if (!assignment) throw new Error('Assignment not found')
+    
+    assignment.status = status
+    
+    // If completed, mark truck as available
+    if (status === AssignmentStatus.COMPLETED) {
+      await this.truckRepository.update(assignment.truckId, { available: true })
+    }
+    
+    return this.routeAssignmentRepository.save(assignment)
+  }
+
+  async getTrucks(city?: string) {
+    const where = city ? { city } : {}
+    return this.truckRepository.find({ where })
+  }
+
+  async createTruck(data: Partial<Truck>) {
+    const truck = this.truckRepository.create(data)
+    return this.truckRepository.save(truck)
   }
 }

@@ -30,10 +30,48 @@ export interface RoutePoint {
 }
 
 export interface OptimizedRoute {
-	route: RoutePoint[]
+	route?: RoutePoint[]
+	routes?: VRPRoute[]
 	totalDistance: number
 	containerCount: number
 	estimatedTime: number
+	trucksUsed?: number
+}
+
+export interface VRPRoute {
+	truckId: string
+	truckName: string
+	points: RoutePoint[]
+}
+
+export interface Truck {
+	id: string
+	name: string
+	licensePlate: string
+	capacity: number
+	city: string
+	available: boolean
+	createdAt: string
+	updatedAt: string
+}
+
+export enum AssignmentStatus {
+	PENDING = 'pending',
+	IN_PROGRESS = 'in_progress',
+	COMPLETED = 'completed',
+}
+
+export interface RouteAssignment {
+	id: string
+	routeName: string
+	routeData: OptimizedRoute
+	truckId: string
+	operatorId: string
+	supervisorId: string
+	city: string
+	status: AssignmentStatus
+	createdAt: string
+	updatedAt: string
 }
 
 export interface SavedRoute extends OptimizedRoute {
@@ -41,6 +79,13 @@ export interface SavedRoute extends OptimizedRoute {
 	name: string
 	city: string
 	createdAt: string
+	updatedAt?: string
+	operatorName?: string
+	operatorId?: string
+	truckId?: string
+	truckName?: string
+	status?: 'pending' | 'in_progress' | 'completed'
+	assignedAt?: string
 }
 
 export enum Profile {

@@ -10,20 +10,20 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class RabbitConfig {
-    
+
     @Value("${rabbitmq.exchange}")
     private String exchange;
-    
+
     @Bean
     public TopicExchange accountsExchange() {
         return new TopicExchange(exchange, true, false);
     }
-    
+
     @Bean
     public Jackson2JsonMessageConverter messageConverter() {
         return new Jackson2JsonMessageConverter();
     }
-    
+
     @Bean
     public RabbitTemplate rabbitTemplate(ConnectionFactory connectionFactory) {
         RabbitTemplate template = new RabbitTemplate(connectionFactory);

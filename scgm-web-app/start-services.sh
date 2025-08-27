@@ -14,15 +14,15 @@ sleep 15
 echo "🔧 Starting Java microservices..."
 
 # Auth Service
-gnome-terminal --title="Auth Service" -- bash -c "cd auth-service && mvn spring-boot:run; exec bash"
+gnome-terminal --title="Auth Service" -- bash -c "cd ../scgm-auth-service && mvn spring-boot:run; exec bash"
 
 # Accounts Service  
-gnome-terminal --title="Accounts Service" -- bash -c "cd accounts-service && mvn spring-boot:run; exec bash"
+gnome-terminal --title="Accounts Service" -- bash -c "cd ../scgm-accounts-service && mvn spring-boot:run; exec bash"
 
 # Node.js services
-gnome-terminal --title="Backend" -- bash -c "cd backend && npm run start:dev; exec bash"
-gnome-terminal --title="Frontend" -- bash -c "cd frontend && npm run dev; exec bash"
-gnome-terminal --title="Sensor Simulator" -- bash -c "cd sensor-simulator && npm start; exec bash"
+#gnome-terminal --title="Backend" -- bash -c "cd backend && npm run start:dev; exec bash"
+#gnome-terminal --title="Frontend" -- bash -c "cd frontend && npm run dev; exec bash"
+#gnome-terminal --title="Sensor Simulator" -- bash -c "cd sensor-simulator && npm start; exec bash"
 
 echo ""
 echo "✅ All services started in separate terminals!"

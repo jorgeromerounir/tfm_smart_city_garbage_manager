@@ -83,7 +83,7 @@ const AppContent: React.FC = () => {
 			<Route
 				path="/users"
 				element={
-					<ProtectedRoute requiredRole={Profile.ADMIN}>
+					<ProtectedRoute>
 						<Box
 							sx={{
 								display: 'flex',

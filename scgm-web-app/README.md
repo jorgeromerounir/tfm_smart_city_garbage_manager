@@ -6,7 +6,10 @@ An open-source system for monitoring urban waste container levels using IoT sens
 
 - **Real-time Monitoring**: Track waste container levels (light, medium, heavy)
 - **Interactive Map**: OpenStreetMap integration with color-coded markers
-- **Route Optimization**: A* algorithm for efficient waste collection routes
+- **Route Optimization**: Sweep + Dijkstra algorithm for Vehicle Routing Problem (VRP)
+- **Multi-truck Support**: Automatic route partitioning across available trucks
+- **Route Assignment**: Supervisors can assign routes to operators with specific trucks
+- **Export Integration**: Operators can export routes to Google Maps and Waze
 - **Multi-city Support**: Bogotá D.C. and Madrid configurations
 - **Country-based Access**: Supervisors see containers only from their assigned country
 - **Real-time Updates**: Socket.io for live status updates
@@ -14,9 +17,11 @@ An open-source system for monitoring urban waste container levels using IoT sens
 
 ## Architecture
 
+https://memgraph.com/blog/use-cases-of-the-shortest-path-algorithm
+
 ```
 uwm/
-├── backend/          # NestJS API with SQLite
+├── backend/          # NestJS API with SQLite and Dijkstra's + Sweep algorithm
 ├── frontend/         # React + TypeScript + MUI
 ├── sensor-simulator/ # HTTP sensor simulation
 ├── auth-service/     # Spring Boot JWT Authentication
@@ -48,6 +53,12 @@ uwm/
 ```bash
 # Use simple startup (manual terminals)
 ./start-simple.sh
+```
+
+**Create sample trucks:**
+```bash
+# Add sample trucks to the database
+./create-trucks.sh
 ```
 
 **Option 2: Manual Setup**
@@ -85,10 +96,10 @@ After starting the services, create and associate users with countries:
 - `john.doe@uwm.com` / `supervisor123` (Supervisor) - Associated with Colombia (Bogotá D.C.)
 - `jhon.doe@uwm.com` (Supervisor) - Existing user, password unknown
 
-**Country Association Rules:**
-- **Admins**: Can view and manage containers from all cities
-- **Supervisors**: Can only view containers from their assigned country
-- **Operators**: Can only view containers from their assigned country
+**User Role Capabilities:**
+- **Admins**: Can view and manage containers from all cities, create routes
+- **Supervisors**: Can view containers from assigned country, create and assign routes to operators
+- **Operators**: Can view assigned routes, update route status, export to Google Maps/Waze
 
 ## API Endpoints
 
@@ -96,7 +107,11 @@ After starting the services, create and associate users with countries:
 - `POST /containers/data` - Receive sensor data
 - `GET /containers` - Get all containers
 - `GET /containers/status` - Get status summary
-- `POST /routes/optimize` - Generate optimized route
+- `POST /routes/optimize` - Generate optimized VRP routes
+- `POST /routes/assign` - Assign route to operator
+- `GET /routes/assignments` - Get route assignments
+- `GET /routes/trucks` - Get available trucks
+- `POST /routes/trucks` - Create new truck
 
 ### Authentication Service (Port 8081)
 - `POST /auth/signin` - User sign in

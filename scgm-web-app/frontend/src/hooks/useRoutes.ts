@@ -87,6 +87,7 @@ export default function useRoutes(
 				wasteTypes:
 					selectedWasteTypes.length > 0 ? selectedWasteTypes : undefined,
 			})
+			// Handle both legacy single route and new VRP multi-route format
 			setOptimizedRoute(route)
 		} catch (error) {
 			console.error('Failed to optimize route:', error)

@@ -2,11 +2,12 @@ import { Box, Chip, Typography } from '@mui/material'
 import { Icon, LatLngExpression } from 'leaflet'
 import React, { useEffect, useState } from 'react'
 import { MapContainer, Marker, Polyline, Popup, TileLayer } from 'react-leaflet'
-import { Container, RoutePoint, WasteLevel } from '../types'
+import { Container, RoutePoint, VRPRoute, WasteLevel } from '../types'
 
 interface MapViewProps {
 	containers: Container[]
 	route?: RoutePoint[]
+	verpRoutes?: VRPRoute[]
 	center: [number, number]
 	zoom?: number
 }
@@ -34,6 +35,7 @@ const createIcon = (level: WasteLevel) => {
 const MapView: React.FC<MapViewProps> = ({
 	containers,
 	route,
+	verpRoutes,
 	center,
 	zoom = 12,
 }) => {
@@ -45,6 +47,8 @@ const MapView: React.FC<MapViewProps> = ({
 
 	const routePositions: LatLngExpression[] =
 		route?.map(point => [point.lat, point.lng]) || []
+
+	const routeColors = ['#2E7D32', '#1976D2', '#F57C00', '#7B1FA2', '#D32F2F']
 
 	return (
 		<Box sx={{ height: '700px', width: '100%', position: 'relative' }}>
@@ -106,7 +110,72 @@ const MapView: React.FC<MapViewProps> = ({
 						opacity={0.7}
 					/>
 				)}
+
+				{verpRoutes?.map((vrpRoute, index) => {
+					const positions: LatLngExpression[] = vrpRoute.points.map(point => [
+						point.lat,
+						point.lng,
+					])
+					return (
+						positions.length > 1 && (
+							<Polyline
+								key={vrpRoute.truckId}
+								positions={positions}
+								color={routeColors[index % routeColors.length]}
+								weight={4}
+								opacity={0.8}
+								dashArray={index > 0 ? '10, 5' : undefined}
+							>
+								<Popup>
+									<Typography variant="subtitle2">
+										{vrpRoute.truckName}
+									</Typography>
+									<Typography variant="body2">
+										{vrpRoute.points.length - 2} containers
+									</Typography>
+								</Popup>
+							</Polyline>
+						)
+					)
+				})}
 			</MapContainer>
+
+			{/* Route Legend */}
+			{verpRoutes && verpRoutes.length > 0 && (
+				<Box
+					sx={{
+						position: 'absolute',
+						top: 10,
+						left: 10,
+						backgroundColor: 'white',
+						borderRadius: 2,
+						p: 2,
+						boxShadow: 2,
+						zIndex: 1000,
+						maxWidth: 200,
+					}}
+				>
+					<Typography variant="subtitle2" gutterBottom>
+						Truck Routes
+					</Typography>
+					{verpRoutes.map((vrpRoute, index) => (
+						<Box key={vrpRoute.truckId} sx={{ display: 'flex', alignItems: 'center', mb: 0.5 }}>
+							<Box
+								sx={{
+									width: 20,
+									height: 3,
+									backgroundColor: routeColors[index % routeColors.length],
+									mr: 1,
+									borderRadius: 1,
+								}}
+							/>
+							<Typography variant="caption">
+								{vrpRoute.truckName}
+							</Typography>
+						</Box>
+					))}
+				</Box>
+			)}
 
 			{/* Compass */}
 			<Box
