@@ -1,7 +1,7 @@
 {
-  "name": "uwm-sensor-simulator",
+  "name": "scgm-containers-data-simulator",
   "version": "1.0.0",
-  "description": "Sensor simulator for Urban Waste Monitoring",
+  "description": "Containers Sensor data simulator for Smart City Garbage Manager",
   "main": "index.js",
   "type": "module",
   "scripts": {
