@@ -15,7 +15,7 @@ public class CustomerValidationException extends RuntimeException {
     private List<String> errors;
 
     public CustomerValidationException(String message, List<String> errors) {
-        super(message);
+        super(message + (errors.isEmpty() ? "" : (":\n- " + String.join("\n- ", errors))));
         this.errors = errors;
     }
 
