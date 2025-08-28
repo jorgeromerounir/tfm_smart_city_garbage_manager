@@ -1,24 +1,28 @@
 package com.scgm.customers.service.customer.impl;
 
-import lombok.AllArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
-
-import com.scgm.customers.dto.customer.CustomerAddReq;
-import com.scgm.customers.dto.customer.CustomerDto;
-import com.scgm.customers.entity.customer.CityEntity;
-import com.scgm.customers.entity.customer.CustomerEntity;
-import com.scgm.customers.exceptions.CustomerDatabaseException;
-import com.scgm.customers.exceptions.CustomerValidationException;
-import com.scgm.customers.exceptions.CustomersException;
-import com.scgm.customers.repository.customer.CityRepository;
-import com.scgm.customers.repository.customer.CustomerRepository;
-import com.scgm.customers.service.customer.CustomersService;
-
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.scgm.customers.dto.customer.CustomerAddDto;
+import com.scgm.customers.dto.customer.CustomerDto;
+import com.scgm.customers.dto.customer.CustomerUpdateDto;
+import com.scgm.customers.entity.customer.CityEntity;
+import com.scgm.customers.entity.customer.CustomerEntity;
+import com.scgm.customers.exceptions.CustomerDatabaseException;
+import com.scgm.customers.exceptions.CustomerNotFoundException;
+import com.scgm.customers.exceptions.CustomerValidationException;
+import com.scgm.customers.exceptions.CustomersLogicException;
+import com.scgm.customers.repository.customer.CityRepository;
+import com.scgm.customers.repository.customer.CustomerRepository;
+import com.scgm.customers.service.customer.CustomersService;
+
+import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
 @AllArgsConstructor
@@ -29,24 +33,26 @@ public class CustomersServiceImpl implements CustomersService {
     private final CityRepository cityRepository;
 
     @Override
-    public CustomerDto add(CustomerAddReq customerAddReq) {
-        Optional<CityEntity> cityOptional = cityRepository.findById(customerAddReq.getCityId());
+    public CustomerDto add(CustomerAddDto customerAdd) {
+        var reqListErrors = customerAdd.validate();
+        if (!reqListErrors.isEmpty())
+            throw new CustomerValidationException("Trying to add: error customer request validation.", reqListErrors);
+        Optional<CityEntity> cityOptional = cityRepository.findById(customerAdd.getCityId());
         if (cityOptional.isEmpty()) {
-            var message = String.format("The city: %s doesn't exists", customerAddReq.getCityId());
-            throw new CustomerValidationException(message);
+            var msg = String.format("The city: %s doesn't exists,", customerAdd.getCityId());
+            throw new CustomersLogicException(msg);
         }
-        var customerEntity = CustomerAddReq.toEntity(customerAddReq);
+        var customerEntity = CustomerAddDto.toEntity(customerAdd);
         customerEntity.setCity(cityOptional.get());
         var listErrors = customerEntity.validate();
-        if (!listErrors.isEmpty()) {
-            throw new CustomerValidationException("Trying to add: error customer entity validation", listErrors);
-        }
+        if (!listErrors.isEmpty())
+            throw new CustomerValidationException("Trying to add: error customer entity validation.", listErrors);
         try {
             CustomerEntity savedCustomer = customerRepository.save(customerEntity);
             return CustomerDto.toDto(savedCustomer);
         } catch (Exception e) {
-            log.error("Error trying to save customer with name: {}", customerEntity.getName(), e);
-            throw new CustomerDatabaseException("Error trying to save customer", e);
+            log.error("Error trying to add customer with name: {}", customerEntity.getName(), e);
+            throw new CustomerDatabaseException("Error trying to add customer", e);
         }
     }
 
@@ -76,6 +82,36 @@ public class CustomersServiceImpl implements CustomersService {
         return customerRepository.findAll().stream()
                 .map(CustomerDto::toDto)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional
+    public CustomerDto update(Long customerId, CustomerUpdateDto customerReq) {
+        var reqListErrors = customerReq.validate();
+        if (!reqListErrors.isEmpty())
+            throw new CustomerValidationException("Trying to update: error customer request validation.", reqListErrors);
+        var customerOpt = customerRepository.findById(customerId);
+        customerOpt.orElseThrow(() -> new CustomerNotFoundException(customerId));
+        Optional<CityEntity> cityOpt = cityRepository.findById(customerReq.getCityId());
+        if (cityOpt.isEmpty()) {
+            var msg = String.format("The city: %s doesn't exists,", customerReq.getCityId());
+            throw new CustomersLogicException(msg);
+        }
+        CustomerEntity existingCustomer = customerOpt.get();
+        existingCustomer.setName(customerReq.getName());
+        existingCustomer.setDescription(customerReq.getDescription());
+        existingCustomer.setActive(customerReq.getActive());
+        existingCustomer.setUpdatedAt(Instant.now());
+        existingCustomer.setCity(cityOpt.get());
+        var listErrors = existingCustomer.validate();
+        if (!listErrors.isEmpty())
+            throw new CustomerValidationException("Trying to update: error customer entity validation.", listErrors);
+        try {
+            return CustomerDto.toDto(customerRepository.save(existingCustomer));
+        } catch (Exception e) {
+            log.error("Error trying to update customer with ID: {}", existingCustomer.getId(), e);
+            throw new CustomerDatabaseException("Error trying to update customer", e);
+        }
     }
 
 }

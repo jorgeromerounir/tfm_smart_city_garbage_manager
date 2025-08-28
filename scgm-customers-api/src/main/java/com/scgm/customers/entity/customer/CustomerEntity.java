@@ -69,4 +69,5 @@ public class CustomerEntity {
             listErrors.add("active: is required");
         return listErrors;
     }
+
 }

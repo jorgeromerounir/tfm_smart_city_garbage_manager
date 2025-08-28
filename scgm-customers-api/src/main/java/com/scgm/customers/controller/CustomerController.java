@@ -6,8 +6,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import com.scgm.customers.dto.customer.CustomerAddReq;
+import com.scgm.customers.dto.customer.CustomerAddDto;
 import com.scgm.customers.dto.customer.CustomerDto;
+import com.scgm.customers.dto.customer.CustomerUpdateDto;
 import com.scgm.customers.service.customer.CustomersService;
 
 import java.util.List;
@@ -21,9 +22,9 @@ public class CustomerController {
     private final CustomersService customersService;
 
     @PostMapping
-    public ResponseEntity<CustomerDto> add(@RequestBody CustomerAddReq customerAddReq) {
+    public ResponseEntity<CustomerDto> add(@RequestBody CustomerAddDto customerAdd) {
         log.debug("Trying to add new customer");
-        var customerDto = customersService.add(customerAddReq);
+        var customerDto = customersService.add(customerAdd);
         return new ResponseEntity<>(customerDto, HttpStatus.CREATED);
     }
 
@@ -39,9 +40,8 @@ public class CustomerController {
     public ResponseEntity<List<CustomerDto>> findByNameContaining(@RequestParam String name) {
         log.debug("Finding customers with name containing: {}", name);
         List<CustomerDto> customers = customersService.findByNameContaining(name);
-        if (customers.isEmpty()) {
+        if (customers.isEmpty())
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-        }
         return new ResponseEntity<>(customers, HttpStatus.OK);
     }
 
@@ -49,9 +49,8 @@ public class CustomerController {
     public ResponseEntity<List<CustomerDto>> findByCityId(@PathVariable Long cityId) {
         log.debug("Finding customers for city with ID: {}", cityId);
         List<CustomerDto> customers = customersService.findByCityId(cityId);
-        if (customers.isEmpty()) {
+        if (customers.isEmpty())
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-        }
         return new ResponseEntity<>(customers, HttpStatus.OK);
     }
 
@@ -59,10 +58,17 @@ public class CustomerController {
     public ResponseEntity<List<CustomerDto>> findAll() {
         log.debug("Finding all customers");
         List<CustomerDto> customers = customersService.findAll();
-        if (customers.isEmpty()) {
+        if (customers.isEmpty())
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-        }
         return new ResponseEntity<>(customers, HttpStatus.OK);
+    }
+
+    @PutMapping("/{customerId}")
+    public ResponseEntity<CustomerDto> update(@PathVariable Long customerId, 
+        @RequestBody CustomerUpdateDto customerUpdate) {
+        log.debug("Trying to update customer with ID: {}", customerId);
+        var customerDto = customersService.update(customerId, customerUpdate);
+        return new ResponseEntity<>(customerDto, HttpStatus.OK);
     }
 
 }
