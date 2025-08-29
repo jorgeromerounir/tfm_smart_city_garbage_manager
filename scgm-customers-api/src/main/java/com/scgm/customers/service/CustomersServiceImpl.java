@@ -56,30 +56,46 @@ public class CustomersServiceImpl implements CustomersService {
 
     @Override
     public Optional<CustomerDto> findById(Long id) {
-        return customerRepository.findById(id)
-                .map(CustomerDto::toDto);
+        try {
+            return customerRepository.findById(id).map(CustomerDto::toDto);
+        } catch (Exception e) {
+            log.error("Error trying to find customer with ID: {}", id, e);
+            throw new CustomerDatabaseException("Error trying to find customer", e);
+        }
     }
 
     @Override
     public List<CustomerDto> findByNameContaining(String name) {
-        List<CustomerEntity> customers = customerRepository.findByNameContaining(name);
-        return customers.stream()
-                .map(CustomerDto::toDto)
-                .collect(Collectors.toList());
+        try {
+            List<CustomerEntity> customers = customerRepository.findByNameContaining(name);
+            return customers.stream().map(CustomerDto::toDto)
+                    .collect(Collectors.toList());
+        } catch (Exception e) {
+            log.error("Error trying to find customers by name", e);
+            throw new CustomerDatabaseException("Error trying to find customers", e);
+        }
     }
 
     @Override
     public List<CustomerDto> findByCityId(Long cityId) {
-        return customerRepository.findByCityId(cityId).stream()
-                .map(CustomerDto::toDto)
-                .collect(Collectors.toList());
+        try {
+            return customerRepository.findByCityId(cityId).stream().map(CustomerDto::toDto)
+                    .collect(Collectors.toList());
+        } catch (Exception e) {
+            log.error("Error trying to find customers by city ID: {}", cityId, e);
+            throw new CustomerDatabaseException("Error trying to find customers", e);
+        }
     }
 
     @Override
     public List<CustomerDto> findAll() {
-        return customerRepository.findAll().stream()
-                .map(CustomerDto::toDto)
-                .collect(Collectors.toList());
+        try {
+            return customerRepository.findAll().stream().map(CustomerDto::toDto)
+                    .collect(Collectors.toList());
+        } catch (Exception e) {
+            log.error("Error trying to find all customers", e);
+            throw new CustomerDatabaseException("Error trying to find customers", e);
+        }
     }
 
     @Override

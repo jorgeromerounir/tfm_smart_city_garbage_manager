@@ -46,23 +46,37 @@ public class CityServiceImpl implements CityService {
 
     @Override
     public Optional<CityDto> findById(Long id) {
-        return cityRepository.findById(id)
-                .map(CityDto::toDto);
+        try {
+            return cityRepository.findById(id).map(CityDto::toDto);
+        } catch (Exception e) {
+            log.error("Error trying to find city with ID: {}", id, e);
+            throw new CustomerDatabaseException("Error trying to find city", e);
+        }
     }
 
     @Override
     public List<CityDto> findByNameContaining(String name) {
-        List<CityEntity> cities = cityRepository.findByNameContaining(name);
-        return cities.stream()
-                .map(CityDto::toDto)
-                .collect(Collectors.toList());
+        try {
+            List<CityEntity> cities = cityRepository.findByNameContaining(name);
+            return cities.stream()
+                    .map(CityDto::toDto)
+                    .collect(Collectors.toList());
+        } catch (Exception e) {
+            log.error("Error trying to find cities with name containing: {}", name, e);
+            throw new CustomerDatabaseException("Error trying to find cities", e);
+        }
     }
 
     @Override
     public List<CityDto> findByCountry(String country) {
-        return cityRepository.findByCountry(country).stream()
-                .map(CityDto::toDto)
-                .collect(Collectors.toList());
+        try {
+            return cityRepository.findByCountry(country).stream()
+                    .map(CityDto::toDto)
+                    .collect(Collectors.toList());
+        } catch (Exception e) {
+            log.error("Error trying to find cities by country: {}", country, e);
+            throw new CustomerDatabaseException("Error trying to find cities", e);
+        }
     }
 
     @Override

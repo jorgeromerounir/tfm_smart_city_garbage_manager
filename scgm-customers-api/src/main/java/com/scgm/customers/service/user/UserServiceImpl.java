@@ -56,23 +56,34 @@ public class UserServiceImpl implements UsersService {
 
     @Override
     public Optional<UserDto> findById(Long id) {
-        return userRepository.findById(id)
-                .map(UserDto::toDto);
+        try {
+            return userRepository.findById(id).map(UserDto::toDto);
+        } catch (Exception e) {
+            log.error("Error trying to find user with ID: {}", id, e);
+            throw new CustomerDatabaseException("Error trying to find user", e);
+        }
     }
 
     @Override
     public List<UserDto> findByNameContaining(String name) {
-        List<UserEntity> users = userRepository.findByNameContaining(name);
-        return users.stream()
-                .map(UserDto::toDto)
-                .collect(Collectors.toList());
+        try {
+            List<UserEntity> users = userRepository.findByNameContaining(name);
+            return users.stream().map(UserDto::toDto).collect(Collectors.toList());
+        } catch (Exception e) {
+            log.error("Error trying to find users by name", e);
+            throw new CustomerDatabaseException("Error trying to find users by name", e);
+        }
     }
 
     @Override
     public List<UserDto> findByCustomerId(Long customerId) {
-        return userRepository.findByCustomerId(customerId).stream()
-                .map(UserDto::toDto)
-                .collect(Collectors.toList());
+        try {
+            return userRepository.findByCustomerId(customerId).stream().map(UserDto::toDto)
+                    .collect(Collectors.toList());
+        } catch (Exception e) {
+            log.error("Error trying to find users for customer with ID: {}", customerId, e);
+            throw new CustomerDatabaseException("Error trying to find users by customer ID", e);
+        }
     }
 
     @Override
