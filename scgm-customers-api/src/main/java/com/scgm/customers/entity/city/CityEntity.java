@@ -87,6 +87,11 @@ public class CityEntity {
         List<String> listErrors = new ArrayList<>();
         if (StringUtils.isEmpty(getName()))
             listErrors.add("name: cannot be empty");
+        if (!StringUtils.isEmpty(getName()) && getName().length() > 255) {
+            listErrors.add("name: must not exceed 255 characters");
+        } else if (!StringUtils.isEmpty(getName()) && !INJECTION_PATTERN.matcher(name).matches()) {
+            listErrors.add("name: invalid format");
+        }
         //country validations
         if (StringUtils.isEmpty(getCountry())) {
             listErrors.add("country: cannot be empty");
