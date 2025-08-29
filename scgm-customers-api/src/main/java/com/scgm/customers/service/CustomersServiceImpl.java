@@ -1,4 +1,4 @@
-package com.scgm.customers.service.customer.impl;
+package com.scgm.customers.service;
 
 import java.time.Instant;
 import java.util.List;
@@ -8,18 +8,17 @@ import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.scgm.customers.dto.customer.CustomerAddDto;
-import com.scgm.customers.dto.customer.CustomerDto;
-import com.scgm.customers.dto.customer.CustomerUpdateDto;
+import com.scgm.customers.dto.CustomerAddDto;
+import com.scgm.customers.dto.CustomerDto;
+import com.scgm.customers.dto.CustomerUpdateDto;
+import com.scgm.customers.entity.CustomerEntity;
 import com.scgm.customers.entity.customer.CityEntity;
-import com.scgm.customers.entity.customer.CustomerEntity;
 import com.scgm.customers.exceptions.CustomerDatabaseException;
 import com.scgm.customers.exceptions.CustomerNotFoundException;
 import com.scgm.customers.exceptions.CustomerValidationException;
 import com.scgm.customers.exceptions.CustomersLogicException;
-import com.scgm.customers.repository.customer.CityRepository;
-import com.scgm.customers.repository.customer.CustomerRepository;
-import com.scgm.customers.service.customer.CustomersService;
+import com.scgm.customers.repository.CustomerRepository;
+import com.scgm.customers.repository.city.CityRepository;
 
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -39,7 +38,7 @@ public class CustomersServiceImpl implements CustomersService {
             throw new CustomerValidationException("Trying to add: error customer request validation.", reqListErrors);
         Optional<CityEntity> cityOptional = cityRepository.findById(customerAdd.getCityId());
         if (cityOptional.isEmpty()) {
-            var msg = String.format("The city: %s doesn't exists,", customerAdd.getCityId());
+            var msg = String.format("The city: %s doesn't exists.", customerAdd.getCityId());
             throw new CustomersLogicException(msg);
         }
         var customerEntity = CustomerAddDto.toEntity(customerAdd);
@@ -48,8 +47,7 @@ public class CustomersServiceImpl implements CustomersService {
         if (!listErrors.isEmpty())
             throw new CustomerValidationException("Trying to add: error customer entity validation.", listErrors);
         try {
-            CustomerEntity savedCustomer = customerRepository.save(customerEntity);
-            return CustomerDto.toDto(savedCustomer);
+            return CustomerDto.toDto(customerRepository.save(customerEntity));
         } catch (Exception e) {
             log.error("Error trying to add customer with name: {}", customerEntity.getName(), e);
             throw new CustomerDatabaseException("Error trying to add customer", e);
@@ -111,6 +109,21 @@ public class CustomersServiceImpl implements CustomersService {
         } catch (Exception e) {
             log.error("Error trying to update customer with ID: {}", existingCustomer.getId(), e);
             throw new CustomerDatabaseException("Error trying to update customer", e);
+        }
+    }
+
+    @Override
+    @Transactional
+    public void delete(Long customerId) {
+        if (!customerRepository.existsById(customerId)) {
+            throw new CustomerNotFoundException(customerId);
+        }
+        try {
+            customerRepository.deleteById(customerId);
+            log.debug("Customer with ID: {} deleted successfully.", customerId);
+        } catch (Exception e) {
+            log.error("Error trying to delete customer with ID: {}", customerId, e);
+            throw new CustomerDatabaseException("Error trying to delete customer", e);
         }
     }
 

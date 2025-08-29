@@ -8,15 +8,16 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.scgm.customers.dto.customer.CustomerAddDto;
-import com.scgm.customers.dto.customer.CustomerDto;
-import com.scgm.customers.dto.customer.CustomerUpdateDto;
-import com.scgm.customers.service.customer.CustomersService;
+import com.scgm.customers.dto.CustomerAddDto;
+import com.scgm.customers.dto.CustomerDto;
+import com.scgm.customers.dto.CustomerUpdateDto;
+import com.scgm.customers.service.CustomersService;
 
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -46,7 +47,7 @@ public class CustomerController {
 
     @GetMapping("/by-name")
     public ResponseEntity<List<CustomerDto>> findByNameContaining(@RequestParam String name) {
-        log.debug("Finding customers with name containing: {}", name);
+        log.debug("Finding customers by name containing");
         List<CustomerDto> customers = customersService.findByNameContaining(name);
         if (customers.isEmpty())
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
@@ -77,6 +78,13 @@ public class CustomerController {
         log.debug("Trying to update customer with ID: {}", customerId);
         var customerDto = customersService.update(customerId, customerUpdate);
         return new ResponseEntity<>(customerDto, HttpStatus.OK);
+    }
+
+    @DeleteMapping("/{customerId}")
+    public ResponseEntity<Void> delete(@PathVariable Long customerId) {
+        log.debug("Trying to delete customer with ID: {}", customerId);
+        customersService.delete(customerId);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
 }

@@ -1,4 +1,4 @@
-package com.scgm.customers.repository.customer;
+package com.scgm.customers.repository;
 
 
 import java.util.List;
@@ -8,7 +8,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.stereotype.Repository;
 
-import com.scgm.customers.entity.customer.CustomerEntity;
+import com.scgm.customers.entity.CustomerEntity;
 
 @Repository
 public interface CustomerRepository extends JpaRepository<CustomerEntity, Long>, JpaSpecificationExecutor<CustomerEntity> {

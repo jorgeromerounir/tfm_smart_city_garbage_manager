@@ -87,6 +87,7 @@ public class CityEntity {
         List<String> listErrors = new ArrayList<>();
         if (StringUtils.isEmpty(getName()))
             listErrors.add("name: cannot be empty");
+        //country validations
         if (StringUtils.isEmpty(getCountry())) {
             listErrors.add("country: cannot be empty");
         } else if (!ISO_COUNTRY_CODES.contains(getCountry().toUpperCase())) {

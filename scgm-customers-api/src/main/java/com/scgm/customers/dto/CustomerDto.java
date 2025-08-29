@@ -1,4 +1,4 @@
-package com.scgm.customers.dto.customer;
+package com.scgm.customers.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -7,8 +7,8 @@ import lombok.NoArgsConstructor;
 
 import java.time.Instant;
 
+import com.scgm.customers.entity.CustomerEntity;
 import com.scgm.customers.entity.customer.CityEntity;
-import com.scgm.customers.entity.customer.CustomerEntity;
 
 @Data
 @NoArgsConstructor

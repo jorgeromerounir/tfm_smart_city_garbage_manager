@@ -1,11 +1,11 @@
-package com.scgm.customers.service.customer;
+package com.scgm.customers.service;
 
 import java.util.List;
 import java.util.Optional;
 
-import com.scgm.customers.dto.customer.CustomerAddDto;
-import com.scgm.customers.dto.customer.CustomerDto;
-import com.scgm.customers.dto.customer.CustomerUpdateDto;
+import com.scgm.customers.dto.CustomerAddDto;
+import com.scgm.customers.dto.CustomerDto;
+import com.scgm.customers.dto.CustomerUpdateDto;
 
 public interface CustomersService {
 
@@ -20,5 +20,7 @@ public interface CustomersService {
     public List<CustomerDto> findAll();
 
     public CustomerDto update(Long customerId, CustomerUpdateDto customerUpdate);
+
+    public void delete(Long customerId);
 
 }

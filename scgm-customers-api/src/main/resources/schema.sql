@@ -27,3 +27,18 @@ CREATE TABLE IF NOT EXISTS customers (
     active BOOLEAN NOT NULL,
     FOREIGN KEY (city_id) REFERENCES cities(id)
 );
+
+CREATE SEQUENCE IF NOT EXISTS users_seq
+START WITH 1
+INCREMENT BY 1;
+
+CREATE TABLE IF NOT EXISTS users (
+    id BIGINT DEFAULT NEXTVAL('users_seq') PRIMARY KEY,
+    name VARCHAR(200) NOT NULL,
+    email VARCHAR(200) NOT NULL UNIQUE,
+    profile VARCHAR(50) NOT NULL,
+    customer_id BIGINT NOT NULL,
+    created_at TIMESTAMP NOT NULL,
+    updated_at TIMESTAMP NOT NULL,
+    FOREIGN KEY (customer_id) REFERENCES customers(id)
+);

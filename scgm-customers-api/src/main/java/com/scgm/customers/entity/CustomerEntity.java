@@ -1,6 +1,8 @@
-package com.scgm.customers.entity.customer;
+package com.scgm.customers.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.scgm.customers.entity.customer.CityEntity;
+
 import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Getter;

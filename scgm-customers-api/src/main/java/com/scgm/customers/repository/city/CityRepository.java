@@ -1,4 +1,4 @@
-package com.scgm.customers.repository.customer;
+package com.scgm.customers.repository.city;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
