@@ -1,4 +1,4 @@
-package com.scgm.customers.service.user;
+package com.scgm.customers.service.user.impl;
 
 import java.time.Instant;
 import java.util.List;
@@ -19,6 +19,7 @@ import com.scgm.customers.exceptions.user.UserNotFoundException;
 import com.scgm.customers.exceptions.user.UserValidationException;
 import com.scgm.customers.repository.CustomerRepository;
 import com.scgm.customers.repository.user.UserRepository;
+import com.scgm.customers.service.user.UsersService;
 
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

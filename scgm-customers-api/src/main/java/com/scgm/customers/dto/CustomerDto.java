@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 import java.time.Instant;
 
 import com.scgm.customers.entity.CustomerEntity;
-import com.scgm.customers.entity.customer.CityEntity;
+import com.scgm.customers.entity.city.CityEntity;
 
 @Data
 @NoArgsConstructor

@@ -1,15 +1,14 @@
 package com.scgm.customers.dto.user;
 
+import java.time.Instant;
+
+import com.scgm.customers.entity.user.Profile;
+import com.scgm.customers.entity.user.UserEntity;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import java.time.Instant;
-
-import com.scgm.customers.entity.CustomerEntity;
-import com.scgm.customers.entity.user.Profile;
-import com.scgm.customers.entity.user.UserEntity;
 
 @Data
 @NoArgsConstructor

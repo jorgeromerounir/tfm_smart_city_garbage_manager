@@ -12,7 +12,7 @@ import com.scgm.customers.dto.CustomerAddDto;
 import com.scgm.customers.dto.CustomerDto;
 import com.scgm.customers.dto.CustomerUpdateDto;
 import com.scgm.customers.entity.CustomerEntity;
-import com.scgm.customers.entity.customer.CityEntity;
+import com.scgm.customers.entity.city.CityEntity;
 import com.scgm.customers.exceptions.CustomerDatabaseException;
 import com.scgm.customers.exceptions.CustomerNotFoundException;
 import com.scgm.customers.exceptions.CustomerValidationException;

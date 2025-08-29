@@ -1,4 +1,4 @@
-package com.scgm.customers.entity.customer;
+package com.scgm.customers.entity.city;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.Column;
