@@ -108,9 +108,8 @@ public class CityServiceImpl implements CityService {
     @Override
     @Transactional
     public void delete(Long cityId) {
-        if (!cityRepository.existsById(cityId)) {
+        if (!cityRepository.existsById(cityId))
             throw new CityNotFoundException(cityId);
-        }
         try {
             cityRepository.deleteById(cityId);
             log.debug("City with ID: {} deleted successfully.", cityId);

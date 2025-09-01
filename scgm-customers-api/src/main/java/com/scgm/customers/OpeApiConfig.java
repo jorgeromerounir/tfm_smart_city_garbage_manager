@@ -19,7 +19,6 @@ public class OpeApiConfig {
         @Value("${swagger.server.url:http://localhost:8182}") String defaultServerUrl,
         @Value("${swagger.server.gateway.url:http://localhost:8762/scgm-customers-api}") String gatewayServerUrl
     ) {
-
         final var license = new License()
             .name("Apache 2.0")
             .url("https://www.apache.org/licenses/LICENSE-2.0");

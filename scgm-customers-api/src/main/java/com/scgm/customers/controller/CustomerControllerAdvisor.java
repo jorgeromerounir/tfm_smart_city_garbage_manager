@@ -2,11 +2,7 @@ package com.scgm.customers.controller;
 
 import com.scgm.customers.dto.DefaultResponseDto;
 import com.scgm.customers.exceptions.CustomerAlreadyExistsException;
-import com.scgm.customers.exceptions.CustomersLogicException;
-import com.scgm.customers.exceptions.CustomerDatabaseException;
 import com.scgm.customers.exceptions.CustomerNotFoundException;
-import com.scgm.customers.exceptions.CustomerValidationException;
-import com.scgm.customers.exceptions.CustomersLogicException;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;

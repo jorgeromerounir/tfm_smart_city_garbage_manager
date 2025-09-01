@@ -119,9 +119,8 @@ public class UserServiceImpl implements UsersService {
     @Override
     @Transactional
     public void delete(Long userId) {
-        if (!userRepository.existsById(userId)) {
+        if (!userRepository.existsById(userId))
             throw new UserNotFoundException(userId);
-        }
         try {
             userRepository.deleteById(userId);
             log.debug("User with ID: {} deleted successfully.", userId);
