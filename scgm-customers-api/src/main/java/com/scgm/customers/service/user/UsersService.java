@@ -17,6 +17,8 @@ public interface UsersService {
 
     public List<UserDto> findByCustomerId(Long customerId);
 
+    public Optional<UserDto> findByEmail(String email);
+
     public UserDto update(Long userId, UserUpdateDto userUpdate);
 
     public void delete(Long userId);

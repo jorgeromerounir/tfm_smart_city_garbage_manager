@@ -1,7 +1,6 @@
 package com.uwm.auth.service;
 
 import com.uwm.auth.dto.AuthResponse;
-import com.uwm.auth.entity.Account;
 import com.uwm.auth.entity.Session;
 import com.uwm.auth.repository.AccountRepository;
 import com.uwm.auth.repository.SessionRepository;

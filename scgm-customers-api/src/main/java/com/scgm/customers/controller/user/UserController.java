@@ -63,6 +63,14 @@ public class UserController {
         return new ResponseEntity<>(users, HttpStatus.OK);
     }
 
+    @GetMapping("/by-email")
+    public ResponseEntity<UserDto> findByEmail(@RequestParam String email) {
+        log.debug("Finding user by email.");
+        var userOpt = usersService.findByEmail(email);
+        return userOpt.map(user -> new ResponseEntity<>(user, HttpStatus.OK))
+                .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
+    }
+
     @PutMapping("/{userId}")
     public ResponseEntity<UserDto> update(@PathVariable Long userId, 
         @RequestBody UserUpdateDto userUpdate) {

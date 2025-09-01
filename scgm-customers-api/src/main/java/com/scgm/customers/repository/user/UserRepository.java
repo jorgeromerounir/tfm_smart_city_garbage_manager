@@ -18,4 +18,6 @@ public interface UserRepository extends JpaRepository<UserEntity, Long>, JpaSpec
 
     List<UserEntity> findByCustomerId(Long customerId);
 
+    Optional<UserEntity> findByEmail(String email);
+
 }

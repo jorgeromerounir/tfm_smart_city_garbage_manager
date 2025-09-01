@@ -66,6 +66,8 @@ public class UserServiceImpl implements UsersService {
 
     @Override
     public List<UserDto> findByNameContaining(String name) {
+        if(!UserEntity.INJECTION_PATTERN.matcher(name).matches())
+            throw new UserValidationException("Trying to find by name: invalid name");
         try {
             List<UserEntity> users = userRepository.findByNameContaining(name);
             return users.stream().map(UserDto::toDto).collect(Collectors.toList());
@@ -83,6 +85,18 @@ public class UserServiceImpl implements UsersService {
         } catch (Exception e) {
             log.error("Error trying to find users for customer with ID: {}", customerId, e);
             throw new CustomerDatabaseException("Error trying to find users by customer ID", e);
+        }
+    }
+
+    @Override
+    public Optional<UserDto> findByEmail(String email) {
+        if(!UserEntity.EMAIL_PATTERN.matcher(email).matches())
+            throw new UserValidationException("Trying to find by email: invalid email");
+        try {
+            return userRepository.findByEmail(email).map(UserDto::toDto);
+        } catch (Exception e) {
+            log.error("Error trying to find user with email: {}", email, e);
+            throw new CustomerDatabaseException("Error trying to find user by email", e);
         }
     }
 
