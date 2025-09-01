@@ -1,7 +1,7 @@
 ## Configuration for Eureka
 eureka:
   client:
-    enabled: false
+    enabled: ${EUREKA_ENABLED:false}
     registerWithEureka: true
     fetchRegistry: true
     service-url:

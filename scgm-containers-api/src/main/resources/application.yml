@@ -1,7 +1,7 @@
 ## Configuration for Eureka
 eureka:
   client:
-    enabled: true
+    enabled: ${EUREKA_ENABLED:false}
     registerWithEureka: true
     fetchRegistry: true
     service-url:
@@ -20,7 +20,8 @@ spring:
     url: jdbc:h2:mem:scgm_containers_db
     driver-class-name: org.h2.Driver
     username: sa
-    password:
+    password: password
+    continue-on-error: true
   jpa:
     hibernate:
       ddl-auto: update
