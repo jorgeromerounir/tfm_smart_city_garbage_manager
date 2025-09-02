@@ -100,21 +100,21 @@ public class CustomersServiceImpl implements CustomersService {
 
     @Override
     @Transactional
-    public CustomerDto update(Long customerId, CustomerUpdateDto customerReq) {
-        var reqListErrors = customerReq.validate();
+    public CustomerDto update(Long customerId, CustomerUpdateDto customerUpdate) {
+        var reqListErrors = customerUpdate.validate();
         if (!reqListErrors.isEmpty())
             throw new CustomerValidationException("Trying to update: error customer request validation.", reqListErrors);
         var customerOpt = customerRepository.findById(customerId);
         customerOpt.orElseThrow(() -> new CustomerNotFoundException(customerId));
-        Optional<CityEntity> cityOpt = cityRepository.findById(customerReq.getCityId());
+        Optional<CityEntity> cityOpt = cityRepository.findById(customerUpdate.getCityId());
         if (cityOpt.isEmpty()) {
-            var msg = String.format("The city: %s doesn't exists,", customerReq.getCityId());
+            var msg = String.format("The city: %s doesn't exists,", customerUpdate.getCityId());
             throw new CustomersLogicException(msg);
         }
         CustomerEntity existingCustomer = customerOpt.get();
-        existingCustomer.setName(customerReq.getName());
-        existingCustomer.setDescription(customerReq.getDescription());
-        existingCustomer.setActive(customerReq.getActive());
+        existingCustomer.setName(customerUpdate.getName());
+        existingCustomer.setDescription(customerUpdate.getDescription());
+        existingCustomer.setActive(customerUpdate.getActive());
         existingCustomer.setUpdatedAt(Instant.now());
         existingCustomer.setCity(cityOpt.get());
         var listErrors = existingCustomer.validate();

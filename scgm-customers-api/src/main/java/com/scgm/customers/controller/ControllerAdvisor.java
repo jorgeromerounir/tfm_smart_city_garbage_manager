@@ -29,13 +29,6 @@ public class ControllerAdvisor {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
     }
 
-    @ExceptionHandler(CustomerValidationException.class)
-    public ResponseEntity<DefaultResponseDto> handleCustomerValidationException(CustomerValidationException ex) {
-        log.debug("Customer validation error: {}, error list: {}", ex.getMessage(), ex.getErrors());
-        var response = new DefaultResponseDto(ex.getErrors(), HttpStatus.BAD_REQUEST.value());
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
-    }
-
     @ExceptionHandler(Exception.class)
     public ResponseEntity<DefaultResponseDto> handleGenericException(Exception ex) {
         log.error("An unexpected error occurred", ex);
