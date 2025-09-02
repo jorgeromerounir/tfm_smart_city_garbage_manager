@@ -4,15 +4,17 @@ import java.util.List;
 
 public class ContainerValidationException extends RuntimeException {
 
+    private List<String> errors;
+
     public ContainerValidationException(String message) {
         super(message);
+        this.errors = List.of();
     }
 
     public ContainerValidationException(String message, Throwable cause) {
         super(message, cause);
+        this.errors = List.of();
     }
-
-    private List<String> errors;
 
     public ContainerValidationException(String message, List<String> errors) {
         super(message + (errors.isEmpty() ? "" : (":\n- " + String.join("\n- ", errors))));

@@ -11,8 +11,15 @@ public class Controller {
     @Value("${spring.application.name}") 
     private String appName;
 
+    @Value("${spring.application.version}") 
+    private String appVersion;
+
+    @Value("${spring.application.description}") 
+    private String appDescription;
+
     @GetMapping("/")
     public ResponseEntity<String> get() {
-        return ResponseEntity.ok("Hello from: " + appName);
+        return ResponseEntity.ok("Hello from: " + appName + " version: " + appVersion + 
+            "\nDescription: " + appDescription);
     }
 }

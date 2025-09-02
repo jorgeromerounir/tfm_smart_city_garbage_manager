@@ -3,7 +3,6 @@ package com.scgm.containers.controller;
 import com.scgm.containers.dto.DefaultResponseDto;
 import com.scgm.containers.exceptions.ContainersLogicException;
 import com.scgm.containers.exceptions.ContainersDatabaseException;
-import com.scgm.containers.exceptions.ContainerValidationException;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -26,13 +25,6 @@ public class ControllerAdvisor {
     public ResponseEntity<DefaultResponseDto> handleCustomerBusinessException(ContainersLogicException ex) {
         log.warn("Container business error: {}", ex.getMessage());
         var response = new DefaultResponseDto(ex.getMessage(), HttpStatus.BAD_REQUEST.value());
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
-    }
-
-    @ExceptionHandler(ContainerValidationException.class)
-    public ResponseEntity<DefaultResponseDto> handleContainerValidationException(ContainerValidationException ex) {
-        log.debug("Container validation error: {}, error list: {}", ex.getMessage(), ex.getErrors());
-        var response = new DefaultResponseDto(ex.getErrors(), HttpStatus.BAD_REQUEST.value());
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
     }
 
