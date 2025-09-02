@@ -1,7 +1,7 @@
 ## Configuration for Eureka
 eureka:
   client:
-    enabled: true
+    enabled: ${EUREKA_ENABLED:false}
     registerWithEureka: true
     fetchRegistry: true
     service-url:
@@ -16,27 +16,9 @@ spring:
     name: @project.artifactId@
     description: @project.description@
     version: @project.version@
-  datasource:
-    url: jdbc:h2:mem:scgm_routes_db
-    driver-class-name: org.h2.Driver
-    username: sa
-    password:
-  jpa:
-    hibernate:
-      ddl-auto: update
-    database-platform: org.hibernate.dialect.H2Dialect
-  sql:
-    init:
-      mode: always
-      schema-locations: classpath:/schema.sql
-      data-locations: classpath:/data.sql
-
-  h2:
-    console:
-      enabled: true
-      path: /h2-console
-      settings:
-        web-allow-others: true
+  data:
+    mongodb:
+      uri: ${MONGODB_URI:mongodb://admin:admin123@localhost:27017/scgm_routes_db?authSource=admin}
 
 ## Instance port
 server:
@@ -62,3 +44,6 @@ management:
       mode: simple
     build:
       enabled: true
+
+scgm.containers.api.url: ${CONTAINERS_API_URL:http://localhost:8181}
+
