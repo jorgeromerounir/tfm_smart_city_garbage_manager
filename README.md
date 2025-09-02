@@ -56,3 +56,30 @@ curl -X 'POST' \
   -d '{"targetMethod": "GET"}'
 
 ```
+
+## Docker compose info
+
+Levantar el servicio:
+```shell
+docker-compose up -d scgm-rabbitmq
+```
+
+Detener el servicio:
+```shell
+docker-compose stop scgm-rabbitmq
+```
+
+Finalizar y destruir el servicio (elimina contenedor y volúmenes):
+```shell
+docker-compose down -v
+```
+
+Levantar el servicio:
+```shell
+docker-compose up -d scgm_routes_db
+```
+
+Detener el servicio:
+```shell
+docker-compose stop scgm_routes_db
+```

@@ -1,0 +1,38 @@
+version: '3.8'
+
+services:
+  scgm-rabbitmq:
+    image: rabbitmq:3.12-management
+    container_name: scgm-rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: admin
+      RABBITMQ_DEFAULT_PASS: admin123
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    networks:
+      - scgm-net
+
+  scgm_routes_db:
+    image: mongo:7.0
+    container_name: scgm_routes_db
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: admin123
+      MONGO_INITDB_DATABASE: scgm_routes_db
+    volumes:
+      - mongodb_data:/data/db
+    networks:
+      - scgm-net
+
+volumes:
+  rabbitmq_data:
+  mongodb_data:
+
+networks:
+  scgm-net:
+    driver: bridge
