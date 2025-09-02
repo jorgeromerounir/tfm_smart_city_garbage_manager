@@ -3,6 +3,7 @@ import {
   declareExchange,
   sendMessage
 } from './rabbitmq-client.js'
+import fs from 'fs'
 
 const EXCHANGE_NAME = 'container.updated.exchange'
 const EXCHANGE_TYPE = 'topic'
@@ -39,8 +40,10 @@ function generateContainerId() {
   })
 }
 
-// Generate container IDs for simulation
-const containerIds = Array.from({ length: 200 }, () => generateContainerId())
+// Load container IDs from JSON file
+//const containerIds = Array.from({ length: 200 }, () => generateContainerId())
+const containerData = JSON.parse(fs.readFileSync('./containers_id_list.json', 'utf8'))
+const containerIds = containerData.container_ids
 
 export async function sendSensorData(processId) {
   try {

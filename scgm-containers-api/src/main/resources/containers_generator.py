@@ -1,5 +1,6 @@
 import uuid
 import random
+import json
 from datetime import datetime, timedelta
 
 def get_waste_level_status_from_value(value):
@@ -10,13 +11,14 @@ def get_waste_level_status_from_value(value):
     else:
         return 'HEAVY'
 
-def generate_sql_insert_script(num_records=10500, filename='containers_data.sql'):
+def generate_sql_insert_script(num_records=10500, filename='containers_data.sql', json_filename='containers_id_list.json'):
     """
     Generates a SQL script with a specified number of INSERT statements for the
     'containers' table and saves it to a file.
     Args:
         num_records (int): The number of records to generate.
         filename (str): The name of the output SQL file.
+        json_filename (str): The name of the output JSON file for container IDs.
     """
     # Range of coordinates for Bogotá, Colombia
     min_lat, max_lat = 4.4988, 4.7955
@@ -37,6 +39,8 @@ def generate_sql_insert_script(num_records=10500, filename='containers_data.sql'
     total_seconds = int(time_delta.total_seconds())
 
     print(f"Generating {num_records} SQL INSERT statements...")
+    
+    container_ids = []
 
     with open(filename, 'w') as f:
         # Write the initial part of the INSERT statement
@@ -45,6 +49,7 @@ def generate_sql_insert_script(num_records=10500, filename='containers_data.sql'
         for i in range(num_records):
             # Generate a unique ID using UUID
             container_id = str(uuid.uuid4())
+            container_ids.append(container_id)
             
             # Generate random coordinates within Bogotá
             latitude = round(random.uniform(min_lat, max_lat), 8)
@@ -78,6 +83,12 @@ def generate_sql_insert_script(num_records=10500, filename='containers_data.sql'
             f.write(values + "\n")
 
     print(f"Successfully generated SQL script and saved to '{filename}'.")
+    
+    # Generate JSON file with container IDs
+    with open(json_filename, 'w') as json_file:
+        json.dump({"container_ids": container_ids}, json_file, indent=2)
+    
+    print(f"Successfully generated container IDs JSON and saved to '{json_filename}'.")
 
 if __name__ == '__main__':
     generate_sql_insert_script()
