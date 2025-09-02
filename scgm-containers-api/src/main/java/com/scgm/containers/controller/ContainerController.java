@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.scgm.containers.dto.ContainerAddDto;
 import com.scgm.containers.dto.ContainerDto;
+import com.scgm.containers.dto.ContainerStatusSummaryDto;
 import com.scgm.containers.dto.ContainerUpdateDto;
 import com.scgm.containers.service.ContainerService;
 
@@ -85,6 +86,14 @@ public class ContainerController {
         log.debug("Trying to delete container by ID");
         containerService.delete(containerId);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
+
+    @GetMapping("/status-summary/{cityId}")
+    public ResponseEntity<ContainerStatusSummaryDto> getStatusSummary(@PathVariable Long cityId) {
+        log.debug("Getting status summary for city ID: {}", cityId);
+        var summaryOpt = containerService.getStatusSummary(cityId);
+        return summaryOpt.map(summary -> new ResponseEntity<>(summary, HttpStatus.OK))
+                .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
 
 }

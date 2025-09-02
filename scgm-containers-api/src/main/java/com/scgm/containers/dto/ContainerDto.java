@@ -21,9 +21,9 @@ public class ContainerDto {
     private String id;
     private Double latitude;
     private Double longitude;
-    private WasteLevel wasteLevel;
     private Double temperature;
     private Double wasteLevelValue;
+    private WasteLevel wasteLevelStatus;
     private String address;
     private Long cityId;
     private Long customerId;
@@ -35,7 +35,8 @@ public class ContainerDto {
                 .id(containerDto.getId())
                 .latitude(containerDto.getLatitude())
                 .longitude(containerDto.getLongitude())
-                .wasteLevel(containerDto.getWasteLevelValue())
+                .wasteLevelValue(containerDto.getWasteLevelValue())
+                .wasteLevelStatus(WasteLevelUtil.getWasteLevelFromDouble(containerDto.getWasteLevelValue()))
                 .temperature(containerDto.getTemperature())
                 .address(containerDto.getAddress())
                 .cityId(containerDto.getCityId())
@@ -50,8 +51,8 @@ public class ContainerDto {
                 .id(containerEntity.getId())
                 .latitude(containerEntity.getLatitude())
                 .longitude(containerEntity.getLongitude())
-                .wasteLevel(WasteLevelUtil.getWasteLevelFromDouble(containerEntity.getWasteLevel()))
-                .wasteLevelValue(containerEntity.getWasteLevel())
+                .wasteLevelValue(containerEntity.getWasteLevelValue())
+                .wasteLevelStatus(containerEntity.getWasteLevelStatus())
                 .temperature(containerEntity.getTemperature())
                 .address(containerEntity.getAddress())
                 .cityId(containerEntity.getCityId())

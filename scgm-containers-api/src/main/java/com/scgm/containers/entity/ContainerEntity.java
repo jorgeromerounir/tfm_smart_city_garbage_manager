@@ -41,8 +41,12 @@ public class ContainerEntity {
     @Column(name = "longitude", nullable = false)
     private Double longitude;
 
-    @Column(name = "waste_level", nullable = false)
-    private Double wasteLevel;
+    @Column(name = "waste_level_value", nullable = false)
+    private Double wasteLevelValue;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "waste_level_status", length = 50, nullable = false)
+    private WasteLevel wasteLevelStatus;
 
     @Column(name = "temperature", nullable = false)
     private Double temperature;
@@ -83,8 +87,8 @@ public class ContainerEntity {
             listErrors.add("longitude: is required");
         else if (longitude < -180.0 || longitude > 180.0)
             listErrors.add("longitude: must be between -180 and 180");
-        if (wasteLevel == null)
-            listErrors.add("wasteLevel: is required");
+        if (wasteLevelStatus == null)
+            listErrors.add("wasteLevelStatus: is required");
         if (temperature == null)
             listErrors.add("temperature: is required");
         if (StringUtils.isEmpty(address)) {

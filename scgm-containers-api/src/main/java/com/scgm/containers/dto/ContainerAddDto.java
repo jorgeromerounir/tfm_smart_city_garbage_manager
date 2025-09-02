@@ -7,6 +7,7 @@ import java.util.List;
 import com.scgm.containers.entity.ContainerEntity;
 import com.scgm.containers.entity.ContainerEntity.WasteLevel;
 import com.scgm.containers.util.UuidUtil;
+import com.scgm.containers.util.WasteLevelUtil;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -22,6 +23,7 @@ public class ContainerAddDto {
     private Double latitude;
     private Double longitude;
     private Double wasteLevelValue;
+    private WasteLevel wasteLevelStatus;
     private Double temperature;
     private String address;
     private Long cityId;
@@ -33,7 +35,8 @@ public class ContainerAddDto {
                 .id(UuidUtil.generateUuidAsString())
                 .latitude(containerDto.getLatitude())
                 .longitude(containerDto.getLongitude())
-                .wasteLevel(containerDto.getWasteLevelValue())
+                .wasteLevelValue(containerDto.getWasteLevelValue())
+                .wasteLevelStatus(WasteLevelUtil.getWasteLevelFromDouble(containerDto.getWasteLevelValue()))
                 .temperature(containerDto.getTemperature())
                 .address(containerDto.getAddress())
                 .cityId(containerDto.getCityId())

@@ -6,6 +6,7 @@ import java.util.Optional;
 import com.scgm.containers.dto.ContainerAddDto;
 import com.scgm.containers.dto.ContainerDto;
 import com.scgm.containers.dto.ContainerUpdateDto;
+import com.scgm.containers.dto.ContainerStatusSummaryDto;
 
 public interface ContainerService {
 
@@ -22,5 +23,7 @@ public interface ContainerService {
     public ContainerDto update(String containerId, ContainerUpdateDto containerUpdate);
 
     public void delete(String containerId);
+
+    public  Optional<ContainerStatusSummaryDto> getStatusSummary(Long cityId);
 
 }

@@ -2,6 +2,14 @@ import uuid
 import random
 from datetime import datetime, timedelta
 
+def get_waste_level_status_from_value(value):
+    if value <= 33.0:
+        return 'LIGHT'
+    elif value <= 66.0:
+        return 'MEDIUM'
+    else:
+        return 'HEAVY'
+
 def generate_sql_insert_script(num_records=10500, filename='containers_data.sql'):
     """
     Generates a SQL script with a specified number of INSERT statements for the
@@ -32,7 +40,7 @@ def generate_sql_insert_script(num_records=10500, filename='containers_data.sql'
 
     with open(filename, 'w') as f:
         # Write the initial part of the INSERT statement
-        f.write("INSERT INTO containers (id, latitude, longitude, waste_level, temperature, address, city_id, customer_id, created_at, updated_at) VALUES\n")
+        f.write("INSERT INTO containers (id, latitude, longitude, waste_level_value, waste_level_status, temperature, address, city_id, customer_id, created_at, updated_at) VALUES\n")
 
         for i in range(num_records):
             # Generate a unique ID using UUID
@@ -43,8 +51,11 @@ def generate_sql_insert_script(num_records=10500, filename='containers_data.sql'
             longitude = round(random.uniform(min_lon, max_lon), 8)
             
             # Generate random waste level (0-100) and temperature (20-30)
-            waste_level = round(random.uniform(0, 100), 4)
+            waste_level_value = round(random.uniform(0, 100), 4)
             temperature = round(random.uniform(20, 30), 2)
+            
+            # Determine the waste level status based on the value
+            waste_level_status = get_waste_level_status_from_value(waste_level_value)
             
             # Select a random address
             address = random.choice(addresses)
@@ -55,7 +66,7 @@ def generate_sql_insert_script(num_records=10500, filename='containers_data.sql'
             formatted_date = random_date.strftime('%Y-%m-%d %H:%M:%S')
             
             # Format the values for the INSERT statement
-            values = f"('{container_id}', {latitude}, {longitude}, {waste_level}, {temperature}, '{address}', 1, 1, '{formatted_date}', '{formatted_date}')"
+            values = f"('{container_id}', {latitude}, {longitude}, {waste_level_value}, '{waste_level_status}', {temperature}, '{address}', 1, 1, '{formatted_date}', '{formatted_date}')"
             
             # Add comma or semicolon
             if i < num_records - 1:

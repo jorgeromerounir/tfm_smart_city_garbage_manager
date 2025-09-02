@@ -1,7 +1,9 @@
 package com.scgm.containers.service;
 
 import java.time.Instant;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -10,12 +12,15 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.scgm.containers.dto.ContainerAddDto;
 import com.scgm.containers.dto.ContainerDto;
+import com.scgm.containers.dto.ContainerStatusSummaryDto;
 import com.scgm.containers.dto.ContainerUpdateDto;
 import com.scgm.containers.entity.ContainerEntity;
+import com.scgm.containers.entity.ContainerEntity.WasteLevel;
 import com.scgm.containers.exceptions.ContainerNotFoundException;
 import com.scgm.containers.exceptions.ContainerValidationException;
 import com.scgm.containers.exceptions.ContainersDatabaseException;
 import com.scgm.containers.repository.ContainerRepository;
+import com.scgm.containers.util.WasteLevelUtil;
 
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -99,7 +104,8 @@ public class ContainerServiceImpl implements ContainerService {
         ContainerEntity existingContainer = containerOpt.get();
         existingContainer.setLatitude(containerUpdate.getLatitude());
         existingContainer.setLongitude(containerUpdate.getLongitude());
-        existingContainer.setWasteLevel(containerUpdate.getWasteLevelValue());
+        existingContainer.setWasteLevelValue(containerUpdate.getWasteLevelValue());
+        existingContainer.setWasteLevelStatus(WasteLevelUtil.getWasteLevelFromDouble(containerUpdate.getWasteLevelValue()));
         existingContainer.setTemperature(containerUpdate.getTemperature());
         existingContainer.setAddress(containerUpdate.getAddress());
         existingContainer.setCityId(containerUpdate.getCityId());
@@ -128,6 +134,29 @@ public class ContainerServiceImpl implements ContainerService {
             log.error("Error trying to delete container with ID: {}", containerId, e);
             throw new ContainersDatabaseException("Error trying to delete container", e);
         }
+    }
+
+    @Override
+    public Optional<ContainerStatusSummaryDto> getStatusSummary(Long cityId) {
+        log.debug("Getting status summary for city ID: {}", cityId);
+        Map<String, Long> statusSummaryMap = new HashMap<>();
+        try {
+            statusSummaryMap = containerRepository.getStatusSummary(cityId);   
+        } catch (Exception e) {
+            log.error("Error trying to get status summary for city ID: {}", cityId, e);
+            throw new ContainersDatabaseException("Error trying to get status summary", e);
+        }
+        Integer light = statusSummaryMap.getOrDefault(WasteLevel.LIGHT.toString(), 0L).intValue();
+        Integer medium = statusSummaryMap.getOrDefault(WasteLevel.MEDIUM.toString(), 0L).intValue();
+        Integer heavy = statusSummaryMap.getOrDefault(WasteLevel.HEAVY.toString(), 0L).intValue();
+        Integer total = statusSummaryMap.getOrDefault("total", 0L).intValue();
+        var summary = ContainerStatusSummaryDto.builder()
+                .light(light)
+                .medium(medium)
+                .heavy(heavy)
+                .total(total)
+                .build();
+        return Optional.of(summary);
     }
 
 }
