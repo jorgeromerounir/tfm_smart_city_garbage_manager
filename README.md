@@ -19,6 +19,8 @@ mvn clean install -f pom.xml
 
 '/c/Program Files/Java/openjdk-21.0.2/bin/java' -jar ./target/scgm-gateway-public.jar
 
+'/c/Program Files/Java/openjdk-21.0.2/bin/java' -jar ./target/auth-service-1.0.0.jar
+
 ## -----> scgm-routes-api run on port: 8180
 '/c/Program Files/Java/openjdk-21.0.2/bin/java' -jar ./target/scgm-routes-api.jar
 
@@ -59,6 +61,11 @@ curl -X 'POST' \
 
 ## Docker compose info
 
+Finalizar y destruir el servicio (elimina contenedor y volúmenes):
+```shell
+docker-compose down -v
+```
+
 Levantar el servicio:
 ```shell
 docker-compose up -d scgm-rabbitmq
@@ -69,11 +76,6 @@ Detener el servicio:
 docker-compose stop scgm-rabbitmq
 ```
 
-Finalizar y destruir el servicio (elimina contenedor y volúmenes):
-```shell
-docker-compose down -v
-```
-
 Levantar el servicio:
 ```shell
 docker-compose up -d scgm_routes_db
@@ -82,4 +84,27 @@ docker-compose up -d scgm_routes_db
 Detener el servicio:
 ```shell
 docker-compose stop scgm_routes_db
+```
+
+
+Test signin:
+```shell
+curl -X 'POST' \
+  'http://localhost:8081/auth/signin' \
+  -H 'Content-Type: application/json' \
+  -d '{
+    "email": "jorge.test@jorge.com",
+    "password": "Admin123"
+  }'
+```
+
+Test refresh token:
+```shell
+curl -X 'POST' \
+  'http://localhost:8081/auth/refresh' \
+  -H 'Content-Type: application/json' \
+  -d '{
+    "refreshToken": "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJqb3JnZS50ZXN0QGpvcmdlLmNvbSIsInByb2ZpbGUiOiJBRE1JTiIsImN1c3RvbWVyX2lkIjoiMSIsImlhdCI6MTc1Njg0NDYyMSwiZXhwIjoxNzU3NDQ5NDIxfQ.bGBqbvsO48_0Z1266yJnArOyycH4ZSF3jHuc2WXyEdFSkkwO9lQ6AD2xRQBBjS1aUZbv_5H2uYs4v5dgImIwCA"
+  }'
+
 ```

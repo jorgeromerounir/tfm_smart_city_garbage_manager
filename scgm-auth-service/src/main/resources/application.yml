@@ -1,13 +1,14 @@
+## Instance port
 server:
-  port: 8081
+  port: ${PORT:8081}
 
 spring:
   application:
     name: auth-service
   datasource:
-    url: jdbc:postgresql://localhost:5432/auth_db
-    username: uwm_user
-    password: uwm_password
+    url: jdbc:postgresql://localhost:5432/scgm_auth_db
+    username: ${POSTGRES_USER:uwm_user}
+    password: ${POSTGRES_PASSWORD:uwm_password}
     driver-class-name: org.postgresql.Driver
   jpa:
     hibernate:

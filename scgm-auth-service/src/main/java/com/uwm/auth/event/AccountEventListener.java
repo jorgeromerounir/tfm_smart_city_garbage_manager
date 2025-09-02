@@ -16,16 +16,18 @@ public class AccountEventListener {
     
     @RabbitListener(queues = "auth.queue")
     public void handleAccountEvent(AccountEvent event) {
-        log.info("Received account event: {} for user: {}", event.eventType(), event.email());
-        switch (event.eventType()) {
+        log.info("Received account event: {} for user: {}", event.getEventType(), event.getEmail());
+        switch (event.getEventType()) {
             case "CREATED":
-                Account account = new Account(event.accountId(), event.email(), event.password());
+                var claims = event.getClaims();
+                log.info("Created user in auth claims: {}", claims);
+                Account account = new Account(event.getAccountId(), event.getEmail(), event.getPassword(), claims);
                 accountRepository.save(account);
-                log.info("Created user in auth service: {}", event.email());
+                log.info("Created user in auth service: {}", event.getEmail());
                 break;
             case "DELETED":
-                accountRepository.deleteById(event.accountId());
-                log.info("Deleted user from auth service: {}", event.email());
+                accountRepository.deleteById(event.getAccountId());
+                log.info("Deleted user from auth service: {}", event.getEmail());
                 break;
         }
     }

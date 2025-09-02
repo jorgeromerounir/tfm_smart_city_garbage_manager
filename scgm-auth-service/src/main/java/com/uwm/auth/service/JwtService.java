@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 
 import javax.crypto.SecretKey;
 import java.util.Date;
+import java.util.Map;
 
 @Service
 public class JwtService {
@@ -30,9 +31,29 @@ public class JwtService {
             .compact();
     }
 
+    public String generateAccessToken(String email, Map<String, String> claims) {
+        return Jwts.builder()
+            .subject(email)
+            .claims(claims)
+            .issuedAt(new Date())
+            .expiration(new Date(System.currentTimeMillis() + accessTokenExpiration))
+            .signWith(getSigningKey())
+            .compact();
+    }    
+
     public String generateRefreshToken(String email) {
         return Jwts.builder()
             .subject(email)
+            .issuedAt(new Date())
+            .expiration(new Date(System.currentTimeMillis() + refreshTokenExpiration))
+            .signWith(getSigningKey())
+            .compact();
+    }
+
+    public String generateRefreshToken(String email, Map<String, String> claims) {
+        return Jwts.builder()
+            .subject(email)
+            .claims(claims)
             .issuedAt(new Date())
             .expiration(new Date(System.currentTimeMillis() + refreshTokenExpiration))
             .signWith(getSigningKey())

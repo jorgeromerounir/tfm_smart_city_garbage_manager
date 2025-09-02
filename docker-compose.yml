@@ -1,9 +1,9 @@
 version: '3.8'
 
 services:
-  scgm-rabbitmq:
+  scgm_rabbitmq:
     image: rabbitmq:3.12-management
-    container_name: scgm-rabbitmq
+    container_name: scgm_rabbitmq
     ports:
       - "5672:5672"
       - "15672:15672"
@@ -15,9 +15,9 @@ services:
     networks:
       - scgm-net
 
-  scgm_routes_db:
+  scgm_mongo_db:
     image: mongo:7.0
-    container_name: scgm_routes_db
+    container_name: scgm_mongo_db
     ports:
       - "27017:27017"
     environment:
@@ -29,9 +29,25 @@ services:
     networks:
       - scgm-net
 
+  scgm_postgresql_db:
+    image: postgres:16
+    container_name: scgm_postgresql_db
+    environment:
+      POSTGRES_USER: uwm_user
+      POSTGRES_PASSWORD: uwm_password
+      POSTGRES_DB: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./deployment/init_postgresql_db.sql:/docker-entrypoint-initdb.d/init-db.sql
+    networks:
+      - scgm-net
+
 volumes:
   rabbitmq_data:
   mongodb_data:
+  postgres_data:
 
 networks:
   scgm-net:

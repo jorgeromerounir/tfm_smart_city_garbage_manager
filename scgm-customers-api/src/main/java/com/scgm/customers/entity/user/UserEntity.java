@@ -29,6 +29,8 @@ public class UserEntity {
     public static final Pattern INJECTION_PATTERN = Pattern.compile("^[a-zA-Z0-9\\s.,!?#@_'-]*$");
     
     public static final Pattern EMAIL_PATTERN = Pattern.compile("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,6}$");
+    
+    public static final Pattern PASSWORD_PATTERN = Pattern.compile("^[a-zA-Z0-9.@#$%^&*()_+-=\\[\\]{}|;':,.<>?]*$");
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "users_seq_gen")
@@ -55,6 +57,9 @@ public class UserEntity {
     @Column(name = "updated_at", nullable = false)
     private Instant updatedAt;
 
+    @Column(name = "password", nullable = false, length = 255)
+    private String password;
+
     public List<String> validate() {
         List<String> listErrors = new ArrayList<>();
         //name validations
@@ -77,6 +82,12 @@ public class UserEntity {
         
         if (customerId == null)
             listErrors.add("customerId: is required");
+
+        if (StringUtils.isBlank(password)) {
+            listErrors.add("password: is required");
+        } else if (!PASSWORD_PATTERN.matcher(password).matches()) {
+            listErrors.add("password: invalid format");
+        }
         
         return listErrors;
     }

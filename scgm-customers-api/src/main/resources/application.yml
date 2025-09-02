@@ -1,3 +1,7 @@
+## Instance port
+server:
+  port: ${PORT:8182}
+
 ## Configuration for Eureka
 eureka:
   client:
@@ -31,6 +35,11 @@ spring:
       mode: always
       schema-locations: classpath:/schema.sql
       data-locations: classpath:/data.sql
+  rabbitmq:
+    host: ${RMQ_HOSTNAME:localhost}
+    port: ${RMQ_PORT:5672}
+    username: ${RMQ_USER:admin}
+    password: ${RMQ_PASS:admin123}
 
   h2:
     console:
@@ -38,10 +47,6 @@ spring:
       path: /h2-console
       settings:
         web-allow-others: true
-
-## Instance port
-server:
-  port: ${PORT:8182}
 
 management:
   endpoints:
@@ -63,3 +68,6 @@ management:
       mode: simple
     build:
       enabled: true
+
+
+scgm.rabbitmq.queue.auth: auth.queue

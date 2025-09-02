@@ -1,3 +1,7 @@
+## Instance port
+server:
+  port: ${PORT:8181}
+
 ## Configuration for Eureka
 eureka:
   client:
@@ -38,10 +42,6 @@ spring:
       path: /h2-console
       settings:
         web-allow-others: true
-
-## Instance port
-server:
-  port: ${PORT:8181}
 
 management:
   endpoints:

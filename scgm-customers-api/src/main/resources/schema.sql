@@ -40,5 +40,6 @@ CREATE TABLE IF NOT EXISTS users (
     customer_id BIGINT NOT NULL,
     created_at TIMESTAMP NOT NULL,
     updated_at TIMESTAMP NOT NULL,
+    password VARCHAR(255) NOT NULL,
     FOREIGN KEY (customer_id) REFERENCES customers(id)
 );

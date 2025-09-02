@@ -6,6 +6,7 @@ import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.amqp.support.converter.MessageConverter;
 
 @Configuration
 public class RabbitConfig {
@@ -24,9 +25,9 @@ public class RabbitConfig {
     public Binding authQueueBinding() {
         return BindingBuilder.bind(authQueue()).to(accountsExchange()).with("auth.queue");
     }
-    
+
     @Bean
-    public Jackson2JsonMessageConverter messageConverter() {
+    public MessageConverter jsonMessageConverter() {
         return new Jackson2JsonMessageConverter();
     }
     
@@ -34,7 +35,7 @@ public class RabbitConfig {
     public SimpleRabbitListenerContainerFactory rabbitListenerContainerFactory(ConnectionFactory connectionFactory) {
         SimpleRabbitListenerContainerFactory factory = new SimpleRabbitListenerContainerFactory();
         factory.setConnectionFactory(connectionFactory);
-        factory.setMessageConverter(messageConverter());
+        factory.setMessageConverter(jsonMessageConverter());
         return factory;
     }
 }

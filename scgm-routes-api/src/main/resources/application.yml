@@ -1,3 +1,7 @@
+## Instance port
+server:
+  port: ${PORT:8180}
+
 ## Configuration for Eureka
 eureka:
   client:
@@ -20,9 +24,7 @@ spring:
     mongodb:
       uri: ${MONGODB_URI:mongodb://admin:admin123@localhost:27017/scgm_routes_db?authSource=admin}
 
-## Instance port
-server:
-  port: ${PORT:8180}
+
 
 management:
   endpoints:
@@ -45,5 +47,5 @@ management:
     build:
       enabled: true
 
+## Url configs
 scgm.containers.api.url: ${CONTAINERS_API_URL:http://localhost:8181}
-

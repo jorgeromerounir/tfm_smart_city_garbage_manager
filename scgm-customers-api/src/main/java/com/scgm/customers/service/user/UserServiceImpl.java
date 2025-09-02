@@ -4,6 +4,7 @@ import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.Map;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,19 +21,25 @@ import com.scgm.customers.exceptions.user.UserValidationException;
 import com.scgm.customers.repository.CustomerRepository;
 import com.scgm.customers.repository.user.UserRepository;
 import com.scgm.customers.service.user.UsersService;
+import com.scgm.customers.event.AccountEvent;
+import com.scgm.customers.event.AccountEventProducer;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 @Service
-@AllArgsConstructor
+@RequiredArgsConstructor
 @Slf4j
 public class UserServiceImpl implements UsersService {
 
     private final UserRepository userRepository;
     private final CustomerRepository customerRepository;
+    private final AccountEventProducer accountEventProducer;
+    private BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
     @Override
+    @Transactional
     public UserDto add(UserAddDto userAdd) {
         var reqListErrors = userAdd.validate();
         if (!reqListErrors.isEmpty())
@@ -43,15 +50,34 @@ public class UserServiceImpl implements UsersService {
             throw new CustomersLogicException(msg);
         }
         var userEntity = UserAddDto.toEntity(userAdd);
+        userEntity.setPassword(passwordEncoder.encode(userAdd.getPassword()));
         var listErrors = userEntity.validate();
         if (!listErrors.isEmpty())
             throw new UserValidationException("Trying to add: error user entity validation.", listErrors);
         try {
-            return UserDto.toDto(userRepository.save(userEntity));
+            userEntity = userRepository.save(userEntity);
         } catch (Exception e) {
             log.error("Error trying to add user with name: {}", userEntity.getName(), e);
             throw new CustomerDatabaseException("Error trying to add user", e);
         }
+        sendUserEvent(userEntity);
+        return UserDto.toDto(userEntity);
+    }
+
+    private void sendUserEvent(UserEntity userEntity){
+        Map<String, String> claims = Map.of(
+            "profile", userEntity.getProfile().toString(),
+            "customer_id", userEntity.getCustomerId().toString()
+        );
+        var accountEvent = new AccountEvent(
+                "CREATED",
+                userEntity.getId(),
+                userEntity.getEmail(),
+                userEntity.getProfile().toString(),
+                userEntity.getPassword(),
+                claims
+        );
+        accountEventProducer.sendAccountEvent(accountEvent);
     }
 
     @Override
