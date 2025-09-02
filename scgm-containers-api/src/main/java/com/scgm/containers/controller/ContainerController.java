@@ -15,9 +15,11 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.scgm.containers.dto.ContainerAddDto;
+import com.scgm.containers.dto.ContainerAddSendorDto;
 import com.scgm.containers.dto.ContainerDto;
 import com.scgm.containers.dto.ContainerStatusSummaryDto;
 import com.scgm.containers.dto.ContainerUpdateDto;
+import com.scgm.containers.entity.ContainerEntity.WasteLevel;
 import com.scgm.containers.service.ContainerService;
 
 import lombok.AllArgsConstructor;
@@ -94,6 +96,23 @@ public class ContainerController {
         var summaryOpt = containerService.getStatusSummary(cityId);
         return summaryOpt.map(summary -> new ResponseEntity<>(summary, HttpStatus.OK))
                 .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
+    }
+
+    @PostMapping("/sensor-data")
+    public ResponseEntity<ContainerDto> addSensorData(@RequestBody ContainerAddSendorDto containerAddSendor) {
+        log.debug("Adding sensor data");
+        var containerDto = containerService.addSensorData(containerAddSendor);
+        return new ResponseEntity<>(containerDto, HttpStatus.OK);
+    }
+
+    @GetMapping("/by-city-and-level/{cityId}")
+    public ResponseEntity<List<ContainerDto>> findByCityAndLevelStatus(@PathVariable Long cityId, 
+        @RequestParam List<WasteLevel> wasteLevelStatuses) {
+        log.debug("Finding containers for city ID: {} with waste level statuses: {}", cityId, wasteLevelStatuses);
+        List<ContainerDto> containers = containerService.findByCityAndLevelStatus(cityId, wasteLevelStatuses);
+        if (containers.isEmpty())
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        return new ResponseEntity<>(containers, HttpStatus.OK);
     }
 
 }

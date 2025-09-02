@@ -91,6 +91,8 @@ public class ContainerEntity {
             listErrors.add("wasteLevelStatus: is required");
         if (temperature == null)
             listErrors.add("temperature: is required");
+        else if (temperature < 0.0 || temperature > 70.0)
+            listErrors.add("temperature: must be between 0 and 70 degrees");
         if (StringUtils.isEmpty(address)) {
             listErrors.add("address: is required");
         } else if (address != null && !INJECTION_PATTERN.matcher(address).matches()) {

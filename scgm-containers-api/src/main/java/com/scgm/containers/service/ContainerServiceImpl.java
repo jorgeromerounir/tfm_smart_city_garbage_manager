@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.scgm.containers.dto.ContainerAddDto;
+import com.scgm.containers.dto.ContainerAddSendorDto;
 import com.scgm.containers.dto.ContainerDto;
 import com.scgm.containers.dto.ContainerStatusSummaryDto;
 import com.scgm.containers.dto.ContainerUpdateDto;
@@ -157,6 +158,46 @@ public class ContainerServiceImpl implements ContainerService {
                 .total(total)
                 .build();
         return Optional.of(summary);
+    }
+
+    @Override
+    public List<ContainerDto> findByCityAndLevelStatus(Long cityId, List<WasteLevel> wasteLevelStatuses) {
+        log.debug("Finding containers for city ID: {} with waste level statuses: {}", cityId, wasteLevelStatuses);
+        try {
+            List<String> statusStrings = wasteLevelStatuses.stream().map(WasteLevel::toString)
+                    .collect(Collectors.toList());
+            return containerRepository.findByCityAndLevelStatus(cityId, statusStrings).stream()
+                    .map(ContainerDto::toDto)
+                    .collect(Collectors.toList());
+        } catch (Exception e) {
+            log.error("Error trying to find containers by city ID: {} and waste level statuses: {}", cityId, wasteLevelStatuses, e);
+            throw new ContainersDatabaseException("Error trying to find containers", e);
+        }
+    }
+
+    @Override
+    @Transactional
+    public ContainerDto addSensorData(ContainerAddSendorDto containerAddSendor) {
+        var reqListErrors = containerAddSendor.validate();
+        if (!reqListErrors.isEmpty())
+            throw new ContainerValidationException("Trying to add sensor data: error request validation.", reqListErrors);
+        log.debug("Adding sensor data for container ID: {}", containerAddSendor.getId());
+        var containerOpt = containerRepository.findById(containerAddSendor.getId());
+        containerOpt.orElseThrow(() -> new ContainerNotFoundException(containerAddSendor.getId()));
+        ContainerEntity existingContainer = containerOpt.get();
+        existingContainer.setWasteLevelValue(containerAddSendor.getWasteLevelValue());
+        existingContainer.setWasteLevelStatus(WasteLevelUtil.getWasteLevelFromDouble(containerAddSendor.getWasteLevelValue()));
+        existingContainer.setTemperature(containerAddSendor.getTemperature());
+        existingContainer.setUpdatedAt(Instant.now());
+        var listErrors = existingContainer.validate();
+        if (!listErrors.isEmpty())
+            throw new ContainerValidationException("Trying to add sensor data: error entity validation.", listErrors);
+        try {
+            return ContainerDto.toDto(containerRepository.save(existingContainer));
+        } catch (Exception e) {
+            log.error("Error trying to add sensor data for container ID: {}", existingContainer.getId(), e);
+            throw new ContainersDatabaseException("Error trying to add sensor data", e);
+        }
     }
 
 }

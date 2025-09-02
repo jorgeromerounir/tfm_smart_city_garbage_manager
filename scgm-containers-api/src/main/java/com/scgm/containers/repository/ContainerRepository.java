@@ -36,4 +36,14 @@ public interface ContainerRepository extends JpaRepository<ContainerEntity, Stri
     """, nativeQuery = true)
     Map<String, Long> getStatusSummary(@Param("cityId") Long cityId);
 
+    @Query(value = """
+    SELECT * FROM containers
+    WHERE
+        city_id = :cityId
+        AND waste_level_status IN (:wasteLevelStatuses);
+    """, nativeQuery = true)
+    List<ContainerEntity> findByCityAndLevelStatus(
+        @Param("cityId") Long cityId, 
+        @Param("wasteLevelStatuses") List<String> wasteLevelStatuses);
+
 }
