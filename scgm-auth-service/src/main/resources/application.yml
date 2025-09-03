@@ -2,9 +2,24 @@
 server:
   port: ${PORT:8081}
 
+## Configuration for Eureka
+eureka:
+  client:
+    enabled: ${EUREKA_ENABLED:false}
+    registerWithEureka: true
+    fetchRegistry: true
+    service-url:
+      defaultZone: ${EUREKA_URL:http://localhost:8761/eureka}
+  instance:
+    preferIpAddress: true # For local development. Set to false if you want to use the hostname in a DNS-enabled environment
+    hostname: ${HOSTNAME:localhost}
+
+## Configuration for App name and Spring Data
 spring:
   application:
-    name: auth-service
+    name: @project.artifactId@
+    description: @project.description@
+    version: @project.version@
   datasource:
     url: jdbc:postgresql://localhost:5432/scgm_auth_db
     username: ${POSTGRES_USER:uwm_user}
@@ -15,7 +30,7 @@ spring:
       ddl-auto: validate
     show-sql: false
   flyway:
-    enabled: true
+    enabled: false
     locations: classpath:db/migration
   rabbitmq:
     host: ${RMQ_HOSTNAME:localhost}

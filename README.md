@@ -13,13 +13,14 @@ mvn clean install -Dmaven.test.skip=true -f pom.xml
 
 mvn clean install -f pom.xml
 
-
+## to enable connection with Eureka
+export EUREKA_ENABLED='true'
 
 '/c/Program Files/Java/openjdk-21.0.2/bin/java' -jar ./target/scgm-eureka-balancer.jar
 
 '/c/Program Files/Java/openjdk-21.0.2/bin/java' -jar ./target/scgm-gateway-public.jar
 
-'/c/Program Files/Java/openjdk-21.0.2/bin/java' -jar ./target/auth-service-1.0.0.jar
+"$JAVA_HOME/bin/java" -jar ./target/auth-service-1.0.0.jar
 
 ## -----> scgm-routes-api run on port: 8180
 '/c/Program Files/Java/openjdk-21.0.2/bin/java' -jar ./target/scgm-routes-api.jar
