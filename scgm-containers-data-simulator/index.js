@@ -52,20 +52,19 @@ export async function sendSensorData(processId) {
       containerIds[Math.floor(Math.random() * containerIds.length)]
 
     // Generate random sensor data
-    const wasteLevel =
-      WASTE_LEVELS[Math.floor(Math.random() * WASTE_LEVELS.length)]
+    //const wasteLevel = WASTE_LEVELS[Math.floor(Math.random() * WASTE_LEVELS.length)]
+    const wasteLevelValue = Math.floor(Math.random() * 100); // Decimal 0-100
     const temperature = Math.round((Math.random() * 40 + 10) * 100) / 100 // 10-50°C
 
     const sensorData = {
       containerId,
-      wasteLevel,
+      wasteLevelValue,
       temperature
     }
-
     await sendMessage(EXCHANGE_NAME, EXCHANGE_NAME, sensorData)
 
     console.log(
-      `🔄 Process ${processId}: 📦 Sent data for container ${containerId.slice(0, 8)} - ${wasteLevel} (🌡️ ${temperature}°C)`
+      `🔄 Process ${processId}: 📦 Sent data for container ${containerId.slice(0, 8)} - ${wasteLevelValue} (🌡️ ${temperature}°C)`
     )
   } catch (error) {
     if (

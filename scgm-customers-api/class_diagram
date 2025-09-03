@@ -1,0 +1,113 @@
+---
+config:
+  theme: base
+---
+classDiagram
+    class CustomerController {
+        -CustomersService customersService
+    }
+    class CityController {
+        -CityService cityService
+    }
+    class UserController {
+        -UsersService usersService
+    }
+    class CustomersService {
+        <<interface>>
+        +add(CustomerAddDto) CustomerDto
+        +findById(Long) Optional~CustomerDto~
+        +findByNameContaining(String) List~CustomerDto~
+        +findByCityId(Long) List~CustomerDto~
+        +findAll() List~CustomerDto~
+        +update(Long, CustomerUpdateDto) CustomerDto
+        +delete(Long) void
+    }
+    class CustomersServiceImpl {
+        -CustomerRepository customerRepository
+        -AccountEventProducer accountEventProducer
+    }
+    class CityServiceImpl {
+        -CityRepository cityRepository
+    }
+    class UserServiceImpl {
+        -UserRepository userRepository
+        -AccountEventProducer accountEventProducer
+    }
+    class CustomerRepository {
+        <<interface>>
+        +findByNameContaining(String) List~CustomerEntity~
+        +findByCityId(Long) List~CustomerEntity~
+    }
+    class CityRepository {
+        <<interface>>
+        +findByNameContaining(String) List~CityEntity~
+    }
+    class UserRepository {
+        <<interface>>
+        +findByCustomerId(Long) List~UserEntity~
+        +findByEmail(String) Optional~UserEntity~
+    }
+    class CustomerEntity {
+        -Long id
+        -String name
+        -String description
+        -Long cityId
+        -Boolean active
+        -Instant createdAt
+        -Instant updatedAt
+        +validate() List~String~
+    }
+    class CityEntity {
+        -Long id
+        -String name
+        -String country
+        -BigDecimal latitude
+        -BigDecimal longitude
+        -Boolean active
+        -Instant createdAt
+        -Instant updatedAt
+        +validate() List~String~
+    }
+    class UserEntity {
+        -Long id
+        -String name
+        -String email
+        -Profile profile
+        -Long customerId
+        -String password
+        -Instant createdAt
+        -Instant updatedAt
+        +validate() List~String~
+    }
+    class Profile {
+        <<enumeration>>
+        ADMIN
+        USER
+        OPERATOR
+    }
+    class AccountEventProducer {
+        -RabbitTemplate rabbitTemplate
+    }
+    class AccountEvent {
+        -String eventType
+        -Long accountId
+        -String email
+        -String password
+        -Map~String, Object~ claims
+    }
+    CustomerController --> CustomersService
+    CityController --> CityServiceImpl
+    UserController --> UserServiceImpl
+    CustomersService <|.. CustomersServiceImpl
+    CustomersServiceImpl --> CustomerRepository
+    CityServiceImpl --> CityRepository
+    UserServiceImpl --> UserRepository
+    CustomerRepository --> CustomerEntity
+    CityRepository --> CityEntity
+    UserRepository --> UserEntity
+    UserEntity --> Profile
+    CustomersServiceImpl --> AccountEventProducer
+    UserServiceImpl --> AccountEventProducer
+    AccountEventProducer --> AccountEvent
+    CustomerEntity --> CityEntity : cityId
+    UserEntity --> CustomerEntity : customerId

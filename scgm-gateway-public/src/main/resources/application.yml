@@ -7,8 +7,8 @@ eureka:
   instance:
     preferIpAddress: true
     hostname: ${HOSTNAME:localhost}
-    
   client:
+    enabled: ${EUREKA_ENABLED:false}
     registerWithEureka: true
     fetchRegistry: true
     serviceUrl:

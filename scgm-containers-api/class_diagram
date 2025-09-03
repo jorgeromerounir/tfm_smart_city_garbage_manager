@@ -1,0 +1,80 @@
+---
+config:
+  theme: base
+---
+classDiagram
+    %% Controller Layer
+    class ContainerController {
+        -ContainerService containerService
+    }
+    
+    %% Service Layer
+    class ContainerService {
+        <<interface>>
+        +add(ContainerAddDto) ContainerDto
+        +findById(String) Optional~ContainerDto~
+        +findByAddressContaining(String) List~ContainerDto~
+        +findByCityId(Long) List~ContainerDto~
+        +findByCustomerId(Long) List~ContainerDto~
+        +update(String, ContainerUpdateDto) ContainerDto
+        +delete(String) void
+        +getStatusSummary(Long) Optional~ContainerStatusSummaryDto~
+        +addSensorData(ContainerAddSendorDto) ContainerDto
+        +findByCityAndLevelStatus(Long, List~WasteLevel~) List~ContainerDto~
+    }
+    
+    class ContainerServiceImpl {
+        -ContainerRepository containerRepository
+    }
+    
+    %% Repository Layer
+    class ContainerRepository {
+        <<interface>>
+    }
+    
+    %% Entity Layer
+    class ContainerEntity {
+        -String id
+        -Double latitude
+        -Double longitude
+        -Double wasteLevelValue
+        -WasteLevel wasteLevelStatus
+        -Double temperature
+        -String address
+        -Long cityId
+        -Long customerId
+        -Instant createdAt
+        -Instant updatedAt
+        +validate() List~String~
+    }
+    
+    class WasteLevel {
+        <<enumeration>>
+        LIGHT
+        MEDIUM
+        HEAVY
+    }
+    
+    %% Event Layer
+    class SensorDataListener {
+        -ContainerServiceImpl containerService
+        +handleSensorData(SensorData) void
+        -convertWasteLevelToDouble(String) Double
+    }
+    
+    class SensorData {
+        -String containerId
+        -String wasteLevel
+        -Double temperature
+    }
+    
+    %% Relationships
+    ContainerController --> ContainerService
+    ContainerService <|.. ContainerServiceImpl
+    ContainerServiceImpl --> ContainerRepository
+    ContainerRepository --> ContainerEntity
+    ContainerEntity --> WasteLevel
+    
+    SensorDataListener --> ContainerServiceImpl
+    SensorDataListener --> SensorData
+
