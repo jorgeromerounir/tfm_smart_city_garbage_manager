@@ -42,6 +42,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 		const userEmail = localStorage.getItem('userEmail')
 
 		if (token && userEmail) {
+			//TODO: Validate functionality
 			void fetchUserByEmail(userEmail)
 		}
 	}, [])

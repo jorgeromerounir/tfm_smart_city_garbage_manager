@@ -132,10 +132,10 @@ export const authService = {
 
 export const userApi = {
 	getByProfile: (customerId: number, profile: Profile): Promise<User[]> =>
-		customersApi.post(`/by-customer/${customerId}/profile/${profile}`, {targetMethod: 'GET'}).then(res => res.data),
+		customersApi.post(`/api/v1/users/by-customer/${customerId}/profile/${profile}`, {targetMethod: 'GET'}).then(res => res.data),
 
 	getByEmail: (email: string): Promise<User> =>
-		customersApi.post(`/api/v1/users/by-email`, {targetMethod: 'GET', queryParams: {email}}).then(res => res.data),
+		customersApi.post(`/api/v1/users/by-email`, {targetMethod: 'GET', queryParams: {email:[email]}}).then(res => res.data),
 
 	getById: (userId: number): Promise<User> =>
 		customersApi.post(`/api/v1/users/${userId}`, {targetMethod: 'GET'}).then(res => res.data),
@@ -149,7 +149,7 @@ export const userApi = {
 
 export const citiesApi = {
 	getByCountry: (country: string): Promise<City[]> =>
-		customersApi.post(`/api/v1/cities/by-country`, {targetMethod: 'GET', queryParams: {country}}).then(res => res.data),
+		customersApi.post(`/api/v1/cities/by-country`, {targetMethod: 'GET', queryParams: {country:[country]}}).then(res => res.data),
 
 	getCountries: (): Promise<CountryDto[]> =>
 		customersApi.post(`/api/v1/cities/countries`, {targetMethod: 'GET'}).then(res => res.data),

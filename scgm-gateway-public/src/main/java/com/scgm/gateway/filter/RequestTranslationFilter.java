@@ -60,12 +60,14 @@ public class RequestTranslationFilter implements GlobalFilter {
                     .flatMap(dataBuffer -> {
                         GatewayRequest request = requestBodyExtractor.getRequest(exchange, dataBuffer);
                         ServerHttpRequest mutatedRequest = requestDecoratorFactory.getDecorator(request);
+                        log.info("Trying request: {} {}", mutatedRequest.getMethod(), mutatedRequest.getURI());
+                        log.info("Trying request headers: {}", mutatedRequest.getHeaders());
                         //RouteToRequestUrlFilter writes the URI to the exchange attributes *before* any global filters run.
                         exchange.getAttributes().put(ServerWebExchangeUtils.GATEWAY_REQUEST_URL_ATTR, mutatedRequest.getURI());
                         if(request.getQueryParams() != null) {
                             request.getQueryParams().clear();
                         }
-                        log.info("Proxying request: {} {}", mutatedRequest.getMethod(), mutatedRequest.getURI());
+                        log.info("Launch roxying request: {} {}", mutatedRequest.getMethod(), mutatedRequest.getURI());
                         return chain.filter(exchange.mutate().request(mutatedRequest).build());
                     });
         }

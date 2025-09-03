@@ -6,8 +6,8 @@ CREATE TABLE IF NOT EXISTS cities (
     id BIGINT DEFAULT NEXTVAL('cities_seq') PRIMARY KEY,
     name VARCHAR(200) NOT NULL,
     country VARCHAR(3) NOT NULL,
-    latitude DECIMAL(11, 8) NOT NULL,
-    longitude DECIMAL(11, 8) NOT NULL,
+    latitude DOUBLE PRECISION NOT NULL,
+    longitude DOUBLE PRECISION NOT NULL,
     active BOOLEAN NOT NULL,
     created_at TIMESTAMP NOT NULL,
     updated_at TIMESTAMP NOT NULL

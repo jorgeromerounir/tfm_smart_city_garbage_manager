@@ -52,6 +52,7 @@ public class GetRequestDecorator extends ServerHttpRequestDecorator {
     @Override
     @NonNull
     public URI getURI() {
+        log.info("Trying GET queryParams: {}", gatewayRequest.getQueryParams());
         return UriComponentsBuilder
                 .fromUri((URI) gatewayRequest.getExchange().getAttributes().get(ServerWebExchangeUtils.GATEWAY_REQUEST_URL_ATTR))
                 .queryParams(gatewayRequest.getQueryParams())

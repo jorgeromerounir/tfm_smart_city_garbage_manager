@@ -7,15 +7,18 @@
 		<version>3.4.1</version>
 		<relativePath />
 	</parent>
+
 	<groupId>com.scgm</groupId>
 	<artifactId>scgm-gateway-public</artifactId>
 	<version>1.0.0</version>
 	<name>scgm-gateway-public</name>
 	<description>Gateway Proxy with filters</description>
+
 	<properties>
 		<java.version>21</java.version>
 		<spring-cloud.version>2024.0.0</spring-cloud.version>
 	</properties>
+	
 	<dependencies>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
