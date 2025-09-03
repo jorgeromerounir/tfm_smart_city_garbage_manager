@@ -57,7 +57,9 @@ const CreateUserForm: React.FC<CreateUserFormProps> = ({
 		setError('')
 
 		try {
-			await userApi.create({ name, email, password, profile })
+			//TODO: Add customerId
+			const customerId = 1
+			await userApi.create({ name, email, password, profile, customerId })
 			onSuccess()
 			onClose()
 			setName('')

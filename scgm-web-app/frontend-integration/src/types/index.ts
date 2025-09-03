@@ -122,6 +122,7 @@ export interface CreateUserRequest {
 	email: string
 	password: string
 	profile: Profile
+	customerId: number
 	country?: string
 }
 
@@ -135,4 +136,18 @@ export interface City {
 	active: boolean
 	createdAt: string
 	updatedAt: string
+}
+
+export interface CityAddDto {
+    name: string
+    country: string
+    latitude: number
+    longitude: number
+    active: boolean
+}
+
+//TODO: Use
+export interface CountryDto {
+	code: string
+	name: string
 }

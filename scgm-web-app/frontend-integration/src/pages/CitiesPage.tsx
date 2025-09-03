@@ -49,7 +49,7 @@ const CitiesPage: React.FC = () => {
 		try {
 			setLoading(true)
 			setError(null)
-			const data = await citiesApi.getAll()
+			const data: City[] = await citiesApi.getByCountry('CO')
 			console.log('Fetched cities:', data)
 			setCities(data)
 		} catch (error) {

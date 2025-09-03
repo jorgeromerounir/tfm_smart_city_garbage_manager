@@ -11,12 +11,15 @@ import {
 	StatusSummary,
 	Truck,
 	User,
+	City,
+	CityAddDto,
+	CountryDto,
 	WasteLevel,
 } from '../types'
 
 const API_BASE = 'http://localhost:3001'
 const AUTH_BASE = 'http://localhost:8763/scgm-auth-service'
-const ACCOUNTS_BASE = 'http://localhost:8763/scgm-customers-api'
+const CUSTOMERS_BASE = 'http://localhost:8763/scgm-customers-api'
 
 const api = axios.create({
 	baseURL: API_BASE,
@@ -49,13 +52,13 @@ const authApi = axios.create({
 	timeout: 10000,
 })
 
-const accountsApi = axios.create({
-	baseURL: ACCOUNTS_BASE,
+const customersApi = axios.create({
+	baseURL: CUSTOMERS_BASE,
 	timeout: 10000,
 })
 
 // Add auth token to requests
-accountsApi.interceptors.request.use(config => {
+customersApi.interceptors.request.use(config => {
 	const token = localStorage.getItem('accessToken')
 	if (token) {
 		config.headers.Authorization = `Bearer ${token}`
@@ -64,7 +67,7 @@ accountsApi.interceptors.request.use(config => {
 })
 
 // Add response interceptor to handle auth errors
-accountsApi.interceptors.response.use(
+customersApi.interceptors.response.use(
 	response => response,
 	error => {
 		if (error.response?.status === 401) {
@@ -128,28 +131,37 @@ export const authService = {
 }
 
 export const userApi = {
-	getByProfile: (profile: Profile): Promise<User[]> =>
-		accountsApi.post(`/accounts/by-profile`, {targetMethod: 'GET', queryParams: {profile}}).then(res => res.data),
+	getByProfile: (customerId: number, profile: Profile): Promise<User[]> =>
+		customersApi.post(`/by-customer/${customerId}/profile/${profile}`, {targetMethod: 'GET'}).then(res => res.data),
 
 	getByEmail: (email: string): Promise<User> =>
-		accountsApi.post(`/accounts/by-email`, {targetMethod: 'GET', queryParams: {email}}).then(res => res.data),
+		customersApi.post(`/api/v1/users/by-email`, {targetMethod: 'GET', queryParams: {email}}).then(res => res.data),
 
-	getById: (id: number): Promise<User> =>
-		accountsApi.get(`/accounts/${id}`).then(res => res.data),
+	getById: (userId: number): Promise<User> =>
+		customersApi.post(`/api/v1/users/${userId}`, {targetMethod: 'GET'}).then(res => res.data),
 
 	create: (data: CreateUserRequest): Promise<User> =>
-		accountsApi.post('/accounts', data).then(res => res.data),
+		customersApi.post('/api/v1/users', {targetMethod: 'POST', body: data}).then(res => res.data),
 
-	delete: (id: number): Promise<void> =>
-		accountsApi.delete(`/accounts/${id}`).then(res => res.data),
+	delete: (userId: number): Promise<void> =>
+		customersApi.post(`/api/v1/users/${userId}`, {targetMethod: 'DELETE'}).then(res => res.data),
 }
 
 export const citiesApi = {
-	getAll: () => api.get('/cities').then(res => res.data),
-	create: (data: any) => api.post('/cities', data).then(res => res.data),
-	update: (id: number, data: any) =>
-		api.put(`/cities/${id}`, data).then(res => res.data),
-	delete: (id: number) => api.delete(`/cities/${id}`).then(res => res.data),
+	getByCountry: (country: string): Promise<City[]> =>
+		customersApi.post(`/api/v1/cities/by-country`, {targetMethod: 'GET', queryParams: {country}}).then(res => res.data),
+
+	getCountries: (): Promise<CountryDto[]> =>
+		customersApi.post(`/api/v1/cities/countries`, {targetMethod: 'GET'}).then(res => res.data),
+
+	create: (data: CityAddDto): Promise<City> =>
+		customersApi.post('/api/v1/cities', {targetMethod: 'POST', body: data}).then(res => res.data),
+
+	update: (cityId: number, data: CityAddDto): Promise<City> =>
+		customersApi.post(`/api/v1/cities/${cityId}`, {targetMethod: 'PUT', body: data}).then(res => res.data),
+
+	delete: (cityId: number): Promise<void> =>
+		customersApi.post(`/api/v1/cities/${cityId}`, {targetMethod: 'DELETE'}).then(res => res.data),
 }
 
 export const truckApi = {

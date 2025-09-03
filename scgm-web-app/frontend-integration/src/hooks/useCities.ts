@@ -35,7 +35,8 @@ export default function useCities(country?: string) {
 	useEffect(() => {
 		const fetchCities = async () => {
 			try {
-				const citiesData: City[] = await citiesApi.getAll()
+				//TODO: Logic to pass country
+				const citiesData: City[] = await citiesApi.getByCountry('CO')
 
 				const citiesWithLocations: CityWithLocations[] = citiesData
 					.filter(city => city.active)
