@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.stereotype.Repository;
 
 import com.scgm.customers.entity.user.UserEntity;
+import com.scgm.customers.entity.user.Profile;
 
 @Repository
 public interface UserRepository extends JpaRepository<UserEntity, Long>, JpaSpecificationExecutor<UserEntity> {
@@ -17,6 +18,8 @@ public interface UserRepository extends JpaRepository<UserEntity, Long>, JpaSpec
     Optional<UserEntity> findById(Long id);
 
     List<UserEntity> findByCustomerId(Long customerId);
+
+    List<UserEntity> findByCustomerIdAndProfile(Long customerId, Profile profile);
 
     Optional<UserEntity> findByEmail(String email);
 

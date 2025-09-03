@@ -14,4 +14,5 @@ public interface CityRepository extends JpaRepository<CityEntity, Long>, JpaSpec
     List<CityEntity> findByNameContaining(String name);
     
     List<CityEntity> findByCountry(String country);
+
 }

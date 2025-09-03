@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.scgm.customers.dto.city.CityAddDto;
 import com.scgm.customers.dto.city.CityDto;
 import com.scgm.customers.dto.city.CityUpdateDto;
+import com.scgm.customers.dto.city.CountryDto;
 import com.scgm.customers.service.city.CityService;
 
 import lombok.AllArgsConstructor;
@@ -47,7 +48,7 @@ public class CityController {
 
     @GetMapping("/by-name")
     public ResponseEntity<List<CityDto>> findByNameContaining(@RequestParam String name) {
-        log.debug("Finding cities by name containing: {}", name);
+        log.debug("Finding cities by name containing");
         List<CityDto> cities = cityService.findByNameContaining(name);
         if (cities.isEmpty())
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
@@ -56,7 +57,7 @@ public class CityController {
 
     @GetMapping("/by-country")
     public ResponseEntity<List<CityDto>> findByCountry(@RequestParam String country) {
-        log.debug("Finding cities by country: {}", country);
+        log.debug("Finding cities by country");
         List<CityDto> cities = cityService.findByCountry(country);
         if (cities.isEmpty())
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
@@ -76,6 +77,13 @@ public class CityController {
         log.debug("Trying to delete city with ID: {}", cityId);
         cityService.delete(cityId);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
+
+    @GetMapping("/countries")
+    public ResponseEntity<List<CountryDto>> getCountries() {
+        log.debug("Getting all countries");
+        List<CountryDto> countries = cityService.getCountries();
+        return new ResponseEntity<>(countries, HttpStatus.OK);
     }
 
 }

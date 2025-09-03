@@ -14,6 +14,7 @@ import com.scgm.customers.dto.user.UserDto;
 import com.scgm.customers.dto.user.UserUpdateDto;
 import com.scgm.customers.entity.CustomerEntity;
 import com.scgm.customers.entity.user.UserEntity;
+import com.scgm.customers.entity.user.Profile;
 import com.scgm.customers.exceptions.CustomerDatabaseException;
 import com.scgm.customers.exceptions.CustomersLogicException;
 import com.scgm.customers.exceptions.user.UserNotFoundException;
@@ -111,6 +112,17 @@ public class UserServiceImpl implements UsersService {
         } catch (Exception e) {
             log.error("Error trying to find users for customer with ID: {}", customerId, e);
             throw new CustomerDatabaseException("Error trying to find users by customer ID", e);
+        }
+    }
+
+    @Override
+    public List<UserDto> findByCustomerIdAndProfile(Long customerId, Profile profile) {
+        try {
+            return userRepository.findByCustomerIdAndProfile(customerId, profile).stream().map(UserDto::toDto)
+                    .collect(Collectors.toList());
+        } catch (Exception e) {
+            log.error("Error trying to find users for customer with ID: {} and profile: {} ", customerId, profile, e);
+            throw new CustomerDatabaseException("Error trying to find users by customer ID and profile", e);
         }
     }
 

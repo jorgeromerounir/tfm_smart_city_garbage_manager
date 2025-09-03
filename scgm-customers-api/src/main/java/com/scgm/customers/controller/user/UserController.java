@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.scgm.customers.dto.user.UserAddDto;
 import com.scgm.customers.dto.user.UserDto;
 import com.scgm.customers.dto.user.UserUpdateDto;
+import com.scgm.customers.entity.user.Profile;
 import com.scgm.customers.service.user.UsersService;
 
 import lombok.AllArgsConstructor;
@@ -58,6 +59,15 @@ public class UserController {
     public ResponseEntity<List<UserDto>> findByCustomerId(@PathVariable Long customerId) {
         log.debug("Finding users for customer with ID: {}", customerId);
         List<UserDto> users = usersService.findByCustomerId(customerId);
+        if (users.isEmpty())
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        return new ResponseEntity<>(users, HttpStatus.OK);
+    }
+
+    @GetMapping("/by-customer/{customerId}/profile/{profile}")
+    public ResponseEntity<List<UserDto>> findByCustomerIdAndProfile(@PathVariable Long customerId, @PathVariable Profile profile) {
+        log.debug("Finding users for customer with ID: {} and profile: {}", customerId, profile);
+        List<UserDto> users = usersService.findByCustomerIdAndProfile(customerId, profile);
         if (users.isEmpty())
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         return new ResponseEntity<>(users, HttpStatus.OK);

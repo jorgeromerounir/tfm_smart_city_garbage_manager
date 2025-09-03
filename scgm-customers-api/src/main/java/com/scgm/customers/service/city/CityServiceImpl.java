@@ -11,7 +11,9 @@ import org.springframework.transaction.annotation.Transactional;
 import com.scgm.customers.dto.city.CityAddDto;
 import com.scgm.customers.dto.city.CityDto;
 import com.scgm.customers.dto.city.CityUpdateDto;
+import com.scgm.customers.dto.city.CountryDto;
 import com.scgm.customers.entity.city.CityEntity;
+import com.scgm.customers.entity.city.Country;
 import com.scgm.customers.exceptions.CustomerDatabaseException;
 import com.scgm.customers.exceptions.city.CityNotFoundException;
 import com.scgm.customers.exceptions.city.CityValidationException;
@@ -117,6 +119,13 @@ public class CityServiceImpl implements CityService {
             log.error("Error trying to delete city with ID: {}", cityId, e);
             throw new CustomerDatabaseException("Error trying to delete city", e);
         }
+    }
+
+    @Override
+    public List<CountryDto> getCountries() {
+        return List.of(Country.values()).stream()
+                .map(country -> new CountryDto(country.getCode(), country.getName()))
+                .collect(Collectors.toList());
     }
 
 }

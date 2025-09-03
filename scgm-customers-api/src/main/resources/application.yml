@@ -69,5 +69,6 @@ management:
     build:
       enabled: true
 
-
-scgm.rabbitmq.queue.auth: auth.queue
+##TODO: Change this to the correct exchange
+scgm.rabbitmq.queue.customer: ${CUSTOMER_QUEUE:customer.queue}
+scgm.rabbitmq.queue.auth: ${AUTH_QUEUE:auth.queue}
