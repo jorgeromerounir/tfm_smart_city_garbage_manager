@@ -30,3 +30,5 @@ replay_pid*
 
 scgm-containers-api/src/main/resources/containers_data.sql
 scgm-containers-api/src/main/resources/containers_id_list.json
+scgm-containers-data-simulator/node_modules
+scgm-web-app/frontend-integration/node_modules

@@ -1,11 +1,11 @@
-//ok
+// Added to API
 export enum WasteLevel {
 	LIGHT = 'light',
 	MEDIUM = 'medium',
 	HEAVY = 'heavy',
 }
 
-//ok
+// Added to API
 export interface Container {
 	id: string
 	latitude: number
@@ -18,7 +18,7 @@ export interface Container {
 	updatedAt: string
 }
 
-//ok
+// Added to API
 export interface StatusSummary {
 	light: number
 	medium: number
@@ -125,6 +125,7 @@ export interface CreateUserRequest {
 	country?: string
 }
 
+// Added to API
 export interface City {
 	id: number
 	name: string
