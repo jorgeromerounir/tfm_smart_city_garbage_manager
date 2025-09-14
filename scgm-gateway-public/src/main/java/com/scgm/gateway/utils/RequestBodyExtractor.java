@@ -1,7 +1,7 @@
 package com.scgm.gateway.utils;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.scgm.gateway.model.GatewayRequest;
+import com.scgm.gateway.dto.GatewayReqDto;
 
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
@@ -16,8 +16,8 @@ import reactor.core.publisher.Flux;
 import java.util.concurrent.atomic.AtomicReference;
 
 /**
- * This class is responsible for extracting the body of the request and converting it into a GatewayRequest object.
- * It uses the ObjectMapper to convert the raw request body into a GatewayRequest object.
+ * This class is responsible for extracting the body of the request and converting it into a GatewayReqDto object.
+ * It uses the ObjectMapper to convert the raw request body into a GatewayReqDto object.
  * It also sets the headers of the request, removing the Content-Length header and setting the Transfer-Encoding header to "chunked".
  */
 @Component
@@ -27,24 +27,24 @@ public class RequestBodyExtractor {
     private final ObjectMapper objectMapper;
 
     /**
-     * This method extracts the body of the request and converts it into a GatewayRequest object.
+     * This method extracts the body of the request and converts it into a GatewayReqDto object.
      * It first retains the DataBuffer, then splits it into a Flux of DataBuffers.
      * It then converts the Flux of DataBuffers into a raw request string.
-     * The raw request string is then converted into a GatewayRequest object using the ObjectMapper.
+     * The raw request string is then converted into a GatewayReqDto object using the ObjectMapper.
      * The headers of the request are then set, removing the Content-Length header and setting the Transfer-Encoding header to "chunked".
-     * The GatewayRequest object is then returned.
+     * The GatewayReqDto object is then returned.
      *
      * @param exchange the current server web exchange
      * @param buffer the data buffer containing the body of the request
-     * @return a GatewayRequest object representing the request
+     * @return a GatewayReqDto object representing the request
      */
     @SneakyThrows
-    public GatewayRequest getRequest(ServerWebExchange exchange, DataBuffer buffer) {
+    public GatewayReqDto getRequest(ServerWebExchange exchange, DataBuffer buffer) {
         DataBufferUtils.retain(buffer);
         Flux<DataBuffer> cachedFlux = Flux.defer(() -> Flux.just(buffer.split(buffer.readableByteCount())));
         String rawRequest = getRawRequest(cachedFlux);
         DataBufferUtils.release(buffer);
-        GatewayRequest request = objectMapper.readValue(rawRequest, GatewayRequest.class);
+        GatewayReqDto request = objectMapper.readValue(rawRequest, GatewayReqDto.class);
         request.setExchange(exchange);
 
         // Set headers -- Needed: https://github.com/spring-cloud/spring-cloud-gateway/issues/894

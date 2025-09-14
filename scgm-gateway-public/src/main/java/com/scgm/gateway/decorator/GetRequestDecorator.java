@@ -9,7 +9,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.server.reactive.ServerHttpRequestDecorator;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import com.scgm.gateway.model.GatewayRequest;
+import com.scgm.gateway.dto.GatewayReqDto;
 
 import reactor.core.publisher.Flux;
 
@@ -17,18 +17,18 @@ import java.net.URI;
 
 
 /**
- * This class is a decorator for the GatewayRequest object for GET requests.
+ * This class is a decorator for the GatewayReqDto object for GET requests.
  * It extends the ServerHttpRequestDecorator class and overrides its methods to modify the request.
  */
 @Slf4j
 public class GetRequestDecorator extends ServerHttpRequestDecorator {
 
-    private final GatewayRequest gatewayRequest;
+    private final GatewayReqDto gatewayReqDto;
 
 
-    public GetRequestDecorator(GatewayRequest gatewayRequest) {
-        super(gatewayRequest.getExchange().getRequest());
-        this.gatewayRequest = gatewayRequest;
+    public GetRequestDecorator(GatewayReqDto gatewayReqDto) {
+        super(gatewayReqDto.getExchange().getRequest());
+        this.gatewayReqDto = gatewayReqDto;
     }
 
     /**
@@ -52,10 +52,10 @@ public class GetRequestDecorator extends ServerHttpRequestDecorator {
     @Override
     @NonNull
     public URI getURI() {
-        log.info("Trying GET queryParams: {}", gatewayRequest.getQueryParams());
+        //log.info("Trying GET queryParams: {}", gatewayReqDto.getQueryParams());
         return UriComponentsBuilder
-                .fromUri((URI) gatewayRequest.getExchange().getAttributes().get(ServerWebExchangeUtils.GATEWAY_REQUEST_URL_ATTR))
-                .queryParams(gatewayRequest.getQueryParams())
+                .fromUri((URI) gatewayReqDto.getExchange().getAttributes().get(ServerWebExchangeUtils.GATEWAY_REQUEST_URL_ATTR))
+                .queryParams(gatewayReqDto.getQueryParams())
                 .build()
                 .toUri();
     }
@@ -69,7 +69,7 @@ public class GetRequestDecorator extends ServerHttpRequestDecorator {
     @Override
     @NonNull
     public HttpHeaders getHeaders() {
-        return gatewayRequest.getHeaders();
+        return gatewayReqDto.getHeaders();
     }
 
     /**

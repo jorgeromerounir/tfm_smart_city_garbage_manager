@@ -1,4 +1,4 @@
-package com.scgm.gateway.model;
+package com.scgm.gateway.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
@@ -18,7 +18,7 @@ import org.springframework.web.server.ServerWebExchange;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class GatewayRequest {
+public class GatewayReqDto {
 
     /**
      * The target HTTP method of the request.

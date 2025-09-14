@@ -1,7 +1,7 @@
 package com.scgm.gateway.decorator;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.scgm.gateway.model.GatewayRequest;
+import com.scgm.gateway.dto.GatewayReqDto;
 
 import lombok.NonNull;
 import lombok.SneakyThrows;
@@ -19,19 +19,19 @@ import reactor.core.publisher.Flux;
 import java.net.URI;
 
 /**
- * This class is a decorator for the GatewayRequest object for PUT requests.
+ * This class is a decorator for the GatewayReqDto object for PUT requests.
  * It extends the ServerHttpRequestDecorator class and overrides its methods to modify the request.
- * It uses the ObjectMapper to convert the body of the GatewayRequest object into bytes.
+ * It uses the ObjectMapper to convert the body of the GatewayReqDto object into bytes.
  */
 @Slf4j
 public class PutRequestDecorator extends ServerHttpRequestDecorator {
 
-    private final GatewayRequest gatewayRequest;
+    private final GatewayReqDto gatewayReqDto;
     private final ObjectMapper objectMapper;
 
-    public PutRequestDecorator(GatewayRequest gatewayRequest, ObjectMapper objectMapper) {
-        super(gatewayRequest.getExchange().getRequest());
-        this.gatewayRequest = gatewayRequest;
+    public PutRequestDecorator(GatewayReqDto gatewayReqDto, ObjectMapper objectMapper) {
+        super(gatewayReqDto.getExchange().getRequest());
+        this.gatewayReqDto = gatewayReqDto;
         this.objectMapper = objectMapper;
     }
 
@@ -56,7 +56,7 @@ public class PutRequestDecorator extends ServerHttpRequestDecorator {
     @Override
     @NonNull
     public URI getURI() {
-        return UriComponentsBuilder.fromUri((URI) gatewayRequest.getExchange().getAttributes().get(ServerWebExchangeUtils.GATEWAY_REQUEST_URL_ATTR)).build().toUri();
+        return UriComponentsBuilder.fromUri((URI) gatewayReqDto.getExchange().getAttributes().get(ServerWebExchangeUtils.GATEWAY_REQUEST_URL_ATTR)).build().toUri();
     }
 
     /**
@@ -68,12 +68,12 @@ public class PutRequestDecorator extends ServerHttpRequestDecorator {
     @Override
     @NonNull
     public HttpHeaders getHeaders() {
-        return gatewayRequest.getHeaders();
+        return gatewayReqDto.getHeaders();
     }
 
     /**
      * This method overrides the getBody method of the ServerHttpRequestDecorator class.
-     * It converts the body of the GatewayRequest object into bytes using the ObjectMapper, and returns it as a Flux of DataBuffers.
+     * It converts the body of the GatewayReqDto object into bytes using the ObjectMapper, and returns it as a Flux of DataBuffers.
      *
      * @return a Flux of DataBuffers representing the body of the request
      */
@@ -82,7 +82,7 @@ public class PutRequestDecorator extends ServerHttpRequestDecorator {
     @SneakyThrows
     public Flux<DataBuffer> getBody() {
         DataBufferFactory bufferFactory = new DefaultDataBufferFactory();
-        byte[] bodyData = objectMapper.writeValueAsBytes(gatewayRequest.getBody());
+        byte[] bodyData = objectMapper.writeValueAsBytes(gatewayReqDto.getBody());
         DataBuffer buffer = bufferFactory.allocateBuffer(bodyData.length);
         buffer.write(bodyData);
         return Flux.just(buffer);
