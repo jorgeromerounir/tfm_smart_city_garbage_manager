@@ -25,7 +25,10 @@ import java.time.Instant;
 @Builder
 public class CustomerEntity {
 
-    private static final Pattern INJECTION_PATTERN = Pattern.compile("^[a-zA-Z0-9\\s.,!?#@_'-]*$");
+    public static final Pattern INJECTION_PATTERN = Pattern.compile(
+        "^[\\p{L}0-9\\s.,!?#@_'-]*$",
+        Pattern.UNICODE_CHARACTER_CLASS
+    );
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "customers_seq_gen")

@@ -55,8 +55,8 @@ public class CityController {
         return new ResponseEntity<>(cities, HttpStatus.OK);
     }
 
-    @GetMapping("/by-country")
-    public ResponseEntity<List<CityDto>> findByCountry(@RequestParam String country) {
+    @GetMapping("/by-country/{country:[A-Z]{2}}")
+    public ResponseEntity<List<CityDto>> findByCountry(@PathVariable String country) {
         log.debug("Finding cities by country");
         List<CityDto> cities = cityService.findByCountry(country);
         if (cities.isEmpty())

@@ -31,7 +31,10 @@ import org.apache.commons.lang.StringUtils;
 @Builder
 public class CityEntity {
 
-    private static final Pattern INJECTION_PATTERN = Pattern.compile("^[a-zA-Z0-9\\s.,!?#@_'-]*$");
+    public static final Pattern INJECTION_PATTERN = Pattern.compile(
+        "^[\\p{L}0-9\\s.,!?#@_'-]*$",
+        Pattern.UNICODE_CHARACTER_CLASS
+    );
 
     /**
      * ISO 3166-1 alpha-2

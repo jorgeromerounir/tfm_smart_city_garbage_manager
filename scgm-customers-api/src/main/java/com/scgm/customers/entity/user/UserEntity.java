@@ -26,7 +26,10 @@ import java.util.regex.Pattern;
 @Slf4j
 public class UserEntity {
 
-    public static final Pattern INJECTION_PATTERN = Pattern.compile("^[a-zA-Z0-9\\s.,!?#@_'-]*$");
+    public static final Pattern INJECTION_PATTERN = Pattern.compile(
+        "^[\\p{L}0-9\\s.,!?#@_'-]*$",
+        Pattern.UNICODE_CHARACTER_CLASS
+    );
     
     public static final Pattern EMAIL_PATTERN = Pattern.compile("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,6}$");
     

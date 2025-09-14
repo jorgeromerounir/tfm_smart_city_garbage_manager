@@ -31,9 +31,16 @@ public class UserController {
 
     private final UsersService usersService;
 
-    @PostMapping
-    public ResponseEntity<UserDto> add(@RequestBody UserAddDto userAdd) {
-        log.debug("Trying to add new user");
+    @PostMapping("/add-for-admin")
+    public ResponseEntity<UserDto> addForAdmin(@RequestBody UserAddDto userAdd) {
+        log.debug("Trying to add new user for ADMIN profile");
+        var userDto = usersService.add(userAdd);
+        return new ResponseEntity<>(userDto, HttpStatus.CREATED);
+    }
+
+    @PostMapping("/add-for-supervisor")
+    public ResponseEntity<UserDto> addForSupervisor(@RequestBody UserAddDto userAdd) {
+        log.debug("Trying to add new user for SUPERVISOR profile");
         var userDto = usersService.add(userAdd);
         return new ResponseEntity<>(userDto, HttpStatus.CREATED);
     }
@@ -64,10 +71,10 @@ public class UserController {
         return new ResponseEntity<>(users, HttpStatus.OK);
     }
 
-    @GetMapping("/by-customer/{customerId}/profile/{profile}")
-    public ResponseEntity<List<UserDto>> findByCustomerIdAndProfile(@PathVariable Long customerId, @PathVariable Profile profile) {
-        log.debug("Finding users for customer with ID: {} and profile: {}", customerId, profile);
-        List<UserDto> users = usersService.findByCustomerIdAndProfile(customerId, profile);
+    @GetMapping("/by-customer/{customerId}/profile-operator")
+    public ResponseEntity<List<UserDto>> findByCustomerIdAndProfile(@PathVariable Long customerId) {
+        log.debug("Finding users for customer with ID: {} and profile OPERATOR", customerId);
+        List<UserDto> users = usersService.findByCustomerIdAndProfile(customerId, Profile.OPERATOR);
         if (users.isEmpty())
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         return new ResponseEntity<>(users, HttpStatus.OK);

@@ -11,5 +11,5 @@ INSERT INTO cities (name, country, latitude, longitude, active, created_at, upda
 ('Bilbao', 'ES', 43.2630, -2.9349, TRUE, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 
 INSERT INTO customers (name, description, city_id, created_at, updated_at, active) VALUES
-('Ana Basuras SAS', 'Cliente de ejemplo 1', 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, TRUE),
+('Admin Customer', 'Admin Customer', 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, TRUE),
 ('City Basuras', 'Cliente de ejemplo 2', 6, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, TRUE);

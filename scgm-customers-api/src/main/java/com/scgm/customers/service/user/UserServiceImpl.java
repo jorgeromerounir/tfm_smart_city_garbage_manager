@@ -56,22 +56,24 @@ public class UserServiceImpl implements UsersService {
         if (!listErrors.isEmpty())
             throw new UserValidationException("Trying to add: error user entity validation.", listErrors);
         try {
-            userEntity = userRepository.save(userEntity);
+            var userEntityResult = userRepository.save(userEntity);
+            sendUserEventCreateUpdate("CREATED", userEntityResult);
+            return UserDto.toDto(userEntityResult);
         } catch (Exception e) {
             log.error("Error trying to add user with name: {}", userEntity.getName(), e);
             throw new CustomerDatabaseException("Error trying to add user", e);
         }
-        sendUserEvent(userEntity);
-        return UserDto.toDto(userEntity);
     }
 
-    private void sendUserEvent(UserEntity userEntity){
+    private void sendUserEventCreateUpdate(String eventType, UserEntity userEntity){
         Map<String, String> claims = Map.of(
             "profile", userEntity.getProfile().toString(),
-            "customer_id", userEntity.getCustomerId().toString()
+            "customerId", userEntity.getCustomerId().toString(),
+            "userId", userEntity.getId().toString(),
+            "updatedAt", userEntity.getUpdatedAt().toString()
         );
         var accountEvent = new AccountEvent(
-                "CREATED",
+                eventType,
                 userEntity.getId(),
                 userEntity.getEmail(),
                 userEntity.getProfile().toString(),
@@ -80,6 +82,8 @@ public class UserServiceImpl implements UsersService {
         );
         accountEventProducer.sendAccountEvent(accountEvent);
     }
+
+    
 
     @Override
     public Optional<UserDto> findById(Long id) {
@@ -161,7 +165,9 @@ public class UserServiceImpl implements UsersService {
         if (!listErrors.isEmpty())
             throw new UserValidationException("Trying to update: error user entity validation.", listErrors);
         try {
-            return UserDto.toDto(userRepository.save(existingUser));
+            var userEntityResult = userRepository.save(existingUser);
+            sendUserEventCreateUpdate("UPDATE", userEntityResult);
+            return UserDto.toDto(userEntityResult);
         } catch (Exception e) {
             log.error("Error trying to update user with ID: {}", existingUser.getId(), e);
             throw new CustomerDatabaseException("Error trying to update user", e);
@@ -175,11 +181,24 @@ public class UserServiceImpl implements UsersService {
             throw new UserNotFoundException(userId);
         try {
             userRepository.deleteById(userId);
+            sendUserEventToDelete(userId);
             log.debug("User with ID: {} deleted successfully.", userId);
         } catch (Exception e) {
             log.error("Error trying to delete user with ID: {}", userId, e);
             throw new CustomerDatabaseException("Error trying to delete user", e);
         }
+    }
+
+    private void sendUserEventToDelete(Long userId){
+        var accountEvent = new AccountEvent(
+                "DELETED",
+                userId,
+                null,
+                null,
+                null,
+                null
+        );
+        accountEventProducer.sendAccountEvent(accountEvent);
     }
 
 }
