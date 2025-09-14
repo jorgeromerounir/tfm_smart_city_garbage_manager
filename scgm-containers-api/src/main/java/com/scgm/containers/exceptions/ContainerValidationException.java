@@ -8,12 +8,12 @@ public class ContainerValidationException extends RuntimeException {
 
     public ContainerValidationException(String message) {
         super(message);
-        this.errors = List.of();
+        this.errors = List.of(message);
     }
 
     public ContainerValidationException(String message, Throwable cause) {
         super(message, cause);
-        this.errors = List.of();
+        this.errors = List.of(message);
     }
 
     public ContainerValidationException(String message, List<String> errors) {

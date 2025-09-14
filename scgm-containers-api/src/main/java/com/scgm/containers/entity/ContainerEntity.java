@@ -28,7 +28,11 @@ import java.time.Instant;
 @Builder
 public class ContainerEntity {
 
-    public static final Pattern INJECTION_PATTERN = Pattern.compile("^[a-zA-Z0-9\\s.,!?#@_'-]*$");
+    public static final Pattern INJECTION_PATTERN = Pattern.compile(
+        "^[\\p{L}0-9\\s.,!?#@_'-]*$",
+        Pattern.UNICODE_CHARACTER_CLASS
+    );
+
     public static final Pattern UUID_PATTERN = Pattern.compile("^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$");
 
     @Id
