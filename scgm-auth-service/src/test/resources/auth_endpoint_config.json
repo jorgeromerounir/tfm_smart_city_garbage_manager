@@ -1,0 +1,43 @@
+{
+    "urlWhiteList": {
+        "GET::/api/v1/users/whitelist-test-alloweb": true
+    },
+    "urlToValidate": {
+        "GET::/api/v1/users/not-enabled": {
+            "allowAllProfiles": false,
+            "allowProfiles": [],
+            "enabled": false,
+            "requireCustomerId": false
+        },
+        "GET::/api/v1/users/require-customer": {
+            "allowAllProfiles": false,
+            "allowProfiles": [],
+            "enabled": true,
+            "requireCustomerId": true
+        },
+        "GET::/api/v1/users/invalid-profile": {
+            "allowAllProfiles": false,
+            "allowProfiles": [],
+            "enabled": true,
+            "requireCustomerId": true
+        },
+        "GET::/api/v1/users/allow-all-profiles": {
+            "allowAllProfiles": true,
+            "allowProfiles": [],
+            "enabled": true,
+            "requireCustomerId": true
+        },
+        "GET::/api/v1/users/allow-specific-profile": {
+            "allowAllProfiles": false,
+            "allowProfiles": ["ADMIN"],
+            "enabled": true,
+            "requireCustomerId": true
+        },
+        "GET::/api/v1/users/allow-specific-profile-case2": {
+            "allowAllProfiles": false,
+            "allowProfiles": ["SUPERVISOR", "OPERATOR"],
+            "enabled": true,
+            "requireCustomerId": true
+        }
+    }
+}

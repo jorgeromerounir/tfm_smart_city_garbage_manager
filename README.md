@@ -68,26 +68,51 @@ curl -X 'POST' \
 Finalizar y destruir el servicio (elimina contenedor y volúmenes):
 ```shell
 docker-compose down -v
+docker compose down -v
 ```
 
-Levantar el servicio:
+Levantar todos los servicios:
+```shell
+docker-compose up -d
+docker compose up -d
+```
+
+Levantar el servicio rabbitmq:
 ```shell
 docker-compose up -d scgm-rabbitmq
+docker compose up -d scgm-rabbitmq
 ```
 
-Detener el servicio:
+Detener el servicio rabbitmq:
 ```shell
 docker-compose stop scgm-rabbitmq
+docker compose stop scgm-rabbitmq
 ```
 
-Levantar el servicio:
+Levantar el servicio routes_db:
 ```shell
 docker-compose up -d scgm_routes_db
+docker compose up -d scgm_routes_db
 ```
 
-Detener el servicio:
+Detener el servicio routes_db:
 ```shell
 docker-compose stop scgm_routes_db
+docker compose stop scgm_routes_db
+```
+
+```shell
+{
+  "name": "Scgm Admin",
+  "email": "scgm.admin@scgm.com",
+  "profile": "ADMIN",
+  "customerId": 1,
+  "password": "Admin1234"
+}
+```
+
+```shell
+rm -rf node_modules
 ```
 
 
@@ -111,4 +136,17 @@ curl -X 'POST' \
     "refreshToken": "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJqb3JnZS50ZXN0QGpvcmdlLmNvbSIsInByb2ZpbGUiOiJBRE1JTiIsImN1c3RvbWVyX2lkIjoiMSIsImlhdCI6MTc1Njg0NDYyMSwiZXhwIjoxNzU3NDQ5NDIxfQ.bGBqbvsO48_0Z1266yJnArOyycH4ZSF3jHuc2WXyEdFSkkwO9lQ6AD2xRQBBjS1aUZbv_5H2uYs4v5dgImIwCA"
   }'
 
+```
+
+```shell
+curl -X 'POST' \
+  'http://localhost:8081/api/v1/auth/endpoint' \
+  -H 'Content-Type: application/json' \
+  -d '{
+    "url": "http://localhost:8763/api/v1/users/by-email",
+    "method": "GET",
+    "accessToken": "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJzY2dtLmFkbWluQHNjZ20uY29tIiwidXBkYXRlZEF0IjoiMjAyNS0wOS0xM1QxODowMTowNy40MDQzNjM2MDBaIiwidXNlcklkIjoiMSIsImN1c3RvbWVySWQiOiIxIiwicHJvZmlsZSI6IkFETUlOIiwiaWF0IjoxNzU3ODYxNjEwLCJleHAiOjE3NTc4NjI1MTB9.ssWlnMT7xXaiPjgqM7m2vGg5gW3Za16BS-v7obB8iSpYhbmcon2pKNm_PDQywHOoS12lWPgHkV9SddEJPBQUpw",
+    "accountId": "1",
+    "customerId": "1"
+  }'
 ```

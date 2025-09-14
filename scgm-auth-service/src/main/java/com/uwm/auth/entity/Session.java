@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
+import java.util.Map;
 
 @Entity
 @Table(name = "sessions")
@@ -31,9 +32,14 @@ public class Session {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt = LocalDateTime.now();
 
-    public Session(String email, String refreshToken, LocalDateTime expiresAt) {
+    @Convert(converter = MapToStringConverter.class)
+    @Column(columnDefinition = "json", nullable = true)
+    private Map<String, String> claims;
+
+    public Session(String email, String refreshToken, LocalDateTime expiresAt, Map<String, String> claims) {
         this.email = email;
         this.refreshToken = refreshToken;
         this.expiresAt = expiresAt;
+        this.claims = claims;
     }
 }

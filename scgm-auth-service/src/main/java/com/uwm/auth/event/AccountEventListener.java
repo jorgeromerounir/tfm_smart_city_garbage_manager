@@ -19,6 +19,7 @@ public class AccountEventListener {
         log.info("Received account event: {} for user: {}", event.getEventType(), event.getEmail());
         switch (event.getEventType()) {
             case "CREATED":
+            case "UPDATE":
                 var claims = event.getClaims();
                 log.info("Created user in auth claims: {}", claims);
                 Account account = new Account(event.getAccountId(), event.getEmail(), event.getPassword(), claims);

@@ -17,6 +17,9 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class AuthService {
 
+    // EXPIRES_AT 7 days
+    private static final LocalDateTime EXPIRES_AT = LocalDateTime.now().plusSeconds(604800);
+    
     private final JwtService jwtService;
     private final SessionRepository sessionRepository;
     private final AccountRepository accountRepository;
@@ -38,8 +41,7 @@ public class AuthService {
         String refreshToken = jwtService.generateRefreshToken(account.getEmail(), account.getClaims());
 
         // Save session
-        Session session = new Session(email, refreshToken,
-            LocalDateTime.now().plusSeconds(604800)); // 7 days
+        Session session = new Session(email, refreshToken, EXPIRES_AT, account.getClaims()); 
         sessionRepository.save(session);
         return new AuthResponse(accessToken, refreshToken);
     }
@@ -59,13 +61,11 @@ public class AuthService {
     public AuthResponse refreshToken(String refreshToken) {
         Session session = sessionRepository.findByRefreshToken(refreshToken)
             .orElseThrow(() -> new RuntimeException("Invalid refresh token"));
-
         if (session.getExpiresAt().isBefore(LocalDateTime.now())) {
             sessionRepository.delete(session);
             throw new RuntimeException("Refresh token expired");
         }
-
-        String newAccessToken = jwtService.generateAccessToken(session.getEmail());
+        String newAccessToken = jwtService.generateAccessToken(session.getEmail(), session.getClaims());
         return new AuthResponse(newAccessToken, refreshToken);
     }
 
