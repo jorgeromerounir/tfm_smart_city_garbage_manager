@@ -72,7 +72,8 @@ export default function RouteAssignmentDialog({
   const loadOperators = async () => {
     try {
       //TODO: pass customerId
-      const data = await userApi.getByProfile(1, Profile.OPERATOR)
+      //const data = await userApi.getByProfile(1, Profile.OPERATOR)
+      const data = await userApi.getByProfileOperator(1)
       setOperators(data.filter(u => u.profile === Profile.OPERATOR))
     } catch (error) {
       console.error('Failed to load operators:', error)

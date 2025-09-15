@@ -17,7 +17,8 @@ export default function useContainers(country?: string) {
   useEffect(() => {
     const fetchContainers = async () => {
       try {
-        const data = await containerApi.getAll(country)
+        //TODO: pasar cityId desde el customer
+        const data = await containerApi.getByCity(1);
         setContainers(data)
       } catch (error) {
         console.error('Failed to fetch containers:', error)

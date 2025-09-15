@@ -37,7 +37,7 @@ const CreateUserForm: React.FC<CreateUserFormProps> = ({
 
 	const availableProfiles = () => {
 		if (user?.profile === Profile.ADMIN) {
-			return [Profile.SUPERVISOR]
+			return [Profile.SUPERVISOR, Profile.OPERATOR]
 		}
 		if (user?.profile === Profile.SUPERVISOR) {
 			return [Profile.OPERATOR]
@@ -59,7 +59,7 @@ const CreateUserForm: React.FC<CreateUserFormProps> = ({
 		try {
 			//TODO: Add customerId
 			const customerId = 1
-			await userApi.create({ name, email, password, profile, customerId })
+			await userApi.create({ name, email, password, profile, customerId }, user)
 			onSuccess()
 			onClose()
 			setName('')

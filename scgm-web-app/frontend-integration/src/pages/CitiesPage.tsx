@@ -49,6 +49,7 @@ const CitiesPage: React.FC = () => {
 		try {
 			setLoading(true)
 			setError(null)
+			//TODO: pasar el country dinámicamente
 			const data: City[] = await citiesApi.getByCountry('CO')
 			console.log('Fetched cities:', data)
 			setCities(data)

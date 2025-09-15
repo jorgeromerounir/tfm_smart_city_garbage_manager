@@ -18,6 +18,7 @@ import {
 } from '../types'
 
 const API_BASE = 'http://localhost:3001'
+const CONTAINERS_BASE = 'http://localhost:8763/scgm-containers-api'
 const AUTH_BASE = 'http://localhost:8763/scgm-auth-service'
 const CUSTOMERS_BASE = 'http://localhost:8763/scgm-customers-api'
 
@@ -47,27 +48,49 @@ api.interceptors.response.use(
 	}
 )
 
-const authApi = axios.create({
+const authApiAxios = axios.create({
 	baseURL: AUTH_BASE,
 	timeout: 10000,
 })
-
-const customersApi = axios.create({
+const customersApiAxios = axios.create({
 	baseURL: CUSTOMERS_BASE,
+	timeout: 10000,
+})
+const containersApiAxios = axios.create({
+	baseURL: CONTAINERS_BASE,
 	timeout: 10000,
 })
 
 // Add auth token to requests
-customersApi.interceptors.request.use(config => {
+customersApiAxios.interceptors.request.use(config => {
 	const token = localStorage.getItem('accessToken')
 	if (token) {
 		config.headers.Authorization = `Bearer ${token}`
 	}
 	return config
 })
-
 // Add response interceptor to handle auth errors
-customersApi.interceptors.response.use(
+customersApiAxios.interceptors.response.use(
+	response => response,
+	error => {
+		if (error.response?.status === 401) {
+			// Don't redirect, just log the error
+			console.error('Authentication failed:', error)
+			return Promise.reject(error)
+		}
+		return Promise.reject(error)
+	}
+)
+// Add auth token to requests
+containersApiAxios.interceptors.request.use(config => {
+	const token = localStorage.getItem('accessToken')
+	if (token) {
+		config.headers.Authorization = `Bearer ${token}`
+	}
+	return config
+})
+// Add response interceptor to handle auth errors
+containersApiAxios.interceptors.response.use(
 	response => response,
 	error => {
 		if (error.response?.status === 401) {
@@ -80,17 +103,11 @@ customersApi.interceptors.response.use(
 )
 
 export const containerApi = {
-	getAll: async (city?: string): Promise<Container[]> => {
-		const params = city ? { city } : {}
-		const res = await api.get('/containers', { params })
-		return res.data
-	},
+	getByCity: (cityId: number): Promise<Container[]> =>
+		containersApiAxios.post(`/api/v1/containers/by-city/${cityId}`, {targetMethod: 'GET'}).then(res => res.data),
 
-	getStatus: async (city?: string): Promise<StatusSummary> => {
-		const params = city ? { city } : {}
-		const res = await api.get('/containers/status', { params })
-		return res.data
-	},
+	getStatusByCity: (cityId: number): Promise<Container[]> =>
+		containersApiAxios.post(`/api/v1/containers/status-summary/${cityId}`, {targetMethod: 'GET'}).then(res => res.data),
 }
 
 export const routeApi = {
@@ -121,47 +138,54 @@ export const routeApi = {
 
 export const authService = {
 	signIn: (data: SignInRequest): Promise<AuthResponse> =>
-		authApi.post('/auth/signin', {targetMethod: 'POST', body: data}).then(res => res.data),
+		authApiAxios.post('/api/v1/auth/signin', {targetMethod: 'POST', body: data}).then(res => res.data),
 
 	refresh: (refreshToken: string): Promise<AuthResponse> =>
-		authApi.post('/auth/refresh', {targetMethod: 'POST', body: { refreshToken }}).then(res => res.data),
+		authApiAxios.post('/api/v1/auth/refresh', {targetMethod: 'POST', body: { refreshToken }}).then(res => res.data),
 
 	logout: (refreshToken: string): Promise<void> =>
-		authApi.post('/auth/logout', {targetMethod: 'POST', body: { refreshToken }}).then(res => res.data),
+		authApiAxios.post('/api/v1/auth/logout', {targetMethod: 'POST', body: { refreshToken }}).then(res => res.data),
 }
 
 export const userApi = {
-	getByProfile: (customerId: number, profile: Profile): Promise<User[]> =>
-		customersApi.post(`/api/v1/users/by-customer/${customerId}/profile/${profile}`, {targetMethod: 'GET'}).then(res => res.data),
+	getByProfileOperator: (customerId: number): Promise<User[]> =>
+		customersApiAxios.post(`/api/v1/users/by-customer/${customerId}/profile-operator}`, {targetMethod: 'GET'}).then(res => res.data),
 
 	getByEmail: (email: string): Promise<User> =>
-		customersApi.post(`/api/v1/users/by-email`, {targetMethod: 'GET', queryParams: {email:[email]}}).then(res => res.data),
+		customersApiAxios.post(`/api/v1/users/by-email`, {targetMethod: 'GET', queryParams: {email:[email]}}).then(res => res.data),
 
 	getById: (userId: number): Promise<User> =>
-		customersApi.post(`/api/v1/users/${userId}`, {targetMethod: 'GET'}).then(res => res.data),
+		customersApiAxios.post(`/api/v1/users/${userId}`, {targetMethod: 'GET'}).then(res => res.data),
 
-	create: (data: CreateUserRequest): Promise<User> =>
-		customersApi.post('/api/v1/users', {targetMethod: 'POST', body: data}).then(res => res.data),
+	create: (data: CreateUserRequest, sessionUser: User): Promise<User> => {
+		if(Profile.ADMIN == sessionUser.profile) {
+			return customersApiAxios.post('/api/v1/users/add-for-admin', {targetMethod: 'POST', body: data}).then(res => res.data)
+		} else if (Profile.SUPERVISOR  == sessionUser.profile) {
+			return customersApiAxios.post('/api/v1/users/add-for-supervisor', {targetMethod: 'POST', body: data}).then(res => res.data)
+		} else {
+			return Promise.reject(new Error('No authorized profile'))
+		}
+	},
 
 	delete: (userId: number): Promise<void> =>
-		customersApi.post(`/api/v1/users/${userId}`, {targetMethod: 'DELETE'}).then(res => res.data),
+		customersApiAxios.post(`/api/v1/users/${userId}`, {targetMethod: 'DELETE'}).then(res => res.data),
 }
 
 export const citiesApi = {
 	getByCountry: (country: string): Promise<City[]> =>
-		customersApi.post(`/api/v1/cities/by-country`, {targetMethod: 'GET', queryParams: {country:[country]}}).then(res => res.data),
+		customersApiAxios.post(`/api/v1/cities/by-country/${country}`, {targetMethod: 'GET', queryParams: {}}).then(res => res.data),
 
 	getCountries: (): Promise<CountryDto[]> =>
-		customersApi.post(`/api/v1/cities/countries`, {targetMethod: 'GET'}).then(res => res.data),
+		customersApiAxios.post(`/api/v1/cities/countries`, {targetMethod: 'GET'}).then(res => res.data),
 
 	create: (data: CityAddDto): Promise<City> =>
-		customersApi.post('/api/v1/cities', {targetMethod: 'POST', body: data}).then(res => res.data),
+		customersApiAxios.post('/api/v1/cities', {targetMethod: 'POST', body: data}).then(res => res.data),
 
 	update: (cityId: number, data: CityAddDto): Promise<City> =>
-		customersApi.post(`/api/v1/cities/${cityId}`, {targetMethod: 'PUT', body: data}).then(res => res.data),
+		customersApiAxios.post(`/api/v1/cities/${cityId}`, {targetMethod: 'PUT', body: data}).then(res => res.data),
 
 	delete: (cityId: number): Promise<void> =>
-		customersApi.post(`/api/v1/cities/${cityId}`, {targetMethod: 'DELETE'}).then(res => res.data),
+		customersApiAxios.post(`/api/v1/cities/${cityId}`, {targetMethod: 'DELETE'}).then(res => res.data),
 }
 
 export const truckApi = {

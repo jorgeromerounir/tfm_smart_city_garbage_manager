@@ -55,7 +55,7 @@ const LoginPage: React.FC = () => {
 					>
 						<RecyclingOutlined sx={{ fontSize: 48, mb: 2 }} />
 						<Typography variant="h4" component="h1" gutterBottom>
-							Urban Waste Monitor
+							Smart City Garbage Manager (SCGM)
 						</Typography>
 						<Typography variant="subtitle1">
 							Smart City Garbage Management System

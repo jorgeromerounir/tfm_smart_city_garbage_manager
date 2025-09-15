@@ -20,7 +20,8 @@ const Dashboard: React.FC = () => {
 	useEffect(() => {
 		const fetchStatus = async () => {
 			try {
-				const data = await containerApi.getStatus(user?.country)
+				// TODO: pasar la ciudad desde el customer
+				const data = await containerApi.getStatusByCity(1);
 				setStatus(data)
 			} catch (error) {
 				console.error('Failed to fetch status:', error)

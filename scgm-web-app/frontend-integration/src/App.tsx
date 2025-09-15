@@ -19,9 +19,10 @@ const AppContent: React.FC = () => {
 	const { isAuthenticated } = useAuth()
 
 	useEffect(() => {
+		
 		if (isAuthenticated) {
-			socketService.connect()
-
+			console.log('----> isAuthenticated: ', isAuthenticated);
+			/*socketService.connect()
 			socketService.onContainerUpdate((container: Container) => {
 				enqueueSnackbar(
 					`Container ${container.id.slice(0, 8)} status changed to ${container.wasteLevel}`,
@@ -31,10 +32,9 @@ const AppContent: React.FC = () => {
 					},
 				)
 			})
-
 			return () => {
 				socketService.disconnect()
-			}
+			}*/
 		}
 	}, [enqueueSnackbar, isAuthenticated])
 

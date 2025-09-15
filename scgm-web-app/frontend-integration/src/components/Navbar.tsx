@@ -47,7 +47,7 @@ const Navbar: React.FC = () => {
 			<AppBar position="static">
 				<Toolbar>
 					<Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-						Urban Waste Monitor
+						Smart City Garbage Manager (SCGM)
 					</Typography>
 					<Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
 						<Button

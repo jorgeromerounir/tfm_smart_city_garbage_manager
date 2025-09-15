@@ -114,9 +114,9 @@ After starting the services, create and associate users with countries:
 - `POST /routes/trucks` - Create new truck
 
 ### Authentication Service (Port 8081)
-- `POST /auth/signin` - User sign in
-- `POST /auth/refresh` - Refresh access token
-- `POST /auth/logout` - User logout
+- `POST /api/v1/auth/signin` - User sign in
+- `POST /api/v1/auth/refresh` - Refresh access token
+- `POST /api/v1/auth/logout` - User logout
 
 ### Accounts Service (Port 8082)
 - `POST /accounts` - Create account (with country field)

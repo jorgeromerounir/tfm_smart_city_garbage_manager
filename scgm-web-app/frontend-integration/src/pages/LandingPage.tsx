@@ -56,7 +56,7 @@ const LandingPage: React.FC = () => {
 							<Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
 								<RecyclingOutlined sx={{ fontSize: 60, mr: 2 }} />
 								<Typography variant="h3" component="h1" fontWeight="bold">
-									Urban Waste Monitor
+									Smart City Garbage Manager (SCGM)
 								</Typography>
 							</Box>
 							<Typography variant="h5" sx={{ mb: 4, opacity: 0.9 }}>

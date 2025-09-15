@@ -37,7 +37,6 @@ export default function useCities(country?: string) {
 			try {
 				//TODO: Logic to pass country
 				const citiesData: City[] = await citiesApi.getByCountry('CO')
-
 				const citiesWithLocations: CityWithLocations[] = citiesData
 					.filter(city => city.active)
 					.map(city => ({
@@ -47,9 +46,7 @@ export default function useCities(country?: string) {
 							defaultLocations[city.name as keyof typeof defaultLocations] ||
 							[],
 					}))
-
 				setCities(citiesWithLocations)
-
 				const defaultCity =
 					citiesWithLocations.find(
 						c =>

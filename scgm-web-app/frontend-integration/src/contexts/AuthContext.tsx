@@ -40,7 +40,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 	useEffect(() => {
 		const token = localStorage.getItem('accessToken')
 		const userEmail = localStorage.getItem('userEmail')
-
 		if (token && userEmail) {
 			//TODO: Validate functionality
 			void fetchUserByEmail(userEmail)
@@ -49,15 +48,17 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
 	const fetchUserByEmail = async (email: string) => {
 		try {
+			console.log('fetchUserByEmail: ', email)
 			const currentUser = await userApi.getByEmail(email)
 			if (currentUser) {
 				setUser(currentUser)
 				setIsAuthenticated(true)
+				navigate('/dashboard')
 			}
 		} catch (error) {
 			console.error('Failed to fetch user:', error)
 			// Keep user authenticated if token exists, use fallback user data
-			if (localStorage.getItem('accessToken')) {
+			/*if (localStorage.getItem('accessToken')) {
 				// Create a fallback user based on email
 				const fallbackUser = {
 					id: 1,
@@ -70,7 +71,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 				}
 				setUser(fallbackUser)
 				setIsAuthenticated(true)
-			}
+			}*/
 		}
 	}
 
