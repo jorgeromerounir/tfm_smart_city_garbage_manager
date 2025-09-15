@@ -8,12 +8,12 @@ public class RouteValidationException extends RuntimeException {
 
     public RouteValidationException(String message) {
         super(message);
-        this.errors = List.of();
+        this.errors = List.of(message);
     }
 
     public RouteValidationException(String message, Throwable cause) {
         super(message, cause);
-        this.errors = List.of();
+        this.errors = List.of(message);
     }
 
     public RouteValidationException(String message, List<String> errors) {
@@ -24,5 +24,4 @@ public class RouteValidationException extends RuntimeException {
     public List<String> getErrors() {
         return errors;
     }
-
 }
