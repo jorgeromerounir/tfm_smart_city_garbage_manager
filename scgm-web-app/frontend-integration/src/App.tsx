@@ -27,7 +27,7 @@ const AppContent: React.FC = () => {
 				enqueueSnackbar(
 					`Container ${container.id.slice(0, 8)} status changed to ${container.wasteLevel}`,
 					{
-						variant: container.wasteLevel === 'heavy' ? 'warning' : 'info',
+						variant: container.wasteLevelStatus === 'heavy' ? 'warning' : 'info',
 						autoHideDuration: 3000,
 					},
 				)

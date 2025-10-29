@@ -1,8 +1,8 @@
 // Added to API
 export enum WasteLevel {
-	LIGHT = 'light',
-	MEDIUM = 'medium',
-	HEAVY = 'heavy',
+	LIGHT = 'LIGHT',
+	MEDIUM = 'MEDIUM',
+	HEAVY = 'HEAVY',
 }
 
 // Added to API
@@ -10,10 +10,11 @@ export interface Container {
 	id: string
 	latitude: number
 	longitude: number
-	wasteLevel: WasteLevel
+	wasteLevelStatus: WasteLevel
+	wasteLevelValue: number
 	temperature: number
-	address?: string
-	city?: string
+	address: string
+	cityId: number
 	createdAt: string
 	updatedAt: string
 }
@@ -99,6 +100,7 @@ export enum Profile {
 
 export interface User {
 	id: number
+	customerId: number
 	name: string
 	email: string
 	profile: Profile
@@ -150,4 +152,14 @@ export interface CityAddDto {
 export interface CountryDto {
 	code: string
 	name: string
+}
+
+export interface Customer {
+  id: number;
+  name: string;
+  description: string;
+  cityId: number;
+  createdAt: string;
+  updatedAt: string;
+  active: boolean;
 }

@@ -19,14 +19,14 @@ public class RouteControllerAdvisor {
 
     @ExceptionHandler(RouteNotFoundException.class)
     public ResponseEntity<DefaultResponseDto> handleRouteNotFoundException(RouteNotFoundException ex) {
-        log.debug("Route not found: {}", ex.getMessage());
+        log.info("Route not found: {}", ex.getMessage());
         var response = new DefaultResponseDto(ex.getMessage(), HttpStatus.NOT_FOUND.value());
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
     }
 
     @ExceptionHandler(RouteValidationException.class)
     public ResponseEntity<DefaultResponseDto> handleRouteValidationException(RouteValidationException ex) {
-        log.debug("Route validation error: {}, error list: {}", ex.getMessage(), ex.getErrors());
+        log.info("Route validation error: {}, error list: {}", ex.getMessage(), ex.getErrors());
         var response = new DefaultResponseDto(ex.getErrors(), HttpStatus.BAD_REQUEST.value());
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
     }

@@ -3,7 +3,7 @@ import { citiesApi } from '../services/api.ts'
 import { City } from '../types/index.ts'
 
 const defaultLocations = {
-	'Bogotá D.C.': [
+	1: [ // Bogotá D.C.
 		{ name: 'Plaza Bolívar', lat: 4.5981, lng: -74.0758 },
 		{ name: 'Zona Rosa', lat: 4.6698, lng: -74.0531 },
 		{ name: 'Centro Andino', lat: 4.6736, lng: -74.0574 },
@@ -11,7 +11,7 @@ const defaultLocations = {
 		{ name: 'Aeropuerto El Dorado', lat: 4.7016, lng: -74.1469 },
 		{ name: 'Universidad Nacional', lat: 4.6356, lng: -74.0834 },
 	],
-	Madrid: [
+	6: [ //Madrid
 		{ name: 'Puerta del Sol', lat: 40.4168, lng: -3.7038 },
 		{ name: 'Plaza Mayor', lat: 40.4155, lng: -3.7074 },
 		{ name: 'Retiro Park', lat: 40.4153, lng: -3.6844 },
@@ -43,9 +43,11 @@ export default function useCities(country?: string) {
 						...city,
 						center: [city.latitude, city.longitude] as [number, number],
 						locations:
-							defaultLocations[city.name as keyof typeof defaultLocations] ||
+							defaultLocations[city.id as keyof typeof defaultLocations] ||
 							[],
 					}))
+				console.log('---> useCities - citiesData', citiesData)
+				console.log('---> useCities - citiesWithLocations ', citiesWithLocations)
 				setCities(citiesWithLocations)
 				const defaultCity =
 					citiesWithLocations.find(

@@ -19,19 +19,37 @@
         },
         "GET::/api/v1/containers/status-summary/([0-9]+)": {
             "allowAllProfiles": false,
-            "allowProfiles": ["OPERATOR", "ADMIN"],
+            "allowProfiles": ["OPERATOR", "SUPERVISOR", "ADMIN"],
             "enabled": true,
             "requireCustomerId": false
         },
         "GET::/api/v1/containers/by-city/([0-9]+)": {
             "allowAllProfiles": false,
-            "allowProfiles": ["OPERATOR", "ADMIN"],
+            "allowProfiles": ["SUPERVISOR", "ADMIN"],
+            "enabled": true,
+            "requireCustomerId": false
+        },
+        "GET::/api/v1/containers/by-customer/([0-9]+)/city/([0-9]+)": {
+            "allowAllProfiles": false,
+            "allowProfiles": ["SUPERVISOR", "ADMIN"],
+            "enabled": true,
+            "requireCustomerId": false
+        },
+        "POST::/api/v1/routes/optimize-by-customer/([0-9]+)": {
+            "allowAllProfiles": false,
+            "allowProfiles": ["SUPERVISOR", "ADMIN"],
+            "enabled": true,
+            "requireCustomerId": false
+        },
+        "GET::/api/v1/customers/([0-9]+)": {
+            "allowAllProfiles": false,
+            "allowProfiles": ["OPERATOR", "SUPERVISOR", "ADMIN"],
             "enabled": true,
             "requireCustomerId": false
         },
         "GET::/api/v1/cities/by-country/([A-Z]{2})": {
             "allowAllProfiles": false,
-            "allowProfiles": ["OPERATOR", "ADMIN"],
+            "allowProfiles": ["OPERATOR", "SUPERVISOR", "ADMIN"],
             "enabled": true,
             "requireCustomerId": false
         },

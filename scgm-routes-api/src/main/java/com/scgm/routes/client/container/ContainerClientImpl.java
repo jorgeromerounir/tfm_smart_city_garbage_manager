@@ -29,11 +29,39 @@ public class ContainerClientImpl implements ContainerClient {
 
     @Override
     public List<ContainerDto> findByCityAndLevelStatus(Long cityId, List<String> wasteLevelStatuses) {
-        log.debug("Calling containers API to find containers for city ID: {} with waste level statuses: {}", cityId, wasteLevelStatuses);
+        log.info("Calling containers API to find containers for city ID: {} with waste level statuses: {}", cityId, wasteLevelStatuses);
         String url = UriComponentsBuilder.fromHttpUrl(containersApiUrl)
                 .path("/api/v1/containers/by-city-and-level/{cityId}")
                 .queryParam("wasteLevelStatuses", wasteLevelStatuses.toArray())
                 .buildAndExpand(cityId)
+                .toUriString();
+        try {
+            var response = restTemplate.exchange(
+                url,
+                HttpMethod.GET,
+                null,
+                new ParameterizedTypeReference<List<ContainerDto>>() {}
+            );
+            return response.getBody();
+        } catch (Exception e) {
+            log.error("Error calling containers API: {}", e.getMessage(), e);
+            return Arrays.asList();
+        }
+    }
+
+    @Override
+    public List<ContainerDto> findByCustomerIdAndCityIdAndBounds(Long customerId, Long cityId, 
+        Double startLat, Double endLat, Double startLng, Double endLng, Integer limit) {
+        log.info("Calling containers API to find containers for customer ID: {}, city ID: {} and bounds: [{},{},{},{}] with limit: {}", 
+            customerId, cityId, startLat, endLat, startLng, endLng, limit);
+        String url = UriComponentsBuilder.fromHttpUrl(containersApiUrl)
+                .path("/api/v1/containers/by-customer/{customerId}/city/{cityId}/bounds")
+                .queryParam("startLat", startLat)
+                .queryParam("endLat", endLat)
+                .queryParam("startLng", startLng)
+                .queryParam("endLng", endLng)
+                .queryParam("limit", limit)
+                .buildAndExpand(customerId, cityId)
                 .toUriString();
         try {
             var response = restTemplate.exchange(

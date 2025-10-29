@@ -127,10 +127,13 @@ const LoginPage: React.FC = () => {
 								Demo Accounts:
 							</Typography>
 							<Typography variant="caption" display="block">
-								Admin: admin@uwm.com / admin123
+								Admin: admin@scgm.com | admin123
 							</Typography>
 							<Typography variant="caption" display="block">
-								Supervisor: john.doe@uwm.com / supervisor123
+								Supervisor: supervisor@scgm.com | supervisor123
+							</Typography>
+							<Typography variant="caption" display="block">
+								Operator: operator@scgm.com | operator123
 							</Typography>
 						</Box>
 					</CardContent>

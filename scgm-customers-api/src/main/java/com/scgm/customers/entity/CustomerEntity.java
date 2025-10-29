@@ -64,7 +64,7 @@ public class CustomerEntity {
         } else if (!StringUtils.isEmpty(getName()) && !INJECTION_PATTERN.matcher(name).matches()) {
             listErrors.add("name: invalid format");
         }
-        if (description != null && !INJECTION_PATTERN.matcher(description).matches())
+        if (getDescription() != null && !INJECTION_PATTERN.matcher(getDescription()).matches())
             listErrors.add("description: invalid format");
         if (getCity() == null)
             listErrors.add("city: is required");

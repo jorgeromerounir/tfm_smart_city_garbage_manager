@@ -1,0 +1,130 @@
+---
+config:
+  theme: base
+---
+classDiagram
+    class RouteController {
+        -RouteService routeService
+        +add(RouteAddDto) ResponseEntity~RouteDto~
+        +findById(String) ResponseEntity~RouteDto~
+        +update(String, RouteUpdateDto) ResponseEntity~RouteDto~
+        +delete(String) ResponseEntity~Void~
+    }
+    class RouteService {
+        <<interface>>
+        +add(RouteAddDto) RouteDto
+        +findById(String) Optional~RouteDto~
+        +update(String, RouteUpdateDto) RouteDto
+        +delete(String) void
+    }
+    class RouteServiceImpl {
+        -RouteRepository routeRepository
+        +add(RouteAddDto) RouteDto
+        +findById(String) Optional~RouteDto~
+        +update(String, RouteUpdateDto) RouteDto
+        +delete(String) void
+    }
+    class RouteIntegrationService {
+        <<interface>>
+        +optimizeRoute(OptimizeRouteDto) OptimizedRouteResponse
+        +assignRoute(RouteAssignmentDto) RouteAssignmentDto
+        +getAssignments(String) List~RouteAssignmentDto~
+        +updateAssignmentStatus(String, AssignmentStatus) RouteAssignmentDto
+    }
+    class RouteIntegrationServiceImpl {
+        -ContainerClient containerClient
+        +optimizeRoute(OptimizeRouteDto) OptimizedRouteResponse
+        +assignRoute(RouteAssignmentDto) RouteAssignmentDto
+        +getAssignments(String) List~RouteAssignmentDto~
+        +updateAssignmentStatus(String, AssignmentStatus) RouteAssignmentDto
+    }
+    class RouteRepository {
+        <<interface>>
+        +findByCityId(Long) List~RouteEntity~
+        +findByCustomerId(Long) List~RouteEntity~
+        +findByRouteStatus(RouteStatus) List~RouteEntity~
+        +findByScheduledDate(LocalDate) List~RouteEntity~
+        +findByCityIdAndRouteStatus(Long, RouteStatus) List~RouteEntity~
+    }
+    class ContainerClient {
+        <<interface>>
+        +findByCityAndLevelStatus(Long, List~String~) List~ContainerDto~
+    }
+    class RouteEntity {
+        -String id
+        -LocalDate scheduledDate
+        -RouteStatus routeStatus
+        -Long cityId
+        -Long customerId
+        -Instant createdAt
+        -Instant updatedAt
+        -String notes
+        +validate() List~String~
+    }
+    class RouteStatus {
+        <<enumeration>>
+        IN_PROGRESS
+        AVIALABLE
+        CANCELLED
+        COMPLETED
+    }
+    class WasteLevel {
+        <<enumeration>>
+        LIGHT
+        MEDIUM
+        HEAVY
+    }
+    class AssignmentStatus {
+        <<enumeration>>
+        PENDING
+        IN_PROGRESS
+        COMPLETED
+        CANCELLED
+    }
+    class RouteDto {
+        -String id
+        -LocalDate scheduledDate
+        -RouteStatus routeStatus
+        -Long cityId
+        -Long customerId
+        -Instant createdAt
+        -Instant updatedAt
+        -String notes
+        +toDto(RouteEntity) RouteDto
+    }
+    class OptimizeRouteDto {
+        -Long cityId
+        -Double startLat
+        -Double startLng
+        -List~String~ wasteLevelStatuses
+    }
+    class OptimizedRouteResponse {
+        -List~RouteResult~ routes
+        -Double totalDistance
+        -Integer containerCount
+        -Integer estimatedTime
+        -Integer trucksUsed
+    }
+    class RouteAssignmentDto {
+        -String routeName
+        -AssignmentStatus status
+        -String operatorId
+    }
+    class Point {
+        -Double lat
+        -Double lng
+        -String id
+        -Integer priority
+    }
+
+    RouteController --> RouteService
+    RouteService <|.. RouteServiceImpl
+    RouteServiceImpl --> RouteRepository
+    RouteRepository --> RouteEntity
+    RouteEntity --> RouteStatus
+    RouteDto --> RouteEntity : toDto
+    RouteIntegrationService <|.. RouteIntegrationServiceImpl
+    RouteIntegrationServiceImpl --> ContainerClient
+    OptimizedRouteResponse --> Point
+    RouteAssignmentDto --> AssignmentStatus
+    OptimizeRouteDto --> WasteLevel : uses

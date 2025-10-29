@@ -1,4 +1,4 @@
-import axios from 'axios'
+import axios, { AxiosResponse, InternalAxiosRequestConfig } from 'axios'
 import {
 	AssignmentStatus,
 	AuthResponse,
@@ -15,39 +15,19 @@ import {
 	CityAddDto,
 	CountryDto,
 	WasteLevel,
+	Customer,
 } from '../types'
 
 const API_BASE = 'http://localhost:3001'
 const CONTAINERS_BASE = 'http://localhost:8763/scgm-containers-api'
 const AUTH_BASE = 'http://localhost:8763/scgm-auth-service'
 const CUSTOMERS_BASE = 'http://localhost:8763/scgm-customers-api'
+const ROUTES_BASE = 'http://localhost:8763/scgm-routes-api'
 
-const api = axios.create({
+const apiBaseAxios = axios.create({
 	baseURL: API_BASE,
 	timeout: 10000,
 })
-
-// Add auth token to main API requests
-api.interceptors.request.use(config => {
-	const token = localStorage.getItem('accessToken')
-	if (token) {
-		config.headers.Authorization = `Bearer ${token}`
-	}
-	return config
-})
-
-// Add response interceptor to handle auth errors
-api.interceptors.response.use(
-	response => response,
-	error => {
-		if (error.response?.status === 401) {
-			console.error('Authentication failed:', error)
-			return Promise.reject(error)
-		}
-		return Promise.reject(error)
-	}
-)
-
 const authApiAxios = axios.create({
 	baseURL: AUTH_BASE,
 	timeout: 10000,
@@ -60,58 +40,66 @@ const containersApiAxios = axios.create({
 	baseURL: CONTAINERS_BASE,
 	timeout: 10000,
 })
+const routesApiAxios = axios.create({
+	baseURL: ROUTES_BASE,
+	timeout: 10000,
+})
 
-// Add auth token to requests
-customersApiAxios.interceptors.request.use(config => {
-	const token = localStorage.getItem('accessToken')
-	if (token) {
-		config.headers.Authorization = `Bearer ${token}`
-	}
-	return config
-})
-// Add response interceptor to handle auth errors
-customersApiAxios.interceptors.response.use(
-	response => response,
-	error => {
-		if (error.response?.status === 401) {
-			// Don't redirect, just log the error
-			console.error('Authentication failed:', error)
-			return Promise.reject(error)
-		}
+const authReqInterceptor = (config: InternalAxiosRequestConfig) => {
+    const token = localStorage.getItem('accessToken');
+    if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+};
+
+const handleReqError = (error: any) => {
+	console.log('Generic handleReqError: ', error)
+    return Promise.reject(error);
+};
+
+const handleResSuccess = (response: AxiosResponse) => {
+    return response;
+};
+
+const handleResError = (error: any) => {
+    if (error.response?.status === 401) {
+		// Don't redirect, just log the error
+        console.error('Authentication failed:', error);
 		return Promise.reject(error)
-	}
-)
-// Add auth token to requests
-containersApiAxios.interceptors.request.use(config => {
-	const token = localStorage.getItem('accessToken')
-	if (token) {
-		config.headers.Authorization = `Bearer ${token}`
-	}
-	return config
-})
-// Add response interceptor to handle auth errors
-containersApiAxios.interceptors.response.use(
-	response => response,
-	error => {
-		if (error.response?.status === 401) {
-			// Don't redirect, just log the error
-			console.error('Authentication failed:', error)
-			return Promise.reject(error)
-		}
-		return Promise.reject(error)
-	}
-)
+    }
+    return Promise.reject(error);
+};
+
+// Add interceptors to apiBaseAxios
+apiBaseAxios.interceptors.request.use(authReqInterceptor, handleReqError)
+apiBaseAxios.interceptors.response.use(handleResSuccess, handleResError)
+// Add interceptors to authApiAxios
+authApiAxios.interceptors.request.use(authReqInterceptor, handleReqError)
+authApiAxios.interceptors.response.use(handleResSuccess, handleResError)
+// Add interceptors to customersApiAxios
+customersApiAxios.interceptors.request.use(authReqInterceptor, handleReqError)
+customersApiAxios.interceptors.response.use(handleResSuccess, handleResError)
+// Add interceptors to containersApiAxios
+containersApiAxios.interceptors.request.use(authReqInterceptor, handleReqError)
+containersApiAxios.interceptors.response.use(handleResSuccess, handleResError)
+// Add interceptors to routesApiAxios
+routesApiAxios.interceptors.request.use(authReqInterceptor, handleReqError)
+routesApiAxios.interceptors.response.use(handleResSuccess, handleResError)
 
 export const containerApi = {
 	getByCity: (cityId: number): Promise<Container[]> =>
 		containersApiAxios.post(`/api/v1/containers/by-city/${cityId}`, {targetMethod: 'GET'}).then(res => res.data),
+	
+	getByCustomerAndCity: (customerId: number, cityId: number): Promise<Container[]> =>
+		containersApiAxios.post(`/api/v1/containers/by-customer/${customerId}/city/${cityId}`, {targetMethod: 'GET'}).then(res => res.data),
 
 	getStatusByCity: (cityId: number): Promise<Container[]> =>
 		containersApiAxios.post(`/api/v1/containers/status-summary/${cityId}`, {targetMethod: 'GET'}).then(res => res.data),
 }
 
 export const routeApi = {
-	optimize: (data: {
+	/*optimize: (data: {
 		startLat: number
 		startLng: number
 		endLat: number
@@ -119,7 +107,19 @@ export const routeApi = {
 		city: string
 		wasteTypes?: WasteLevel[]
 	}): Promise<OptimizedRoute> =>
-		api.post('/routes/optimize', data).then(res => res.data),
+		apiBaseAxios.post('/routes/optimize', data).then(res => res.data),*/
+	optimize: (customerId: number, data: {
+		startLat: number
+		startLng: number
+		endLat: number
+		endLng: number
+		cityId: number
+		wasteTypes?: WasteLevel[]
+	}): Promise<OptimizedRoute> =>
+		routesApiAxios.post(`/api/v1/routes/optimize-by-customer/${customerId}`, {targetMethod: 'POST', body: data}).then(res => res.data),
+
+	/*signIn: (data: SignInRequest): Promise<AuthResponse> =>
+		authApiAxios.post('/api/v1/auth/signin', {targetMethod: 'POST', body: data}).then(res => res.data),*/
 
 	generateGoogleMapsUrl: (points: { lat: number; lng: number }[]): string => {
 		if (points.length === 0) return ''
@@ -146,6 +146,12 @@ export const authService = {
 	logout: (refreshToken: string): Promise<void> =>
 		authApiAxios.post('/api/v1/auth/logout', {targetMethod: 'POST', body: { refreshToken }}).then(res => res.data),
 }
+
+export const customersApi = {
+	getById: (customerId: number): Promise<Customer> =>
+		customersApiAxios.post(`/api/v1/customers/${customerId}`, {targetMethod: 'GET'}).then(res => res.data),	
+}
+
 
 export const userApi = {
 	getByProfileOperator: (customerId: number): Promise<User[]> =>
@@ -191,7 +197,7 @@ export const citiesApi = {
 export const truckApi = {
 	getAll: (city?: string): Promise<Truck[]> => {
 		const params = city ? { city } : {}
-		return api.get('/routes/trucks', { params }).then(res => res.data)
+		return apiBaseAxios.get('/routes/trucks', { params }).then(res => res.data)
 	},
 	create: (data: {
 		name: string
@@ -199,7 +205,7 @@ export const truckApi = {
 		capacity: number
 		city: string
 	}): Promise<Truck> =>
-		api.post('/routes/trucks', data).then(res => res.data),
+		apiBaseAxios.post('/routes/trucks', data).then(res => res.data),
 }
 
 export const assignmentApi = {
@@ -211,13 +217,13 @@ export const assignmentApi = {
 		supervisorId: string
 		city: string
 	}): Promise<RouteAssignment> =>
-		api.post('/routes/assign', data).then(res => res.data),
+		apiBaseAxios.post('/routes/assign', data).then(res => res.data),
 
 	getAll: (operatorId?: string): Promise<RouteAssignment[]> => {
 		const params = operatorId ? { operatorId } : {}
-		return api.get('/routes/assignments', { params }).then(res => res.data)
+		return apiBaseAxios.get('/routes/assignments', { params }).then(res => res.data)
 	},
 
 	updateStatus: (id: string, status: AssignmentStatus): Promise<RouteAssignment> =>
-		api.put(`/routes/assignments/${id}/status`, { status }).then(res => res.data),
+		apiBaseAxios.put(`/routes/assignments/${id}/status`, { status }).then(res => res.data),
 }

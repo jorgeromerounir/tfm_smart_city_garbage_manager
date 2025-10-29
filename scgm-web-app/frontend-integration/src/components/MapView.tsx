@@ -21,12 +21,12 @@ const createIcon = (level: WasteLevel) => {
 
 	return new Icon({
 		iconUrl: `data:image/svg+xml;base64,${btoa(`
-      <svg width="25" height="41" viewBox="0 0 25 41" xmlns="http://www.w3.org/2000/svg">
-        <path fill="${colors[level]}" stroke="#fff" stroke-width="2" d="M12.5 0C5.6 0 0 5.6 0 12.5c0 12.5 12.5 28.5 12.5 28.5s12.5-16 12.5-28.5C25 5.6 19.4 0 12.5 0z"/>
-        <circle fill="#fff" cx="12.5" cy="12.5" r="6"/>
-      </svg>
-    `)}`,
-		iconSize: [25, 41],
+		<svg width="20" height="35" viewBox="0 0 25 41" xmlns="http://www.w3.org/2000/svg">
+			<path fill="${colors[level]}" stroke="#fff" stroke-width="2" d="M12.5 0C5.6 0 0 5.6 0 12.5c0 12.5 12.5 28.5 12.5 28.5s12.5-16 12.5-28.5C25 5.6 19.4 0 12.5 0z"/>
+			<circle fill="#fff" cx="12.5" cy="12.5" r="6"/>
+		</svg>
+		`)}`,
+		iconSize: [15, 30],
 		iconAnchor: [12, 41],
 		popupAnchor: [1, -34],
 	})
@@ -67,7 +67,7 @@ const MapView: React.FC<MapViewProps> = ({
 					<Marker
 						key={container.id}
 						position={[container.latitude, container.longitude]}
-						icon={createIcon(container.wasteLevel)}
+						icon={createIcon(container.wasteLevelStatus)}
 					>
 						<Popup>
 							<Box>
@@ -84,12 +84,12 @@ const MapView: React.FC<MapViewProps> = ({
 									</Typography>
 								)}
 								<Chip
-									label={container.wasteLevel.toUpperCase()}
+									label={container.wasteLevelStatus.toUpperCase()}
 									size="small"
 									color={
-										container.wasteLevel === WasteLevel.HEAVY
+										container.wasteLevelStatus === WasteLevel.HEAVY
 											? 'error'
-											: container.wasteLevel === WasteLevel.MEDIUM
+											: container.wasteLevelStatus === WasteLevel.MEDIUM
 												? 'warning'
 												: 'success'
 									}

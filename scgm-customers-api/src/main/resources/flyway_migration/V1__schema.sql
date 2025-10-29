@@ -24,8 +24,7 @@ CREATE TABLE IF NOT EXISTS customers (
     city_id BIGINT NOT NULL,
     created_at TIMESTAMP NOT NULL,
     updated_at TIMESTAMP NOT NULL,
-    active BOOLEAN NOT NULL,
-    FOREIGN KEY (city_id) REFERENCES cities(id)
+    active BOOLEAN NOT NULL
 );
 
 CREATE SEQUENCE IF NOT EXISTS users_seq

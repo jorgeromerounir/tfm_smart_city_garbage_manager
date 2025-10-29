@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react'
 import { routeApi } from '../services/api.ts'
-import { OptimizedRoute, SavedRoute, User, WasteLevel } from '../types/index.ts'
+import { Customer, OptimizedRoute, SavedRoute, User, WasteLevel } from '../types/index.ts'
 import useCities from './useCities.ts'
 import useSavedRoutes from './useSavedRoutes.ts'
 
 export default function useRoutes(
+	customer?: Customer,
 	user?: User,
 	selectedWasteTypes: WasteLevel[] = [],
 ) {
@@ -52,7 +53,6 @@ export default function useRoutes(
 			})
 			return
 		}
-
 		if (!selectedCity) {
 			setNotification({
 				open: true,
@@ -61,12 +61,10 @@ export default function useRoutes(
 			})
 			return
 		}
-
 		const startLoc = selectedCity.locations.find(
 			loc => loc.name === startLocation,
 		)
 		const endLoc = selectedCity.locations.find(loc => loc.name === endLocation)
-
 		if (!startLoc || !endLoc) {
 			setNotification({
 				open: true,
@@ -75,15 +73,14 @@ export default function useRoutes(
 			})
 			return
 		}
-
 		setLoading(true)
 		try {
-			const route = await routeApi.optimize({
+			const route = await routeApi.optimize(customer?.id ,{
 				startLat: startLoc.lat,
 				startLng: startLoc.lng,
 				endLat: endLoc.lat,
 				endLng: endLoc.lng,
-				city: `${selectedCity.name}, ${selectedCity.country}`,
+				cityId: customer?.cityId,
 				wasteTypes:
 					selectedWasteTypes.length > 0 ? selectedWasteTypes : undefined,
 			})
@@ -175,7 +172,7 @@ export default function useRoutes(
 			})
 		}
 
-		setRouteName('')
+		//setRouteName('')
 	}
 
 	const handleLoadRoute = (route: SavedRoute) => {

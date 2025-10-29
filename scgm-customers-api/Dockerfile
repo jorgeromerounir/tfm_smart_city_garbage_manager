@@ -3,6 +3,6 @@ COPY . .
 RUN mvn clean package
 
 FROM openjdk:21
-EXPOSE 8180
+EXPOSE 8182
 COPY --from=build /target/scgm-customers-api*.jar app.jar
 ENTRYPOINT ["java", "-jar", "/app.jar"]

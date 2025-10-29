@@ -10,6 +10,7 @@ import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.scgm.containers.dto.BoundsDto;
 import com.scgm.containers.dto.ContainerAddDto;
 import com.scgm.containers.dto.ContainerAddSendorDto;
 import com.scgm.containers.dto.ContainerDto;
@@ -95,6 +96,33 @@ public class ContainerServiceImpl implements ContainerService {
     }
 
     @Override
+    public List<ContainerDto> findByCustomerIdAndCityId(Long customerId, Long cityId) {
+        try {
+            return containerRepository.findByCustomerIdAndCityId(customerId, cityId).stream().map(ContainerDto::toDto)
+                    .collect(Collectors.toList());
+        } catch (Exception e) {
+            log.error("Error trying to find containers by customer ID: {} and city ID: {}", customerId, cityId, e);
+            throw new ContainersDatabaseException("Error trying to find containers", e);
+        }
+    }
+
+    @Override
+    public List<ContainerDto> findByCustomerIdAndCityIdAndBounds(Long customerId, Long cityId, BoundsDto bounds) {
+        var reqListErrors = bounds.validate();
+        if (!reqListErrors.isEmpty())
+            throw new ContainerValidationException("Trying to find by bounds: error bounds validation.", reqListErrors);
+        try {
+            return containerRepository.findByCustomerIdAndCityIdAndBounds(customerId, cityId, 
+                bounds.getStartLat(), bounds.getEndLat(), bounds.getStartLng(), bounds.getEndLng(), bounds.getLimit())
+                    .stream().map(ContainerDto::toDto)
+                    .collect(Collectors.toList());
+        } catch (Exception e) {
+            log.error("Error trying to find containers by customer ID: {}, city ID: {} and bounds: {}", customerId, cityId, bounds, e);
+            throw new ContainersDatabaseException("Error trying to find containers", e);
+        }
+    }
+
+    @Override
     @Transactional
     public ContainerDto update(String containerId, ContainerUpdateDto containerUpdate) {
         var reqListErrors = containerUpdate.validate();
@@ -130,7 +158,7 @@ public class ContainerServiceImpl implements ContainerService {
             throw new ContainerNotFoundException(containerId);
         try {
             containerRepository.deleteById(containerId);
-            log.debug("Container with ID: {} deleted successfully.", containerId);
+            log.info("Container with ID: {} deleted successfully.", containerId);
         } catch (Exception e) {
             log.error("Error trying to delete container with ID: {}", containerId, e);
             throw new ContainersDatabaseException("Error trying to delete container", e);
@@ -139,7 +167,7 @@ public class ContainerServiceImpl implements ContainerService {
 
     @Override
     public Optional<ContainerStatusSummaryDto> getStatusSummary(Long cityId) {
-        log.debug("Getting status summary for city ID: {}", cityId);
+        log.info("Getting status summary for city ID: {}", cityId);
         Map<String, Long> statusSummaryMap = new HashMap<>();
         try {
             statusSummaryMap = containerRepository.getStatusSummary(cityId);   
@@ -162,7 +190,7 @@ public class ContainerServiceImpl implements ContainerService {
 
     @Override
     public List<ContainerDto> findByCityAndLevelStatus(Long cityId, List<WasteLevel> wasteLevelStatuses) {
-        log.debug("Finding containers for city ID: {} with waste level statuses: {}", cityId, wasteLevelStatuses);
+        log.info("Finding containers for city ID: {} with waste level statuses: {}", cityId, wasteLevelStatuses);
         try {
             List<String> statusStrings = wasteLevelStatuses.stream().map(WasteLevel::toString)
                     .collect(Collectors.toList());
@@ -181,7 +209,7 @@ public class ContainerServiceImpl implements ContainerService {
         var reqListErrors = containerAddSendor.validate();
         if (!reqListErrors.isEmpty())
             throw new ContainerValidationException("Trying to add sensor data: error request validation.", reqListErrors);
-        log.debug("Adding sensor data for container ID: {}", containerAddSendor.getId());
+        log.info("Adding sensor data for container ID: {}", containerAddSendor.getId());
         var containerOpt = containerRepository.findById(containerAddSendor.getId());
         containerOpt.orElseThrow(() -> new ContainerNotFoundException(containerAddSendor.getId()));
         ContainerEntity existingContainer = containerOpt.get();

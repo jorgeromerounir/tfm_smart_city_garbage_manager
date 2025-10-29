@@ -11,7 +11,7 @@ public class InitApplication {
 	public static void main(String[] args) {
 		String profile = System.getenv("PROFILE");
 		System.setProperty("spring.profiles.active", profile != null ? profile : "default");
-		log.debug("Waiting for Internal Interface to start...");
+		log.info("Waiting for Internal Interface to start...");
 		try {
 			Thread.sleep(2000);
 		} catch (InterruptedException e) {

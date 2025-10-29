@@ -23,8 +23,8 @@ spring:
   data:
     mongodb:
       uri: ${MONGODB_URI:mongodb://admin:admin123@localhost:27017/scgm_routes_db?authSource=admin}
-
-
+      auto-index-creation: true
+      database: scgm_routes_db
 
 management:
   endpoints:

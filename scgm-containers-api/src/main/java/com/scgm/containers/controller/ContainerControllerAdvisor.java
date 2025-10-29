@@ -18,14 +18,14 @@ public class ContainerControllerAdvisor {
 
     @ExceptionHandler(ContainerNotFoundException.class)
     public ResponseEntity<DefaultResponseDto> handleContainerNotFoundException(ContainerNotFoundException ex) {
-        log.debug("Container not found: {}", ex.getMessage());
+        log.info("Container not found: {}", ex.getMessage());
         var response = new DefaultResponseDto(ex.getMessage(), HttpStatus.NOT_FOUND.value());
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
     }
 
     @ExceptionHandler(ContainerValidationException.class)
     public ResponseEntity<DefaultResponseDto> handleContainerValidationException(ContainerValidationException ex) {
-        log.debug("Container validation error: {}, error list: {}", ex.getMessage(), ex.getErrors());
+        log.info("Container validation error: {}, error list: {}", ex.getMessage(), ex.getErrors());
         var response = new DefaultResponseDto(ex.getErrors(), HttpStatus.BAD_REQUEST.value());
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
     }

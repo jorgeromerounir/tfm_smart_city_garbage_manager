@@ -23,19 +23,51 @@ public interface ContainerRepository extends JpaRepository<ContainerEntity, Stri
 
     List<ContainerEntity> findByCustomerId(Long customerId);
 
+    //-----------------
+    @Query(value = """
+    SELECT * FROM containers
+    WHERE
+        customer_id = :customerId
+        AND city_id = :cityId
+    ORDER BY random()
+    LIMIT 500;
+    """, nativeQuery = true)
+    List<ContainerEntity> findByCustomerIdAndCityId(
+        @Param("customerId") Long customerId, 
+        @Param("cityId") Long cityId);
+
+    //-----------------
+    @Query(value = """
+    SELECT * FROM containers WHERE
+        customer_id = :customerId
+        AND city_id = :cityId
+        AND latitude BETWEEN :startLat AND :endLat
+        AND longitude BETWEEN :startLng AND :endLng
+    ORDER BY updated_at DESC
+    LIMIT CASE WHEN :limit <= 0 THEN (SELECT COUNT(*) FROM containers) ELSE :limit END;
+    """, nativeQuery = true)
+    List<ContainerEntity> findByCustomerIdAndCityIdAndBounds(
+        @Param("customerId") Long customerId, 
+        @Param("cityId") Long cityId,
+        @Param("startLat") Double startLat,
+        @Param("endLat") Double endLat,
+        @Param("startLng") Double startLng,
+        @Param("endLng") Double endLng,
+        @Param("limit") Integer limit
+    );
+
+    //-----------------
     @Query(value = """
     SELECT
         SUM(CASE WHEN waste_level_status = 'LIGHT' THEN 1 ELSE 0 END) AS light,
         SUM(CASE WHEN waste_level_status = 'MEDIUM' THEN 1 ELSE 0 END) AS medium,
         SUM(CASE WHEN waste_level_status = 'HEAVY' THEN 1 ELSE 0 END) AS heavy,
         COUNT(*) AS total
-    FROM
-        containers
-    WHERE
-        city_id = :cityId
+    FROM containers WHERE city_id = :cityId;
     """, nativeQuery = true)
     Map<String, Long> getStatusSummary(@Param("cityId") Long cityId);
 
+    //-----------------
     @Query(value = """
     SELECT * FROM containers
     WHERE

@@ -30,6 +30,7 @@ import OperatorDashboard from '../components/OperatorDashboard.tsx'
 import RouteAssignmentDialog from '../components/RouteAssignmentDialog.tsx'
 import { useAuth } from '../contexts/AuthContext.tsx'
 import useContainers from '../hooks/useContainers.ts'
+import useCustomer from '../hooks/useCustomer.ts'
 import useRoutes from '../hooks/useRoutes.ts'
 import { Profile } from '../types/index.ts'
 
@@ -40,9 +41,14 @@ const RoutesPage: React.FC = () => {
 
   const [selectedRoute, setSelectedRoute] = useState<any>(null)
 
-
-  const { filteredContainers, selectedWasteTypes, setSelectedWasteTypes } =
-    useContainers(user?.country)
+  
+  //console.log('---> user data: ', user);
+  const { customer } = useCustomer(user?.customerId);
+  //console.log('---> customer data: ', customer);
+  
+  const { filteredContainers, selectedWasteTypes, setSelectedWasteTypes, setContainers } =
+  useContainers(customer?.id, customer?.cityId)
+  //console.log('---> filteredContainers: ', filteredContainers);
   const {
     tabValue,
     cities,
@@ -63,8 +69,8 @@ const RoutesPage: React.FC = () => {
     handleLoadRoute,
     handleSaveRoute,
     setNotification,
-    savedRoutes
-  } = useRoutes(user ?? undefined, selectedWasteTypes)
+    savedRoutes,
+  } = useRoutes(customer ?? undefined, user ?? undefined, selectedWasteTypes)
 
   // Show operator dashboard for operators
   if (user?.profile === Profile.OPERATOR) {
@@ -203,21 +209,13 @@ const RoutesPage: React.FC = () => {
                   size="small"
                   fullWidth
                 >
-                  <ToggleButton
-                    value="light"
-                    color="success"
-                    sx={{ flex: 1 }}
-                  >
+                  <ToggleButton value="LIGHT" color="success" sx={{ flex: 1 }}>
                     Light
                   </ToggleButton>
-                  <ToggleButton
-                    value="medium"
-                    color="warning"
-                    sx={{ flex: 1 }}
-                  >
+                  <ToggleButton value="MEDIUM" color="warning" sx={{ flex: 1 }}>
                     Medium
                   </ToggleButton>
-                  <ToggleButton value="heavy" color="error" sx={{ flex: 1 }}>
+                  <ToggleButton value="HEAVY" color="error" sx={{ flex: 1 }}>
                     Heavy
                   </ToggleButton>
                 </ToggleButtonGroup>
@@ -233,7 +231,7 @@ const RoutesPage: React.FC = () => {
                     py: 1.5,
                     px: 3
                   }}
-                  onClick={handleOptimizeRoute}
+                  onClick={() => (handleOptimizeRoute(), setContainers([]))}
                   disabled={loading}
                   startIcon={
                     loading ? <CircularProgress size={20}/> : <RouteIcon/>
