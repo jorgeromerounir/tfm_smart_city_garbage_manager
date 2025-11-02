@@ -3,16 +3,9 @@ import { containerApi } from '../services/api.ts'
 import { Container } from '../types/index.ts'
 import useWasteTypes from './useWasteTypes.ts'
 
-export default function useContainers(customerId?: number, cityId?: number) {
+export default function useContainers(customerId?: number, cityId?: number, limit: number = 500, hasZoneId?: string, refreshKey?:number) {
   const [containers, setContainers] = useState<Container[]>([])
   const { selectedWasteTypes, setSelectedWasteTypes } = useWasteTypes()
-
-  /*const filteredContainers = containers.filter(container => {
-    return (
-      selectedWasteTypes.length === 0 ||
-      selectedWasteTypes.includes(container.wasteLevelStatus)
-    )
-  })*/
   const filteredContainers = containers
 
   useEffect(() => {
@@ -22,16 +15,15 @@ export default function useContainers(customerId?: number, cityId?: number) {
         return
       }
       try {
-        //const data = await containerApi.getByCity(cityId);
-        const data = await containerApi.getByCustomerAndCity(customerId, cityId);
-        setContainers(data)
+        const data = await containerApi.getByCustomerAndCity(customerId, cityId, limit, hasZoneId);
+        setContainers(data ? data : [])
       } catch (error) {
         console.error('Failed to fetch containers:', error)
       }
     }
 
     void fetchContainers()
-  }, [customerId, cityId])
+  }, [customerId, cityId, hasZoneId, refreshKey])
 
   return {
     filteredContainers,

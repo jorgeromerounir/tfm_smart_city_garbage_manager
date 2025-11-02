@@ -21,6 +21,7 @@ import com.scgm.containers.dto.ContainerAddSendorDto;
 import com.scgm.containers.dto.ContainerDto;
 import com.scgm.containers.dto.ContainerStatusSummaryDto;
 import com.scgm.containers.dto.ContainerUpdateDto;
+import com.scgm.containers.dto.ContainerZoneUpdateDto;
 import com.scgm.containers.entity.ContainerEntity.WasteLevel;
 import com.scgm.containers.service.ContainerService;
 
@@ -59,15 +60,6 @@ public class ContainerController {
         return new ResponseEntity<>(containers, HttpStatus.OK);
     }
 
-    @GetMapping("/by-city/{cityId}")
-    public ResponseEntity<List<ContainerDto>> findByCityId(@PathVariable Long cityId) {
-        log.info("Finding containers for city with ID: {}", cityId);
-        List<ContainerDto> containers = containerService.findByCityId(cityId);
-        if (containers.isEmpty())
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-        return new ResponseEntity<>(containers, HttpStatus.OK);
-    }
-
     @GetMapping("/by-customer/{customerId}")
     public ResponseEntity<List<ContainerDto>> findByCustomerId(@PathVariable Long customerId) {
         log.info("Finding containers for customer with ID: {}", customerId);
@@ -78,21 +70,28 @@ public class ContainerController {
     }
 
     @GetMapping("/by-customer/{customerId}/city/{cityId}")
-    public ResponseEntity<List<ContainerDto>> findByCustomerIdAndCityId(@PathVariable Long customerId, @PathVariable Long cityId) {
-        log.info("Finding containers for customer ID: {} and city ID: {}", customerId, cityId);
-        List<ContainerDto> containers = containerService.findByCustomerIdAndCityId(customerId, cityId);
+    public ResponseEntity<List<ContainerDto>> findByCustomerIdAndCityId(
+        @PathVariable Long customerId, 
+        @PathVariable Long cityId,
+        @RequestParam(required = false) Integer limit,
+        @RequestParam(required = false) Boolean hasZoneId) {
+        log.info("Finding containers for customer ID: {}, city ID: {} with limit: {}, hasZoneId:{}", 
+            customerId, cityId, limit, hasZoneId);
+        List<ContainerDto> containers = containerService.findByCustomerIdAndCityId(customerId, cityId, limit, hasZoneId);
         if (containers.isEmpty())
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         return new ResponseEntity<>(containers, HttpStatus.OK);
     }
 
-    @GetMapping("/by-customer/{customerId}/city/{cityId}/bounds")
-    public ResponseEntity<List<ContainerDto>> findByCustomerIdAndCityIdAndBounds(
+    @GetMapping("/by-customer/{customerId}/city/{cityId}/zone/{zoneId}")
+    public ResponseEntity<List<ContainerDto>> findByCustomerIdAndCityIdAndZoneId(
         @PathVariable Long customerId, 
         @PathVariable Long cityId,
-        @ModelAttribute BoundsDto bounds) {
-        log.debug("Finding containers for customer ID: {}, city ID: {} and bounds: {}", customerId, cityId, bounds);
-        List<ContainerDto> containers = containerService.findByCustomerIdAndCityIdAndBounds(customerId, cityId, bounds);
+        @PathVariable String zoneId,
+        @RequestParam(required = false) Integer limit) {
+        log.info("Finding containers for customer ID: {}, city ID: {} and zoneId: {}", customerId, cityId, zoneId);
+        List<ContainerDto> containers = containerService.findByCustomerIdAndCityIdAndZoneId(
+            customerId, cityId, zoneId, limit);
         if (containers.isEmpty())
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         return new ResponseEntity<>(containers, HttpStatus.OK);
@@ -136,6 +135,15 @@ public class ContainerController {
         if (containers.isEmpty())
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         return new ResponseEntity<>(containers, HttpStatus.OK);
+    }
+
+    @PutMapping("/by-customer/{customerId}/multiple-zones")
+    public ResponseEntity<Void> updateMultipleZonesId(
+        @PathVariable Long customerId,
+        @RequestBody List<ContainerZoneUpdateDto> containerZoneUpdates) {
+        log.info("Updating multiple zones for customer ID: {}", customerId);
+        containerService.updateMultipleZonesId(customerId, containerZoneUpdates);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
 }

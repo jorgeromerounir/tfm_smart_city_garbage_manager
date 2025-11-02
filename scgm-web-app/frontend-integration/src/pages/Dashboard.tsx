@@ -11,17 +11,30 @@ import React, { useEffect, useState } from 'react'
 import { useAuth } from '../contexts/AuthContext'
 import { containerApi } from '../services/api'
 import { StatusSummary } from '../types'
+import useCustomer from '../hooks/useCustomer'
 
 const Dashboard: React.FC = () => {
 	const { user } = useAuth()
+	const { customer } = useCustomer(user?.customerId);
 	const [status, setStatus] = useState<StatusSummary | null>(null)
 	const [loading, setLoading] = useState(true)
+	const secondsToRefresh = 30
+	const millisecondsToRefresh = secondsToRefresh * 1000;
 
 	useEffect(() => {
 		const fetchStatus = async () => {
+			setLoading(true)
 			try {
-				// TODO: pasar la ciudad desde el customer
-				const data = await containerApi.getStatusByCity(1);
+				if (!customer?.cityId) {
+					setStatus({
+						heavy: 0,
+						light: 0,
+						medium: 0,
+						total: 0
+					})
+					return
+				}
+				const data = await containerApi.getStatusByCity(customer?.cityId);
 				setStatus(data)
 			} catch (error) {
 				console.error('Failed to fetch status:', error)
@@ -29,12 +42,10 @@ const Dashboard: React.FC = () => {
 				setLoading(false)
 			}
 		}
-
 		void fetchStatus()
-		const interval = setInterval(fetchStatus, 60000) // Update every minute
-
+		const interval = setInterval(fetchStatus, millisecondsToRefresh) // Update every time
 		return () => clearInterval(interval)
-	}, [user?.country])
+	}, [customer?.cityId])
 
 	if (loading) {
 		return (
@@ -48,6 +59,8 @@ const Dashboard: React.FC = () => {
 			</Box>
 		)
 	}
+
+	const customerName = customer?.name
 
 	const cards = [
 		{
@@ -78,11 +91,9 @@ const Dashboard: React.FC = () => {
 
 	return (
 		<Box>
-			<Typography variant="h4" gutterBottom>
-				Dashboard
-			</Typography>
+			<Typography variant="h4" gutterBottom>Dashboard {customerName ? `- ${customerName}` : ''}</Typography>
 			<Typography variant="subtitle1" color="text.secondary" gutterBottom>
-				Real-time overview of waste container status
+				Real-time overview of waste container status (every {secondsToRefresh} seconds) for customer {customerName ? `${customerName}` : ''}
 			</Typography>
 
 			<Grid container spacing={3} sx={{ mt: 2 }}>

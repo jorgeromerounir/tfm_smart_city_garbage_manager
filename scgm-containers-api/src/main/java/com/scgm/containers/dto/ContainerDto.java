@@ -27,6 +27,7 @@ public class ContainerDto {
     private String address;
     private Long cityId;
     private Long customerId;
+    private String zoneId;
     private Instant createdAt;
     private Instant updatedAt;
 
@@ -41,6 +42,7 @@ public class ContainerDto {
                 .address(containerDto.getAddress())
                 .cityId(containerDto.getCityId())
                 .customerId(containerDto.getCustomerId())
+                .zoneId(containerDto.getZoneId())
                 .createdAt(containerDto.getCreatedAt())
                 .updatedAt(containerDto.getUpdatedAt())
                 .build();
@@ -57,6 +59,7 @@ public class ContainerDto {
                 .address(containerEntity.getAddress())
                 .cityId(containerEntity.getCityId())
                 .customerId(containerEntity.getCustomerId())
+                .zoneId(containerEntity.getZoneId())
                 .createdAt(containerEntity.getCreatedAt())
                 .updatedAt(containerEntity.getUpdatedAt())
                 .build();

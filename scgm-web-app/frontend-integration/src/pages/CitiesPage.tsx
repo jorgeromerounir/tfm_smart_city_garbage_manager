@@ -1,4 +1,4 @@
-import { Add, Delete, Edit, LocationCity } from '@mui/icons-material'
+import { Add, Delete, Edit, LocationCity, Search } from '@mui/icons-material'
 import {
 	Alert,
 	Autocomplete,
@@ -6,10 +6,13 @@ import {
 	Button,
 	CircularProgress,
 	Dialog,
+	DialogActions,
 	DialogContent,
 	DialogTitle,
 	FormControlLabel,
 	IconButton,
+	InputAdornment,
+	Pagination,
 	Paper,
 	Switch,
 	Table,
@@ -25,6 +28,7 @@ import React, { useEffect, useState } from 'react'
 import { AVAILABLE_CITIES } from '../data/cities'
 import { citiesApi } from '../services/api'
 import { City } from '../types'
+import useNoti from '../hooks/useNoti'
 
 const CitiesPage: React.FC = () => {
 	const [cities, setCities] = useState<City[]>([])
@@ -33,6 +37,11 @@ const CitiesPage: React.FC = () => {
 	const [open, setOpen] = useState(false)
 	const [editingCity, setEditingCity] = useState<City | null>(null)
 	const [selectedCityOption, setSelectedCityOption] = useState<string>('')
+	const [searchTerm, setSearchTerm] = useState('')
+	const [currentPage, setCurrentPage] = useState(1)
+	const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
+	const [cityToDelete, setCityToDelete] = useState<number | null>(null)
+	const { showNoti, NotificationComponent } = useNoti()
 	const [formData, setFormData] = useState({
 		name: '',
 		country: '',
@@ -49,9 +58,7 @@ const CitiesPage: React.FC = () => {
 		try {
 			setLoading(true)
 			setError(null)
-			//TODO: pasar el country dinámicamente
-			const data: City[] = await citiesApi.getByCountry('CO')
-			console.log('Fetched cities:', data)
+			const data: City[] = await citiesApi.getAll()
 			setCities(data)
 		} catch (error) {
 			console.error('Failed to fetch cities:', error)
@@ -62,29 +69,49 @@ const CitiesPage: React.FC = () => {
 	}
 
 	const handleSubmit = async () => {
-		try {
-			if (editingCity) {
-				await citiesApi.update(editingCity.id, formData)
-			} else {
-				await citiesApi.create(formData)
-			}
-
-			fetchCities()
-			handleClose()
-		} catch (error) {
-			console.error('Failed to save city:', error)
+		if (editingCity) {
+			citiesApi.update(editingCity.id, formData).then(() => {
+				fetchCities()
+				handleClose()
+				showNoti('Your city has been updated successfully!', 'success')
+			}).catch((error) => {
+				console.error('Failed to update city:', error)
+				showNoti('Failed to update city. Please try again.', 'error')
+			})
+		} else {
+			citiesApi.create(formData).then(() => {
+				fetchCities()
+				handleClose()
+				showNoti('Your city has been created successfully!', 'success')
+			}).catch((error) => {
+				console.error('Failed to create city:', error)
+				showNoti('Failed to create city. Please try again.', 'error')
+			})
 		}
 	}
 
-	const handleDelete = async (id: number) => {
-		if (window.confirm('Are you sure you want to delete this city?')) {
-			try {
-				await citiesApi.delete(id)
+	const handleDeleteClick = (id: number) => {
+		setCityToDelete(id)
+		setDeleteDialogOpen(true)
+	}
+
+	const handleDeleteConfirm = () => {
+		if (cityToDelete) {
+			citiesApi.delete(cityToDelete).then(() => {
 				fetchCities()
-			} catch (error) {
+				showNoti('City has been deleted successfully!', 'success')
+			}).catch((error) => {
 				console.error('Failed to delete city:', error)
-			}
+				showNoti('Failed to delete city. Please try again.', 'error')
+			})
 		}
+		setDeleteDialogOpen(false)
+		setCityToDelete(null)
+	}
+
+	const handleDeleteCancel = () => {
+		setDeleteDialogOpen(false)
+		setCityToDelete(null)
 	}
 
 	const handleCitySelect = (cityKey: string) => {
@@ -132,7 +159,26 @@ const CitiesPage: React.FC = () => {
 		setEditingCity(null)
 	}
 
+	const filteredCities = cities.filter(city => 
+		city.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+		city.country.toLowerCase().includes(searchTerm.toLowerCase())
+	)
+
+	const itemsPerPage = 6
+	const totalPages = Math.ceil(filteredCities.length / itemsPerPage)
+	const paginatedCities = filteredCities.slice(
+		(currentPage - 1) * itemsPerPage,
+		currentPage * itemsPerPage
+	)
+
+	const handleSearchChange = (value: string) => {
+		setSearchTerm(value)
+		setCurrentPage(1)
+	}
+
 	return (
+		<>
+		<NotificationComponent/>
 		<Box>
 			<Box
 				sx={{
@@ -168,6 +214,21 @@ const CitiesPage: React.FC = () => {
 				</Alert>
 			)}
 
+			<TextField
+				fullWidth
+				placeholder="Search cities by name or country..."
+				value={searchTerm}
+				onChange={(e) => handleSearchChange(e.target.value)}
+				InputProps={{
+					startAdornment: (
+						<InputAdornment position="start">
+							<Search />
+						</InputAdornment>
+					),
+				}}
+				sx={{ mb: 2 }}
+			/>
+
 			{loading ? (
 				<Box sx={{ display: 'flex', justifyContent: 'center', p: 4 }}>
 					<CircularProgress />
@@ -185,16 +246,16 @@ const CitiesPage: React.FC = () => {
 							</TableRow>
 						</TableHead>
 						<TableBody>
-							{cities.length === 0 ? (
+							{paginatedCities.length === 0 ? (
 								<TableRow>
 									<TableCell colSpan={5} align="center">
 										<Typography color="text.secondary">
-											No cities found. Click "Add City" to create one.
+											{searchTerm ? 'No cities match your search.' : 'No cities found. Click "Add City" to create one.'}
 										</Typography>
 									</TableCell>
 								</TableRow>
 							) : (
-								cities.map(city => (
+								paginatedCities.map(city => (
 									<TableRow key={city.id}>
 										<TableCell>{city.name}</TableCell>
 										<TableCell>{city.country}</TableCell>
@@ -206,7 +267,7 @@ const CitiesPage: React.FC = () => {
 											<IconButton onClick={() => handleOpen(city)}>
 												<Edit />
 											</IconButton>
-											<IconButton onClick={() => handleDelete(city.id)}>
+											<IconButton onClick={() => handleDeleteClick(city.id)}>
 												<Delete />
 											</IconButton>
 										</TableCell>
@@ -216,6 +277,17 @@ const CitiesPage: React.FC = () => {
 						</TableBody>
 					</Table>
 				</TableContainer>
+			)}
+
+			{!loading && totalPages > 1 && (
+				<Box sx={{ display: 'flex', justifyContent: 'center', mt: 3 }}>
+					<Pagination
+						count={totalPages}
+						page={currentPage}
+						onChange={(_, page) => setCurrentPage(page)}
+						color="primary"
+					/>
+				</Box>
 			)}
 
 			<Dialog open={open} onClose={handleClose} maxWidth="sm" fullWidth>
@@ -234,7 +306,7 @@ const CitiesPage: React.FC = () => {
 							renderInput={params => (
 								<TextField
 									{...params}
-									label="Select City"
+									label="Searach your City for autocomple"
 									margin="normal"
 									fullWidth
 								/>
@@ -248,7 +320,6 @@ const CitiesPage: React.FC = () => {
 						value={formData.name}
 						onChange={e => setFormData({ ...formData, name: e.target.value })}
 						margin="normal"
-						disabled={!editingCity}
 					/>
 					<TextField
 						fullWidth
@@ -258,7 +329,6 @@ const CitiesPage: React.FC = () => {
 							setFormData({ ...formData, country: e.target.value })
 						}
 						margin="normal"
-						disabled={!editingCity}
 					/>
 					<TextField
 						fullWidth
@@ -269,7 +339,6 @@ const CitiesPage: React.FC = () => {
 							setFormData({ ...formData, latitude: parseFloat(e.target.value) })
 						}
 						margin="normal"
-						disabled={!editingCity}
 					/>
 					<TextField
 						fullWidth
@@ -283,7 +352,6 @@ const CitiesPage: React.FC = () => {
 							})
 						}
 						margin="normal"
-						disabled={!editingCity}
 					/>
 					<FormControlLabel
 						control={
@@ -328,7 +396,23 @@ const CitiesPage: React.FC = () => {
 					</Box>
 				</DialogContent>
 			</Dialog>
+
+			<Dialog open={deleteDialogOpen} onClose={handleDeleteCancel}>
+				<DialogTitle>Confirm Delete</DialogTitle>
+				<DialogContent>
+					<Typography>
+						Are you sure you want to delete this city? This action cannot be undone.
+					</Typography>
+				</DialogContent>
+				<DialogActions>
+					<Button onClick={handleDeleteCancel}>Cancel</Button>
+					<Button onClick={handleDeleteConfirm} color="error" variant="contained">
+						Delete
+					</Button>
+				</DialogActions>
+			</Dialog>
 		</Box>
+		</>
 	)
 }
 

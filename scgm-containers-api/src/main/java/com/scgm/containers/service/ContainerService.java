@@ -9,6 +9,7 @@ import com.scgm.containers.dto.ContainerDto;
 import com.scgm.containers.dto.ContainerUpdateDto;
 import com.scgm.containers.dto.ContainerAddSendorDto;
 import com.scgm.containers.dto.ContainerStatusSummaryDto;
+import com.scgm.containers.dto.ContainerZoneUpdateDto;
 import com.scgm.containers.entity.ContainerEntity.WasteLevel;
 
 public interface ContainerService {
@@ -25,9 +26,9 @@ public interface ContainerService {
 
     public List<ContainerDto> findByCustomerId(Long customerId);
 
-    public List<ContainerDto> findByCustomerIdAndCityId(Long customerId, Long cityId);
+    public List<ContainerDto> findByCustomerIdAndCityId(Long customerId, Long cityId, Integer limit, Boolean hasZoneId);
 
-    public List<ContainerDto> findByCustomerIdAndCityIdAndBounds(Long customerId, Long cityId, BoundsDto bounds);
+    public List<ContainerDto> findByCustomerIdAndCityIdAndZoneId(Long customerId, Long cityId, String zoneId, Integer limit);
 
     public ContainerDto update(String containerId, ContainerUpdateDto containerUpdate);
 
@@ -36,5 +37,7 @@ public interface ContainerService {
     public Optional<ContainerStatusSummaryDto> getStatusSummary(Long cityId);
 
     public ContainerDto addSensorData(ContainerAddSendorDto containerAddSendor);
+
+    public void updateMultipleZonesId(Long customerId, List<ContainerZoneUpdateDto> containerZoneUpdates);
 
 }

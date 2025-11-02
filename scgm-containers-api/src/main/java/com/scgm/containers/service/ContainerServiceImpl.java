@@ -16,6 +16,7 @@ import com.scgm.containers.dto.ContainerAddSendorDto;
 import com.scgm.containers.dto.ContainerDto;
 import com.scgm.containers.dto.ContainerStatusSummaryDto;
 import com.scgm.containers.dto.ContainerUpdateDto;
+import com.scgm.containers.dto.ContainerZoneUpdateDto;
 import com.scgm.containers.entity.ContainerEntity;
 import com.scgm.containers.entity.ContainerEntity.WasteLevel;
 import com.scgm.containers.exceptions.ContainerNotFoundException;
@@ -96,10 +97,20 @@ public class ContainerServiceImpl implements ContainerService {
     }
 
     @Override
-    public List<ContainerDto> findByCustomerIdAndCityId(Long customerId, Long cityId) {
+    public List<ContainerDto> findByCustomerIdAndCityId(Long customerId, Long cityId, Integer limit, Boolean hasZoneId) {
         try {
-            return containerRepository.findByCustomerIdAndCityId(customerId, cityId).stream().map(ContainerDto::toDto)
+            if (limit == null || limit < 0)
+                limit = 500;
+            if (limit > 2000)
+                limit = 2000;
+            if (hasZoneId != null) {
+                return containerRepository.findByCustomerIdAndCityIdWithZoneFilter(customerId, cityId, limit, hasZoneId)
+                    .stream().map(ContainerDto::toDto)
                     .collect(Collectors.toList());
+            }
+            return containerRepository.findByCustomerIdAndCityId(customerId, cityId, limit)
+                .stream().map(ContainerDto::toDto)
+                .collect(Collectors.toList());
         } catch (Exception e) {
             log.error("Error trying to find containers by customer ID: {} and city ID: {}", customerId, cityId, e);
             throw new ContainersDatabaseException("Error trying to find containers", e);
@@ -107,17 +118,20 @@ public class ContainerServiceImpl implements ContainerService {
     }
 
     @Override
-    public List<ContainerDto> findByCustomerIdAndCityIdAndBounds(Long customerId, Long cityId, BoundsDto bounds) {
-        var reqListErrors = bounds.validate();
-        if (!reqListErrors.isEmpty())
-            throw new ContainerValidationException("Trying to find by bounds: error bounds validation.", reqListErrors);
+    public List<ContainerDto> findByCustomerIdAndCityIdAndZoneId(Long customerId, Long cityId, String zoneId, Integer limit) {
+        if (zoneId != null && !ContainerEntity.UUID_PATTERN.matcher(zoneId).matches())
+            throw new ContainerValidationException("zoneId: invalid UUID format", List.of("zoneId: invalid UUID format"));
+        log.info("Finding containers for customer ID: {}, city ID: {} and zone ID: {} with limit: {}", 
+            customerId, cityId, zoneId, limit);
         try {
-            return containerRepository.findByCustomerIdAndCityIdAndBounds(customerId, cityId, 
-                bounds.getStartLat(), bounds.getEndLat(), bounds.getStartLng(), bounds.getEndLng(), bounds.getLimit())
+            if (limit == null)
+                limit = 2000;
+            return containerRepository.findByCustomerIdAndCityIdAndZoneId(customerId, cityId, zoneId, limit)
                     .stream().map(ContainerDto::toDto)
                     .collect(Collectors.toList());
         } catch (Exception e) {
-            log.error("Error trying to find containers by customer ID: {}, city ID: {} and bounds: {}", customerId, cityId, bounds, e);
+            log.error("Error trying to find containers by customer ID: {}, city ID: {} and zone ID: {}", 
+            customerId, cityId, zoneId, e);
             throw new ContainersDatabaseException("Error trying to find containers", e);
         }
     }
@@ -130,23 +144,14 @@ public class ContainerServiceImpl implements ContainerService {
             throw new ContainerValidationException("Trying to update: error container request validation.", reqListErrors);
         var containerOpt = containerRepository.findById(containerId);
         containerOpt.orElseThrow(() -> new ContainerNotFoundException(containerId));
-        ContainerEntity existingContainer = containerOpt.get();
-        existingContainer.setLatitude(containerUpdate.getLatitude());
-        existingContainer.setLongitude(containerUpdate.getLongitude());
-        existingContainer.setWasteLevelValue(containerUpdate.getWasteLevelValue());
-        existingContainer.setWasteLevelStatus(WasteLevelUtil.getWasteLevelFromDouble(containerUpdate.getWasteLevelValue()));
-        existingContainer.setTemperature(containerUpdate.getTemperature());
-        existingContainer.setAddress(containerUpdate.getAddress());
-        existingContainer.setCityId(containerUpdate.getCityId());
-        existingContainer.setCustomerId(containerUpdate.getCustomerId());
-        existingContainer.setUpdatedAt(Instant.now());
-        var listErrors = existingContainer.validate();
+        ContainerEntity containerToUpdate = ContainerUpdateDto.toEntity(containerUpdate, containerOpt.get());
+        var listErrors = containerToUpdate.validate();
         if (!listErrors.isEmpty())
             throw new ContainerValidationException("Trying to update: error container entity validation.", listErrors);
         try {
-            return ContainerDto.toDto(containerRepository.save(existingContainer));
+            return ContainerDto.toDto(containerRepository.save(containerToUpdate));
         } catch (Exception e) {
-            log.error("Error trying to update container with ID: {}", existingContainer.getId(), e);
+            log.error("Error trying to update container with ID: {}", containerToUpdate.getId(), e);
             throw new ContainersDatabaseException("Error trying to update container", e);
         }
     }
@@ -225,6 +230,25 @@ public class ContainerServiceImpl implements ContainerService {
         } catch (Exception e) {
             log.error("Error trying to add sensor data for container ID: {}", existingContainer.getId(), e);
             throw new ContainersDatabaseException("Error trying to add sensor data", e);
+        }
+    }
+
+    @Override
+    @Transactional
+    public void updateMultipleZonesId(Long customerId, List<ContainerZoneUpdateDto> containerZoneUpdates) {
+        for (ContainerZoneUpdateDto update : containerZoneUpdates) {
+            var reqListErrors = update.validate();
+            if (!reqListErrors.isEmpty())
+                throw new ContainerValidationException("Error in container zone update validation.", reqListErrors);
+        }
+        try {
+            for (ContainerZoneUpdateDto update : containerZoneUpdates) {
+                containerRepository.updateZoneIdByContainerIdAndCustomerId(customerId, 
+                    update.getContainerId(), update.getZoneId());
+            }
+        } catch (Exception e) {
+            log.error("Error updating multiple zones for customer ID: {}", customerId, e);
+            throw new ContainersDatabaseException("Error updating multiple zones", e);
         }
     }
 

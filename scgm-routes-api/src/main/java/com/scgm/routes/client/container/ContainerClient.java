@@ -8,7 +8,7 @@ public interface ContainerClient {
 
     public List<ContainerDto> findByCityAndLevelStatus(Long cityId, List<String> wasteLevelStatuses);
 
-    public List<ContainerDto> findByCustomerIdAndCityIdAndBounds(Long customerId, Long cityId, 
-        Double startLat, Double endLat, Double startLng, Double endLng, Integer limit);
+    public List<ContainerDto> findByCustomerIdAndCityIdAndZoneId(Long customerId, Long cityId, 
+        String zoneId, Integer limit);
 
 }

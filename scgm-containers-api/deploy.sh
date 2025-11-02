@@ -1,3 +1,5 @@
+## For local deploy
+
 export PORT='8181'
 export EUREKA_URL='http://localhost:8761/eureka'
 export POSTGRES_USER='uwm_user'

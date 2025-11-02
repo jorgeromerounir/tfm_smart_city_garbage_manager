@@ -11,12 +11,16 @@ import LandingPage from './pages/LandingPage'
 import LoginPage from './pages/LoginPage'
 import RoutesPage from './pages/RoutesPage'
 import UsersPage from './pages/UsersPage'
-import { socketService } from './services/socket'
-import { Container, Profile } from './types'
+import ZonesPage from './pages/ZonesPage'
+//import { socketService } from './services/socket'
+import { Profile } from './types'
+import ContentInit from './components/ContentInit'
+import useNoti from './hooks/useNoti'
 
 const AppContent: React.FC = () => {
 	const { enqueueSnackbar } = useSnackbar()
 	const { isAuthenticated } = useAuth()
+	const { showNoti, NotificationComponent } = useNoti()
 
 	useEffect(() => {
 		
@@ -35,10 +39,13 @@ const AppContent: React.FC = () => {
 			return () => {
 				socketService.disconnect()
 			}*/
+			showNoti('Wellcome to your portal!', 'success')   
 		}
 	}, [enqueueSnackbar, isAuthenticated])
 
 	return (
+		<>
+		<NotificationComponent />
 		<Routes>
 			<Route path="/" element={<LandingPage />} />
 			<Route path="/login" element={<LoginPage />} />
@@ -55,6 +62,7 @@ const AppContent: React.FC = () => {
 						>
 							<Navbar />
 							<Box component="main" sx={{ flexGrow: 1, p: 3 }}>
+								<ContentInit />
 								<Dashboard />
 							</Box>
 						</Box>
@@ -74,7 +82,28 @@ const AppContent: React.FC = () => {
 						>
 							<Navbar />
 							<Box component="main" sx={{ flexGrow: 1, p: 3 }}>
+								<ContentInit />
 								<RoutesPage />
+							</Box>
+						</Box>
+					</ProtectedRoute>
+				}
+			/>
+			<Route
+				path="/zones"
+				element={
+					<ProtectedRoute>
+						<Box
+							sx={{
+								display: 'flex',
+								flexDirection: 'column',
+								minHeight: '100vh',
+							}}
+						>
+							<Navbar />
+							<Box component="main" sx={{ flexGrow: 1, p: 3 }}>
+								<ContentInit />
+								<ZonesPage />
 							</Box>
 						</Box>
 					</ProtectedRoute>
@@ -93,6 +122,7 @@ const AppContent: React.FC = () => {
 						>
 							<Navbar />
 							<Box component="main" sx={{ flexGrow: 1, p: 3 }}>
+								<ContentInit />
 								<UsersPage />
 							</Box>
 						</Box>
@@ -112,6 +142,7 @@ const AppContent: React.FC = () => {
 						>
 							<Navbar />
 							<Box component="main" sx={{ flexGrow: 1, p: 3 }}>
+								<ContentInit />
 								<CitiesPage />
 							</Box>
 						</Box>
@@ -119,6 +150,7 @@ const AppContent: React.FC = () => {
 				}
 			/>
 		</Routes>
+		</>
 	)
 }
 

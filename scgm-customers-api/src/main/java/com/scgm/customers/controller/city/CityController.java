@@ -64,6 +64,15 @@ public class CityController {
         return new ResponseEntity<>(cities, HttpStatus.OK);
     }
 
+    @GetMapping
+    public ResponseEntity<List<CityDto>> findAll() {
+        log.debug("Finding all cities");
+        List<CityDto> cities = cityService.findAll();
+        if (cities.isEmpty())
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        return new ResponseEntity<>(cities, HttpStatus.OK);
+    }
+
     @PutMapping("/{cityId}")
     public ResponseEntity<CityDto> update(@PathVariable Long cityId, 
         @RequestBody CityUpdateDto cityUpdate) {

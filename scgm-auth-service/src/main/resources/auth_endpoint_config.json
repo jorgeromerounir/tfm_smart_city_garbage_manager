@@ -1,81 +1,117 @@
 {
-    "urlWhiteList": {
-        "POST::/api/v1/auth/logout": true,
-        "POST::/api/v1/auth/signin": true,
-        "POST::/api/v1/auth/refresh": true
+  "urlWhiteList": {
+    "POST::/api/v1/auth/logout": true,
+    "POST::/api/v1/auth/signin": true,
+    "POST::/api/v1/auth/refresh": true
+  },
+  "urlToValidate": {
+    "GET::/api/v1/users/by-email": {
+      "allowAllProfiles": true,
+      "allowProfiles": [],
+      "enabled": true,
+      "requireCustomerId": false
     },
-    "urlToValidate": {
-        "GET::/api/v1/users/by-email": {
-            "allowAllProfiles": true,
-            "allowProfiles": [],
-            "enabled": true,
-            "requireCustomerId": false
-        },
-        "GET::/api/v1/users/by-customer/([0-9]+)/profile-operator": {
-            "allowAllProfiles": false,
-            "allowProfiles": ["OPERATOR", "ADMIN"],
-            "enabled": true,
-            "requireCustomerId": false
-        },
-        "GET::/api/v1/containers/status-summary/([0-9]+)": {
-            "allowAllProfiles": false,
-            "allowProfiles": ["OPERATOR", "SUPERVISOR", "ADMIN"],
-            "enabled": true,
-            "requireCustomerId": false
-        },
-        "GET::/api/v1/containers/by-city/([0-9]+)": {
-            "allowAllProfiles": false,
-            "allowProfiles": ["SUPERVISOR", "ADMIN"],
-            "enabled": true,
-            "requireCustomerId": false
-        },
-        "GET::/api/v1/containers/by-customer/([0-9]+)/city/([0-9]+)": {
-            "allowAllProfiles": false,
-            "allowProfiles": ["SUPERVISOR", "ADMIN"],
-            "enabled": true,
-            "requireCustomerId": false
-        },
-        "POST::/api/v1/routes/optimize-by-customer/([0-9]+)": {
-            "allowAllProfiles": false,
-            "allowProfiles": ["SUPERVISOR", "ADMIN"],
-            "enabled": true,
-            "requireCustomerId": false
-        },
-        "GET::/api/v1/customers/([0-9]+)": {
-            "allowAllProfiles": false,
-            "allowProfiles": ["OPERATOR", "SUPERVISOR", "ADMIN"],
-            "enabled": true,
-            "requireCustomerId": false
-        },
-        "GET::/api/v1/cities/by-country/([A-Z]{2})": {
-            "allowAllProfiles": false,
-            "allowProfiles": ["OPERATOR", "SUPERVISOR", "ADMIN"],
-            "enabled": true,
-            "requireCustomerId": false
-        },
-        "PUT::/api/v1/cities/([0-9]+)": {
-            "allowAllProfiles": false,
-            "allowProfiles": ["SUPERVISOR", "ADMIN"],
-            "enabled": true,
-            "requireCustomerId": false
-        },
-        "DELETE::/api/v1/cities/([0-9]+)": {
-            "allowAllProfiles": false,
-            "allowProfiles": ["SUPERVISOR", "ADMIN"],
-            "enabled": true,
-            "requireCustomerId": false
-        },
-        "POST::/api/v1/users/add-for-admin": {
-            "allowAllProfiles": false,
-            "allowProfiles": ["ADMIN"],
-            "enabled": true,
-            "requireCustomerId": false
-        },
-        "POST::/api/v1/users/add-for-superviso": {
-            "allowAllProfiles": false,
-            "allowProfiles": ["SUPERVISOR"],
-            "enabled": true,
-            "requireCustomerId": false
-        }
+    "GET::/api/v1/users/by-customer/([0-9]+)/profile-operator": {
+      "allowAllProfiles": false,
+      "allowProfiles": ["OPERATOR", "ADMIN"],
+      "enabled": true,
+      "requireCustomerId": false
+    },
+    "POST::/api/v1/zones/multiple/by-customer/([0-9]+)": {
+      "allowAllProfiles": false,
+      "allowProfiles": ["ADMIN", "SUPERVISOR"],
+      "enabled": true,
+      "requireCustomerId": false
+    },
+    "DELETE::/api/v1/zones/by-customer/([0-9]+)/zone-id/([a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12})": {
+      "allowAllProfiles": false,
+      "allowProfiles": ["ADMIN", "SUPERVISOR"],
+      "enabled": true,
+      "requireCustomerId": false
+    },
+    "GET::/api/v1/zones/by-customer/([0-9]+)/city/([0-9]+)": {
+      "allowAllProfiles": false,
+      "allowProfiles": ["SUPERVISOR", "ADMIN"],
+      "enabled": true,
+      "requireCustomerId": false
+    },
+    "GET::/api/v1/containers/by-customer/([0-9]+)/city/([0-9]+)": {
+      "allowAllProfiles": false,
+      "allowProfiles": ["SUPERVISOR", "ADMIN"],
+      "enabled": true,
+      "requireCustomerId": false
+    },
+    "GET::/api/v1/containers/status-summary/([0-9]+)": {
+      "allowAllProfiles": false,
+      "allowProfiles": ["OPERATOR", "SUPERVISOR", "ADMIN"],
+      "enabled": true,
+      "requireCustomerId": false
+    },
+    "PUT::/api/v1/containers/by-customer/([0-9]+)/multiple-zones": {
+      "allowAllProfiles": false,
+      "allowProfiles": ["ADMIN", "SUPERVISOR"],
+      "enabled": true,
+      "requireCustomerId": false
+    },
+    "POST::/api/v1/routes/optimize/by-customer/([0-9]+)": {
+      "allowAllProfiles": false,
+      "allowProfiles": ["SUPERVISOR", "ADMIN"],
+      "enabled": true,
+      "requireCustomerId": false
+    },
+    "GET::/api/v1/customers/([0-9]+)": {
+      "allowAllProfiles": false,
+      "allowProfiles": ["OPERATOR", "SUPERVISOR", "ADMIN"],
+      "enabled": true,
+      "requireCustomerId": false
+    },
+    "GET::/api/v1/cities": {
+      "allowAllProfiles": false,
+      "allowProfiles": ["ADMIN"],
+      "enabled": true,
+      "requireCustomerId": false
+    },
+    "GET::/api/v1/cities/by-country/([A-Z]{2})": {
+      "allowAllProfiles": false,
+      "allowProfiles": ["OPERATOR", "SUPERVISOR", "ADMIN"],
+      "enabled": true,
+      "requireCustomerId": false
+    },
+    "GET::/api/v1/cities/([0-9]+)": {
+      "allowAllProfiles": false,
+      "allowProfiles": ["OPERATOR", "SUPERVISOR", "ADMIN"],
+      "enabled": true,
+      "requireCustomerId": false
+    },
+    "PUT::/api/v1/cities/([0-9]+)": {
+      "allowAllProfiles": false,
+      "allowProfiles": ["ADMIN"],
+      "enabled": true,
+      "requireCustomerId": false
+    },
+    "POST::/api/v1/cities": {
+      "allowAllProfiles": false,
+      "allowProfiles": ["ADMIN"],
+      "enabled": true,
+      "requireCustomerId": false
+    },
+    "DELETE::/api/v1/cities/([0-9]+)": {
+      "allowAllProfiles": false,
+      "allowProfiles": ["ADMIN"],
+      "enabled": true,
+      "requireCustomerId": false
+    },
+    "POST::/api/v1/users/add-for-admin": {
+      "allowAllProfiles": false,
+      "allowProfiles": ["ADMIN"],
+      "enabled": true,
+      "requireCustomerId": false
+    },
+    "POST::/api/v1/users/add-for-superviso": {
+      "allowAllProfiles": false,
+      "allowProfiles": ["SUPERVISOR"],
+      "enabled": true,
+      "requireCustomerId": false
     }
+  }
 }

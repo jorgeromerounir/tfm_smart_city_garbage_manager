@@ -82,6 +82,18 @@ public class CityServiceImpl implements CityService {
     }
 
     @Override
+    public List<CityDto> findAll() {
+        try {
+            return cityRepository.findAll().stream()
+                    .map(CityDto::toDto)
+                    .collect(Collectors.toList());
+        } catch (Exception e) {
+            log.error("Error trying to find all cities", e);
+            throw new CustomerDatabaseException("Error trying to find cities", e);
+        }
+    }
+
+    @Override
     @Transactional
     public CityDto update(Long cityId, CityUpdateDto cityUpdate) {
         var reqListErrors = cityUpdate.validate();

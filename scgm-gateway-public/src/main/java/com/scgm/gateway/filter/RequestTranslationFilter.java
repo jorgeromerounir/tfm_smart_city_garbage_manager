@@ -21,14 +21,12 @@ import com.scgm.gateway.decorator.RequestDecoratorFactory;
 import com.scgm.gateway.dto.DefaultResponseDto;
 import com.scgm.gateway.dto.GatewayReqDto;
 import com.scgm.gateway.utils.RequestBodyExtractor;
-import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.RequestEntity;
 import org.springframework.web.client.RestTemplate;
 
 import java.net.URI;
-import java.util.Map;
 import reactor.core.publisher.Mono;
 
 import com.scgm.gateway.dto.AuthEndpointDto;
@@ -129,7 +127,7 @@ public class RequestTranslationFilter implements GlobalFilter {
                         return chain.filter(exchange.mutate().request(mutatedRequest).build());
                     } catch (Exception e) {
                         if (e instanceof UnauthorizedException) {
-                            log.error("Unauthorized request: {}", e.getMessage(), e);
+                            log.error("Unauthorized request: {}", e.getMessage());
                             return handleUnauthorizedResponse(exchange);
                         }
                         log.error("Error processing request: {}", e.getMessage(), e);
@@ -144,7 +142,7 @@ public class RequestTranslationFilter implements GlobalFilter {
                 "Unauthorized request, invalid access", 
                 HttpStatus.UNAUTHORIZED.value());
             String responseBody = objectMapper.writeValueAsString(errorResponse);
-            return addResponse(exchange, responseBody, HttpStatus.BAD_REQUEST);
+            return addResponse(exchange, responseBody, HttpStatus.UNAUTHORIZED);
         } catch (JsonProcessingException e) {
             log.error("Error serializing invalid response", e);
             return exchange.getResponse().setComplete();
@@ -188,7 +186,7 @@ public class RequestTranslationFilter implements GlobalFilter {
                     throw new RuntimeException("Authorization validation failed with status: " + response.getStatusCode());
                 }
             } catch (Exception e) {
-                log.error("Error calling authorization service: {}", e.getMessage(), e);
+                log.error("Error calling authorization service: {}", e.getMessage());
                 throw new UnauthorizedException("Authorization service unavailable: ", e);
             }
         }

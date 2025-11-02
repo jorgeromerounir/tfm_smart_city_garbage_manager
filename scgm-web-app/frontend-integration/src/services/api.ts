@@ -16,6 +16,10 @@ import {
 	CountryDto,
 	WasteLevel,
 	Customer,
+	ZoneAddDto,
+	ZoneDto,
+	ContainerZoneUpdateDto,
+	OptimizeRouteDto,
 } from '../types'
 
 const API_BASE = 'http://localhost:3001'
@@ -88,38 +92,35 @@ routesApiAxios.interceptors.request.use(authReqInterceptor, handleReqError)
 routesApiAxios.interceptors.response.use(handleResSuccess, handleResError)
 
 export const containerApi = {
-	getByCity: (cityId: number): Promise<Container[]> =>
-		containersApiAxios.post(`/api/v1/containers/by-city/${cityId}`, {targetMethod: 'GET'}).then(res => res.data),
-	
-	getByCustomerAndCity: (customerId: number, cityId: number): Promise<Container[]> =>
-		containersApiAxios.post(`/api/v1/containers/by-customer/${customerId}/city/${cityId}`, {targetMethod: 'GET'}).then(res => res.data),
+	getByCustomerAndCity: (customerId: number, cityId: number, limit:number = 500, 
+		hasZoneId?: string): Promise<Container[]> =>
+		containersApiAxios.post(`/api/v1/containers/by-customer/${customerId}/city/${cityId}`, 
+			{targetMethod: 'GET', queryParams: {limit:[limit], 
+				hasZoneId:[!hasZoneId ? null : (hasZoneId == 'true')]}})
+				.then(res => res.data),
 
-	getStatusByCity: (cityId: number): Promise<Container[]> =>
-		containersApiAxios.post(`/api/v1/containers/status-summary/${cityId}`, {targetMethod: 'GET'}).then(res => res.data),
+	getStatusByCity: (cityId: number): Promise<StatusSummary> =>
+		containersApiAxios.post(`/api/v1/containers/status-summary/${cityId}`, 
+			{targetMethod: 'GET'}).then(res => res.data),
+}
+
+export const zonesApi = {
+	addMultipleZones: (customerId: number, data: ZoneAddDto[]): Promise<ZoneDto[]> =>
+		containersApiAxios.post(`/api/v1/zones/multiple/by-customer/${customerId}`, 
+			{targetMethod: 'POST', body: data}).then(res => res.data),
+
+	getZonesByCustomerIdAndCityId: (customerId: number, cityId: number): Promise<ZoneDto[]> =>
+		containersApiAxios.post(`/api/v1/zones/by-customer/${customerId}/city/${cityId}`, 
+			{targetMethod: 'GET'}).then(res => res.data),
+
+	deleteZone: (customerId: number, zoneId: string): Promise<void> =>
+		containersApiAxios.post(`/api/v1/zones/by-customer/${customerId}/zone-id/${zoneId}`, 
+			{targetMethod: 'DELETE'}).then(res => res.data),
 }
 
 export const routeApi = {
-	/*optimize: (data: {
-		startLat: number
-		startLng: number
-		endLat: number
-		endLng: number
-		city: string
-		wasteTypes?: WasteLevel[]
-	}): Promise<OptimizedRoute> =>
-		apiBaseAxios.post('/routes/optimize', data).then(res => res.data),*/
-	optimize: (customerId: number, data: {
-		startLat: number
-		startLng: number
-		endLat: number
-		endLng: number
-		cityId: number
-		wasteTypes?: WasteLevel[]
-	}): Promise<OptimizedRoute> =>
-		routesApiAxios.post(`/api/v1/routes/optimize-by-customer/${customerId}`, {targetMethod: 'POST', body: data}).then(res => res.data),
-
-	/*signIn: (data: SignInRequest): Promise<AuthResponse> =>
-		authApiAxios.post('/api/v1/auth/signin', {targetMethod: 'POST', body: data}).then(res => res.data),*/
+	optimize: (customerId: number, data: OptimizeRouteDto): Promise<OptimizedRoute> =>
+		routesApiAxios.post(`/api/v1/routes/optimize/by-customer/${customerId}`, {targetMethod: 'POST', body: data}).then(res => res.data),
 
 	generateGoogleMapsUrl: (points: { lat: number; lng: number }[]): string => {
 		if (points.length === 0) return ''
@@ -152,7 +153,6 @@ export const customersApi = {
 		customersApiAxios.post(`/api/v1/customers/${customerId}`, {targetMethod: 'GET'}).then(res => res.data),	
 }
 
-
 export const userApi = {
 	getByProfileOperator: (customerId: number): Promise<User[]> =>
 		customersApiAxios.post(`/api/v1/users/by-customer/${customerId}/profile-operator}`, {targetMethod: 'GET'}).then(res => res.data),
@@ -181,6 +181,9 @@ export const citiesApi = {
 	getByCountry: (country: string): Promise<City[]> =>
 		customersApiAxios.post(`/api/v1/cities/by-country/${country}`, {targetMethod: 'GET', queryParams: {}}).then(res => res.data),
 
+	getAll: (): Promise<City[]> =>
+		customersApiAxios.post(`/api/v1/cities`, {targetMethod: 'GET', queryParams: {}}).then(res => res.data),
+
 	getCountries: (): Promise<CountryDto[]> =>
 		customersApiAxios.post(`/api/v1/cities/countries`, {targetMethod: 'GET'}).then(res => res.data),
 
@@ -192,6 +195,9 @@ export const citiesApi = {
 
 	delete: (cityId: number): Promise<void> =>
 		customersApiAxios.post(`/api/v1/cities/${cityId}`, {targetMethod: 'DELETE'}).then(res => res.data),
+
+	getById: (cityId: number): Promise<City> =>
+		customersApiAxios.post(`/api/v1/cities/${cityId}`, {targetMethod: 'GET'}).then(res => res.data),
 }
 
 export const truckApi = {

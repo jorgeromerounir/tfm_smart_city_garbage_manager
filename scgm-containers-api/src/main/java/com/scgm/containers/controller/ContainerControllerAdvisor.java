@@ -8,7 +8,6 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import com.scgm.containers.dto.DefaultResponseDto;
 import com.scgm.containers.exceptions.ContainerNotFoundException;
 import com.scgm.containers.exceptions.ContainerValidationException;
-import com.scgm.containers.exceptions.ContainersDatabaseException;
 
 import lombok.extern.slf4j.Slf4j;
 

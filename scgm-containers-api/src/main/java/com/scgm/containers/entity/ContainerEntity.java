@@ -70,6 +70,9 @@ public class ContainerEntity {
     @Column(name = "updated_at", nullable = false)
     private Instant updatedAt;
 
+    @Column(name = "zone_id", nullable = true)
+    private String zoneId;
+
     public enum WasteLevel {
         LIGHT,
         MEDIUM,
@@ -110,6 +113,8 @@ public class ContainerEntity {
             listErrors.add("createdAt: is required");
         if (updatedAt == null)
             listErrors.add("updatedAt: is required");
+        if (zoneId != null && !StringUtils.isEmpty(zoneId) && !UUID_PATTERN.matcher(zoneId).matches())
+            listErrors.add("zoneId: invalid UUID format");
         return listErrors;
     }
 }

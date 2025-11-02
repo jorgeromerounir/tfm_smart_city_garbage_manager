@@ -28,6 +28,7 @@ public class ContainerAddDto {
     private String address;
     private Long cityId;
     private Long customerId;
+    private String zoneId;
 
     public static ContainerEntity toEntity(ContainerAddDto containerDto) {
         Instant currentInstant = Instant.now();
@@ -41,6 +42,7 @@ public class ContainerAddDto {
                 .address(containerDto.getAddress())
                 .cityId(containerDto.getCityId())
                 .customerId(containerDto.getCustomerId())
+                .zoneId(containerDto.getZoneId())
                 .createdAt(currentInstant)
                 .updatedAt(currentInstant)
                 .build();

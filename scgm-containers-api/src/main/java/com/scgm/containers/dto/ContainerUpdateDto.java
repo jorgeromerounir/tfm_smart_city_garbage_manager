@@ -2,8 +2,11 @@ package com.scgm.containers.dto;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.time.Instant;
 
 import com.scgm.containers.entity.ContainerEntity.WasteLevel;
+import com.scgm.containers.entity.ContainerEntity;
+import com.scgm.containers.util.WasteLevelUtil;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -23,6 +26,7 @@ public class ContainerUpdateDto {
     private String address;
     private Long cityId;
     private Long customerId;
+    private String zoneId;
 
     public List<String> validate() {
         List<String> listErrors = new ArrayList<>();
@@ -41,6 +45,20 @@ public class ContainerUpdateDto {
         if (customerId == null)
             listErrors.add("customerId: is required");
         return listErrors;
+    }
+
+    public static ContainerEntity toEntity(ContainerUpdateDto updateDto, ContainerEntity existingContainer) {
+        existingContainer.setLatitude(updateDto.getLatitude());
+        existingContainer.setLongitude(updateDto.getLongitude());
+        existingContainer.setWasteLevelValue(updateDto.getWasteLevelValue());
+        existingContainer.setWasteLevelStatus(WasteLevelUtil.getWasteLevelFromDouble(updateDto.getWasteLevelValue()));
+        existingContainer.setTemperature(updateDto.getTemperature());
+        existingContainer.setAddress(updateDto.getAddress());
+        existingContainer.setCityId(updateDto.getCityId());
+        existingContainer.setCustomerId(updateDto.getCustomerId());
+        existingContainer.setUpdatedAt(Instant.now());
+        existingContainer.setZoneId(updateDto.getZoneId() != null ? updateDto.getZoneId() : existingContainer.getZoneId());
+        return existingContainer;
     }
 
 }

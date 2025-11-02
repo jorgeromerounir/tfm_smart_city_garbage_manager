@@ -49,19 +49,17 @@ public class ContainerClientImpl implements ContainerClient {
         }
     }
 
+    // findByCustomerIdAndCityIdAndZoneId(Long customerId, Long cityId, String zoneId, Integer limit)
+
     @Override
-    public List<ContainerDto> findByCustomerIdAndCityIdAndBounds(Long customerId, Long cityId, 
-        Double startLat, Double endLat, Double startLng, Double endLng, Integer limit) {
-        log.info("Calling containers API to find containers for customer ID: {}, city ID: {} and bounds: [{},{},{},{}] with limit: {}", 
-            customerId, cityId, startLat, endLat, startLng, endLng, limit);
+    public List<ContainerDto> findByCustomerIdAndCityIdAndZoneId(Long customerId, Long cityId, 
+        String zoneId, Integer limit) {
+        log.info("Calling containers API to find containers for customer ID: {}, city ID: {} and zoneId:{} with limit: {}", 
+            customerId, cityId, zoneId, limit);
         String url = UriComponentsBuilder.fromHttpUrl(containersApiUrl)
-                .path("/api/v1/containers/by-customer/{customerId}/city/{cityId}/bounds")
-                .queryParam("startLat", startLat)
-                .queryParam("endLat", endLat)
-                .queryParam("startLng", startLng)
-                .queryParam("endLng", endLng)
+                .path("/api/v1/containers/by-customer/{customerId}/city/{cityId}/zone/{zoneId}")
                 .queryParam("limit", limit)
-                .buildAndExpand(customerId, cityId)
+                .buildAndExpand(customerId, cityId, zoneId)
                 .toUriString();
         try {
             var response = restTemplate.exchange(
@@ -70,7 +68,7 @@ public class ContainerClientImpl implements ContainerClient {
                 null,
                 new ParameterizedTypeReference<List<ContainerDto>>() {}
             );
-            return response.getBody();
+            return response.getBody() == null ? Arrays.asList() : response.getBody();
         } catch (Exception e) {
             log.error("Error calling containers API: {}", e.getMessage(), e);
             return Arrays.asList();

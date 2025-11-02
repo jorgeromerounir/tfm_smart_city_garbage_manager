@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react'
 import { routeApi } from '../services/api.ts'
-import { Customer, OptimizedRoute, SavedRoute, User, WasteLevel } from '../types/index.ts'
+import { Customer, OptimizedRoute, SavedRoute, User, WasteLevel, ZoneDto } from '../types/index.ts'
 import useCities from './useCities.ts'
 import useSavedRoutes from './useSavedRoutes.ts'
+import useNoti from './useNoti.tsx'
 
 export default function useRoutes(
 	customer?: Customer,
@@ -12,24 +13,19 @@ export default function useRoutes(
 	const [optimizedRoute, setOptimizedRoute] = useState<OptimizedRoute | null>(
 		null,
 	)
-	const [startLocation, setStartLocation] = useState('')
-	const [endLocation, setEndLocation] = useState('')
-
-	const { cities, selectedCity, setSelectedCity } = useCities(user?.country)
+	const [currentZone, setCurrentZone] = useState<ZoneDto | null>()
+	
+	//console.log('----> useRoutes user: ', user)
+	const { cities, selectedCity } = useCities(customer)
 	const { savedRoutes, setSavedRoutes } = useSavedRoutes()
 	const [loading, setLoading] = useState(false)
 	const [routeName, setRouteName] = useState('')
 	const [tabValue, setTabValue] = useState(0)
-	const [notification, setNotification] = useState<{
-		open: boolean
-		message: string
-		severity: 'success' | 'error' | 'warning'
-	}>({ open: false, message: '', severity: 'success' })
+	const { showNoti } = useNoti()
 
 	useEffect(() => {
 		if (selectedCity) {
-			setStartLocation('')
-			setEndLocation('')
+			setCurrentZone(null)
 			setOptimizedRoute(null)
 			const loadSavedRoutes = () => {
 				const routes = JSON.parse(localStorage.getItem('savedRoutes') || '[]')
@@ -45,42 +41,25 @@ export default function useRoutes(
 	}, [selectedCity])
 
 	const handleOptimizeRoute = async () => {
-		if (!startLocation || !endLocation) {
-			setNotification({
-				open: true,
-				message: 'Please select start and end locations',
-				severity: 'warning',
-			})
+		if (!customer) {
+			showNoti('Please select customer', 'warning')
+			return
+		}
+		if (!currentZone) {
+			showNoti('Please select zone', 'warning')
 			return
 		}
 		if (!selectedCity) {
-			setNotification({
-				open: true,
-				message: 'Please select a city first',
-				severity: 'error',
-			})
-			return
-		}
-		const startLoc = selectedCity.locations.find(
-			loc => loc.name === startLocation,
-		)
-		const endLoc = selectedCity.locations.find(loc => loc.name === endLocation)
-		if (!startLoc || !endLoc) {
-			setNotification({
-				open: true,
-				message: 'Invalid location selection',
-				severity: 'error',
-			})
+			showNoti('Please select a city first', 'error')
 			return
 		}
 		setLoading(true)
 		try {
 			const route = await routeApi.optimize(customer?.id ,{
-				startLat: startLoc.lat,
-				startLng: startLoc.lng,
-				endLat: endLoc.lat,
-				endLng: endLoc.lng,
+				startLat: currentZone.startLat,
+				startLng: currentZone.startLng,
 				cityId: customer?.cityId,
+				zoneId: currentZone.id,
 				wasteTypes:
 					selectedWasteTypes.length > 0 ? selectedWasteTypes : undefined,
 			})
@@ -88,11 +67,7 @@ export default function useRoutes(
 			setOptimizedRoute(route)
 		} catch (error) {
 			console.error('Failed to optimize route:', error)
-			setNotification({
-				open: true,
-				message: 'Failed to optimize route',
-				severity: 'error',
-			})
+			showNoti('Failed to optimize route', 'error')
 		} finally {
 			setLoading(false)
 		}
@@ -100,11 +75,7 @@ export default function useRoutes(
 
 	const handleSaveRoute = () => {
 		if (!routeName || !optimizedRoute) {
-			setNotification({
-				open: true,
-				message: 'Please enter a route name and optimize a route first',
-				severity: 'warning',
-			})
+			showNoti('Please enter a route name and optimize a route first', 'warning')
 			return
 		}
 
@@ -143,11 +114,7 @@ export default function useRoutes(
 			)
 			setSavedRoutes(cityRoutes)
 
-			setNotification({
-				open: true,
-				message: 'Route replaced successfully!',
-				severity: 'success',
-			})
+			showNoti('Route replaced successfully!', 'success')
 		} else {
 			const newRoute: SavedRoute = {
 				id: Date.now().toString(),
@@ -165,11 +132,7 @@ export default function useRoutes(
 			)
 			setSavedRoutes(cityRoutes)
 
-			setNotification({
-				open: true,
-				message: 'Route saved successfully!',
-				severity: 'success',
-			})
+			showNoti('Route saved successfully!', 'success')
 		}
 
 		//setRouteName('')
@@ -202,22 +165,17 @@ export default function useRoutes(
 		tabValue,
 		cities,
 		selectedCity,
-		startLocation,
-		endLocation,
+		currentZone,
 		optimizedRoute,
 		loading,
 		routeName,
 		setRouteName,
-		setStartLocation,
-		setEndLocation,
+		setCurrentZone,
 		setTabValue,
-		setSelectedCity,
 		handleDeleteRoute,
 		handleOptimizeRoute,
 		handleSaveRoute,
 		handleLoadRoute,
-		notification,
-		setNotification,
 		savedRoutes,
 	}
 }

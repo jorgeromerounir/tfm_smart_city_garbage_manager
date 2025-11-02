@@ -10,6 +10,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import java.util.*;
 import java.util.stream.Collectors;
+import com.scgm.routes.entity.RouteAssignmentEntity.AssignmentStatus;
 
 @Service
 @AllArgsConstructor
@@ -64,27 +65,10 @@ public class RouteIntegrationServiceImpl implements RouteIntegrationService {
     }
 
     private List<ContainerDto> getFilteredContainers(Long customerId, OptimizeRouteDto data) {
-        //CityBounds bounds = getCityBounds(data.getCityId());
-        // TODO: Use ContainerClient to get filtered containers
-        // For now, return empty list
-        log.info("Tryon to get contianers customerId: {} OptimizeRoute: {}", customerId, data);
-        return this.containerClient.findByCustomerIdAndCityIdAndBounds(customerId, data.getCityId(),
-            data.getStartLat(), data.getEndLat(), data.getStartLng(), data.getEndLng(), 0);
+        log.info("Trying to get containers for customerId: {} OptimizeRoute: {}", customerId, data);
+        return this.containerClient.findByCustomerIdAndCityIdAndZoneId(customerId, data.getCityId(),
+            data.getZoneId(), LIMIT_CONTAINERS_REQ);
     }
-
-    /*
-    private double minLat;
-        private double maxLat;
-        private double minLng;
-        private double maxLng;
-        */
-    /*private CityBounds getCityBounds(Long cityId) {
-        Map<Long, CityBounds> bounds = Map.of(
-            1L, new CityBounds(4.597, 4.76, -74.147, -74.047),
-            6L, new CityBounds(40.39, 40.47, -3.75, -3.65)
-        );
-        return bounds.getOrDefault(cityId, bounds.get(cityId));
-    }*/
 
     private List<TruckDto> getAvailableTrucks(Long customerId, Long cityId) {
         return truckService.findByCustomerCityAndAvailable(customerId, cityId, true);

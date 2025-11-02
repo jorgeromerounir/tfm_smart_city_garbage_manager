@@ -12,22 +12,26 @@ interface MapViewProps {
 	zoom?: number
 }
 
-const createIcon = (level: WasteLevel) => {
-	const colors = {
-		[WasteLevel.LIGHT]: '#4CAF50',
-		[WasteLevel.MEDIUM]: '#FF9800',
-		[WasteLevel.HEAVY]: '#F44336',
-	}
+const containerColors = {
+    [WasteLevel.LIGHT]: '#2E7D32',
+    [WasteLevel.MEDIUM]: '#E65100',
+    [WasteLevel.HEAVY]: '#B71C1C',
+}
 
+const createIcon = (level: WasteLevel) => {
+	const color = containerColors[level]
 	return new Icon({
 		iconUrl: `data:image/svg+xml;base64,${btoa(`
-		<svg width="20" height="35" viewBox="0 0 25 41" xmlns="http://www.w3.org/2000/svg">
-			<path fill="${colors[level]}" stroke="#fff" stroke-width="2" d="M12.5 0C5.6 0 0 5.6 0 12.5c0 12.5 12.5 28.5 12.5 28.5s12.5-16 12.5-28.5C25 5.6 19.4 0 12.5 0z"/>
-			<circle fill="#fff" cx="12.5" cy="12.5" r="6"/>
+		<svg width="16" height="16" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
+			<circle fill="#fff" cx="8" cy="8" r="7" stroke="#333" stroke-width="1"/>
+			<circle fill="${color}" cx="8" cy="8" r="5">
+				<animate attributeName="r" values="3;6;3" dur="1.5s" repeatCount="indefinite"/>
+				<animate attributeName="opacity" values="1;0.5;1" dur="1.5s" repeatCount="indefinite"/>
+			</circle>
 		</svg>
 		`)}`,
-		iconSize: [15, 30],
-		iconAnchor: [12, 41],
+		iconSize: [14, 14],
+		iconAnchor: [8, 8],
 		popupAnchor: [1, -34],
 	})
 }

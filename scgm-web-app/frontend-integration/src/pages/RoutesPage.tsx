@@ -1,6 +1,5 @@
-import { Close, Delete, LocalShipping, Menu, Person, Route as RouteIcon, Save, Update } from '@mui/icons-material'
+import { Close, Delete, LocalShipping, Person, Route as RouteIcon, Save, Update } from '@mui/icons-material'
 import {
-  Alert,
   Autocomplete,
   Box,
   Button,
@@ -9,14 +8,12 @@ import {
   Chip,
   CircularProgress,
   Drawer,
-  Fab,
   FormControl,
   Grid,
   IconButton,
   InputLabel,
   MenuItem,
   Select,
-  Snackbar,
   Tab,
   Tabs,
   TextField,
@@ -33,71 +30,76 @@ import useContainers from '../hooks/useContainers.ts'
 import useCustomer from '../hooks/useCustomer.ts'
 import useRoutes from '../hooks/useRoutes.ts'
 import { Profile } from '../types/index.ts'
+import useGetZones from '../hooks/useGetZones.ts'
 
 const RoutesPage: React.FC = () => {
   const { user } = useAuth()
   const [assignmentDialogOpen, setAssignmentDialogOpen] = useState(false)
   const [sidenavOpen, setSidenavOpen] = useState(false)
-
   const [selectedRoute, setSelectedRoute] = useState<any>(null)
-
-  
   //console.log('---> user data: ', user);
   const { customer } = useCustomer(user?.customerId);
+
   //console.log('---> customer data: ', customer);
+  const { zones } = useGetZones(customer?.id, customer?.cityId)
   
-  const { filteredContainers, selectedWasteTypes, setSelectedWasteTypes, setContainers } =
-  useContainers(customer?.id, customer?.cityId)
+  // Show operator dashboard for operators
+  if (user?.profile === Profile.OPERATOR) {
+    return <OperatorDashboard user={user}/>
+  }
+  
+  const { filteredContainers, selectedWasteTypes, setSelectedWasteTypes } =
+    useContainers(customer?.id, customer?.cityId, 500, 'true')
   //console.log('---> filteredContainers: ', filteredContainers);
   const {
     tabValue,
     cities,
     selectedCity,
     setRouteName,
-    setSelectedCity,
     setTabValue,
     routeName,
     loading,
     optimizedRoute,
-    setStartLocation,
-    setEndLocation,
-    startLocation,
-    endLocation,
+    currentZone,
+    setCurrentZone,
     handleDeleteRoute,
-    notification,
     handleOptimizeRoute,
     handleLoadRoute,
     handleSaveRoute,
-    setNotification,
     savedRoutes,
   } = useRoutes(customer ?? undefined, user ?? undefined, selectedWasteTypes)
 
-  // Show operator dashboard for operators
-  if (user?.profile === Profile.OPERATOR) {
-    return <OperatorDashboard user={user}/>
+  function handleAssignTruck(route: any) {
+    setSelectedRoute(route)
+    setAssignmentDialogOpen(true)
   }
 
   return (
     <Box>
-      <Typography variant="h4" gutterBottom>
-        Route Optimization
-      </Typography>
-
-      <Box sx={{ position: 'relative' }}>
-        <Fab
-          color="primary"
-          size="medium"
+      <Box sx={{ position: "relative" }}>
+        <Typography variant="h4" gutterBottom sx={{ display: 'inline-block', mr: 2 }}>
+          Route Optimization
+        </Typography>
+        <Button
+          type="submit"
+          variant="contained"
+          disabled={loading}
           sx={{
-            position: 'absolute',
-            top: 16,
-            left: 16,
-            zIndex: 1000
+            borderRadius: 2,
+            textTransform: "none",
+            fontWeight: 600,
+            px: 3,
+            py: 1.5,
+            marginBottom: 2,
+            float: 'right'
           }}
           onClick={() => setSidenavOpen(true)}
         >
-          <Menu/>
-        </Fab>
+          {loading ? 'Loading...' : 'Manage routes'}
+        </Button>
+      </Box>
 
+      <Box sx={{ position: "relative" }}>
         <Drawer
           anchor="left"
           open={sidenavOpen}
@@ -105,92 +107,54 @@ const RoutesPage: React.FC = () => {
           PaperProps={{
             sx: {
               width: 400,
-              height: '100%',
-              borderRadius: 4
-            }
+              height: "100%",
+              borderRadius: 4,
+            },
           }}
         >
-          <Box sx={{ p: 2, height: '100%', overflow: 'auto' }}>
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+          <Box sx={{ p: 2, height: "100%", overflow: "auto" }}>
+            <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 2 }}>
               <Typography variant="h6">Route Configuration</Typography>
               <IconButton onClick={() => setSidenavOpen(false)}>
-                <Close/>
+                <Close />
               </IconButton>
             </Box>
 
-            <Tabs
-              value={tabValue}
-              onChange={(_, newValue) => setTabValue(newValue)}
-              sx={{ mb: 2 }}
-            >
-              <Tab label="Configuration"/>
-              <Tab label={'Saved Routes'}/>
+            <Tabs value={tabValue} onChange={(_, newValue) => setTabValue(newValue)} sx={{ mb: 2 }}>
+              <Tab label="Configuration" />
+              <Tab label={"Saved Routes"} />
             </Tabs>
 
             {tabValue === 0 && (
               <Box>
                 <Autocomplete
                   options={cities
-                    .filter(city => {
-                      if (user?.profile === 'ADMIN') return true
-                      return city.country === user?.country
+                    .filter((city) => {
+                      if (user?.profile === "ADMIN") return true;
+                      return city.country === user?.country;
                     })
-                    .map(city => `${city.name}, ${city.country}`)}
-                  value={
-                    selectedCity
-                      ? `${selectedCity.name}, ${selectedCity.country}`
-                      : ''
-                  }
+                    .map((city) => `${city.name}, ${city.country}`)}
+                  value={selectedCity ? `${selectedCity.name}, ${selectedCity.country}` : ""}
                   onChange={(_, newValue) => {
                     if (newValue) {
-                      const city = cities.find(
-                        c => `${c.name}, ${c.country}` === newValue
-                      )
-                      if (city) setSelectedCity(city)
+                      const city = cities.find((c) => `${c.name}, ${c.country}` === newValue);
                     }
                   }}
                   disabled={false}
-                  renderInput={params => (
-                    <TextField
-                      {...params}
-                      label="City"
-                      margin="normal"
-                      fullWidth
-                    />
-                  )}
+                  renderInput={(params) => <TextField {...params} label="City" margin="normal" fullWidth />}
                 />
 
                 <FormControl fullWidth margin="normal">
-                  <InputLabel id="start-location-label">
-                    Start Location
-                  </InputLabel>
+                  <InputLabel id="zones-selector">Zones</InputLabel>
                   <Select
-                    labelId="start-location-label"
-                    value={startLocation}
-                    label="Start Location"
-                    onChange={e => setStartLocation(e.target.value)}
+                    labelId="zones-selector"
+                    value={currentZone?.id}
+                    label="Zones"
+                    onChange={(e) => setCurrentZone(zones.find((z) => z.id === e.target.value))}
                   >
-                    {selectedCity?.locations.map(location => (
-                      <MenuItem key={location.name} value={location.name}>
-                        {location.name}
-                      </MenuItem>
-                    )) || []}
-                  </Select>
-                </FormControl>
-
-                <FormControl fullWidth margin="normal">
-                  <InputLabel id="end-location-label">
-                    End Location
-                  </InputLabel>
-                  <Select
-                    labelId="end-location-label"
-                    value={endLocation}
-                    label="End Location"
-                    onChange={e => setEndLocation(e.target.value)}
-                  >
-                    {selectedCity?.locations.map(location => (
-                      <MenuItem key={location.name} value={location.name}>
-                        {location.name}
+                    {zones.map((zone) => (
+                      <MenuItem key={zone.name} value={zone.id}>
+                        {zone.name}
                       </MenuItem>
                     )) || []}
                   </Select>
@@ -203,7 +167,7 @@ const RoutesPage: React.FC = () => {
                   value={selectedWasteTypes}
                   onChange={(_, newTypes) => {
                     if (newTypes.length > 0) {
-                      setSelectedWasteTypes(newTypes)
+                      setSelectedWasteTypes(newTypes);
                     }
                   }}
                   size="small"
@@ -226,18 +190,16 @@ const RoutesPage: React.FC = () => {
                   sx={{
                     mt: 2,
                     borderRadius: 2,
-                    textTransform: 'none',
+                    textTransform: "none",
                     fontWeight: 600,
                     py: 1.5,
-                    px: 3
+                    px: 3,
                   }}
-                  onClick={() => (handleOptimizeRoute(), setContainers([]))}
+                  onClick={() => (handleOptimizeRoute())}
                   disabled={loading}
-                  startIcon={
-                    loading ? <CircularProgress size={20}/> : <RouteIcon/>
-                  }
+                  startIcon={loading ? <CircularProgress size={20} /> : <RouteIcon />}
                 >
-                  {loading ? 'Optimizing...' : 'Optimize Route'}
+                  {loading ? "Optimizing..." : "Optimize Route"}
                 </Button>
 
                 {optimizedRoute && (
@@ -251,8 +213,8 @@ const RoutesPage: React.FC = () => {
                       sx={{
                         mr: 1,
                         borderRadius: 2,
-                        bgcolor: 'primary.container',
-                        color: 'primary.onContainer'
+                        bgcolor: "primary.container",
+                        color: "primary.onContainer",
                       }}
                     />
                     <Chip
@@ -261,8 +223,8 @@ const RoutesPage: React.FC = () => {
                       sx={{
                         mr: 1,
                         borderRadius: 2,
-                        bgcolor: 'secondary.container',
-                        color: 'secondary.onContainer'
+                        bgcolor: "secondary.container",
+                        color: "secondary.onContainer",
                       }}
                     />
                     <Chip
@@ -271,8 +233,8 @@ const RoutesPage: React.FC = () => {
                       sx={{
                         mr: 1,
                         borderRadius: 2,
-                        bgcolor: 'tertiary.container',
-                        color: 'tertiary.onContainer'
+                        bgcolor: "tertiary.container",
+                        color: "tertiary.onContainer",
                       }}
                     />
                     {optimizedRoute.trucksUsed && (
@@ -281,8 +243,8 @@ const RoutesPage: React.FC = () => {
                         size="small"
                         sx={{
                           borderRadius: 2,
-                          bgcolor: 'success.container',
-                          color: 'success.onContainer'
+                          bgcolor: "success.container",
+                          color: "success.onContainer",
                         }}
                       />
                     )}
@@ -290,7 +252,7 @@ const RoutesPage: React.FC = () => {
                     <TextField
                       label="Route Name"
                       value={routeName}
-                      onChange={e => setRouteName(e.target.value)}
+                      onChange={(e) => setRouteName(e.target.value)}
                       fullWidth
                       margin="normal"
                       size="small"
@@ -302,55 +264,49 @@ const RoutesPage: React.FC = () => {
                       sx={{
                         mt: 1,
                         borderRadius: 2,
-                        textTransform: 'none',
+                        textTransform: "none",
                         fontWeight: 600,
-                        px: 3
+                        px: 3,
                       }}
                       onClick={handleSaveRoute}
-                      startIcon={<Save/>}
+                      startIcon={<Save />}
                     >
                       Save Route
                     </Button>
-
-
                   </Box>
                 )}
               </Box>
             )}
 
             {tabValue === 1 && (
-              <Box sx={{ overflow: 'auto' }}>
+              <Box sx={{ overflow: "auto" }}>
                 {savedRoutes.length === 0 ? (
-                  <Typography
-                    variant="body2"
-                    color="text.secondary"
-                    textAlign="center"
-                  >
+                  <Typography variant="body2" color="text.secondary" textAlign="center">
                     No saved routes for {selectedCity?.name}
                   </Typography>
                 ) : (
-                  savedRoutes.map(route => (
+                  savedRoutes.map((route) => (
                     <Card
                       key={route.id}
                       sx={{
                         mb: 2,
                         p: 2,
                         borderRadius: 2,
-                        bgcolor: 'background.paper',
-                        boxShadow: 2
+                        bgcolor: "background.paper",
+                        boxShadow: 2,
                       }}
                     >
                       <Box>
-                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 1 }}>
+                        <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", mb: 1 }}>
                           <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
                             {route.name}
                           </Typography>
-                          <Box sx={{ display: 'flex', gap: 0.5 }}>
+                          <Box sx={{ display: "flex", gap: 0.5 }}>
                             <Button
                               size="small"
                               onClick={() => handleLoadRoute(route)}
-                              startIcon={<Update/>}
-                              sx={{ textTransform: 'none', fontWeight: 600, borderRadius: 2 }}
+                              startIcon={<Update />}
+                              sx={{ textTransform: "none", fontWeight: 600, borderRadius: 2 }}
                             >
                               Load
                             </Button>
@@ -358,48 +314,58 @@ const RoutesPage: React.FC = () => {
                               size="small"
                               color="error"
                               onClick={() => handleDeleteRoute(route.id)}
-                              startIcon={<Delete/>}
-                              sx={{ textTransform: 'none', fontWeight: 600, borderRadius: 2 }}
+                              startIcon={<Delete />}
+                              sx={{ textTransform: "none", fontWeight: 600, borderRadius: 2 }}
                             >
                               Delete
                             </Button>
                           </Box>
                         </Box>
 
-                        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, mb: 1 }}>
-                          <Chip size="small" label={`${route.containerCount} containers`} color="primary"
-                                variant="outlined"/>
-                          <Chip size="small" label={`${route.totalDistance}km`} color="secondary" variant="outlined"/>
-                          <Chip size="small" label={`${route.estimatedTime}min`} color="info" variant="outlined"/>
+                        <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5, mb: 1 }}>
+                          <Chip
+                            size="small"
+                            label={`${route.containerCount} containers`}
+                            color="primary"
+                            variant="outlined"
+                          />
+                          <Chip size="small" label={`${route.totalDistance}km`} color="secondary" variant="outlined" />
+                          <Chip size="small" label={`${route.estimatedTime}min`} color="info" variant="outlined" />
                           {route.trucksUsed && (
-                            <Chip size="small" label={`${route.trucksUsed} trucks`} color="success" variant="outlined"/>
+                            <Chip
+                              size="small"
+                              label={`${route.trucksUsed} trucks`}
+                              color="success"
+                              variant="outlined"
+                            />
                           )}
                         </Box>
 
-                        <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 0.5 }}>
-                          Created: {new Date(route.createdAt).toLocaleDateString()} {new Date(route.createdAt).toLocaleTimeString()}
+                        <Typography variant="caption" color="text.secondary" sx={{ display: "block", mb: 0.5 }}>
+                          Created: {new Date(route.createdAt).toLocaleDateString()}{" "}
+                          {new Date(route.createdAt).toLocaleTimeString()}
                         </Typography>
 
                         <Box sx={{ mt: 1 }}>
-                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
-                            <Person fontSize="small" color="action"/>
+                          <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 0.5 }}>
+                            <Person fontSize="small" color="action" />
                             <Typography variant="caption" color="text.secondary">
-                              {route.operatorName || 'No operator assigned'}
+                              {route.operatorName || "No operator assigned"}
                             </Typography>
                           </Box>
-                          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                              <LocalShipping fontSize="small" color="action"/>
+                          <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                            <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                              <LocalShipping fontSize="small" color="action" />
                               <Typography variant="caption" color="text.secondary">
-                                {route.truckName || 'No truck assigned'}
+                                {route.truckName || "No truck assigned"}
                               </Typography>
                             </Box>
-                            {user?.profile === 'SUPERVISOR' && (
+                            {user?.profile === "SUPERVISOR" && (
                               <Button
                                 size="small"
                                 variant="outlined"
                                 onClick={() => handleAssignTruck(route)}
-                                sx={{ textTransform: 'none', fontSize: '0.75rem' }}
+                                sx={{ textTransform: "none", fontSize: "0.75rem" }}
                               >
                                 Assign
                               </Button>
@@ -410,8 +376,14 @@ const RoutesPage: React.FC = () => {
                         {route.status && (
                           <Chip
                             size="small"
-                            label={route.status.replace('_', ' ').toUpperCase()}
-                            color={route.status === 'completed' ? 'success' : route.status === 'in_progress' ? 'warning' : 'default'}
+                            label={route.status.replace("_", " ").toUpperCase()}
+                            color={
+                              route.status === "completed"
+                                ? "success"
+                                : route.status === "in_progress"
+                                ? "warning"
+                                : "default"
+                            }
                             variant="filled"
                             sx={{ mt: 0.5 }}
                           />
@@ -430,20 +402,20 @@ const RoutesPage: React.FC = () => {
             <Card
               sx={{
                 borderRadius: 3,
-                boxShadow: '0 6px 16px rgba(0,0,0,0.12)',
-                bgcolor: 'surface.main'
+                boxShadow: "0 6px 16px rgba(0,0,0,0.12)",
+                bgcolor: "surface.main",
               }}
             >
               <CardContent>
                 <Typography variant="h6" gutterBottom>
                   Map View
                 </Typography>
-                <Box sx={{ width: '100%', minWidth: '100%' }}>
+                <Box sx={{ width: "100%", minWidth: "100%" }}>
                   <MapView
                     containers={filteredContainers}
                     route={optimizedRoute?.route}
                     verpRoutes={optimizedRoute?.routes}
-                    center={selectedCity?.center || [0, 0]}
+                    center={[selectedCity?.latitude || 0, selectedCity?.longitude || 0]}
                   />
                 </Box>
               </CardContent>
@@ -452,37 +424,16 @@ const RoutesPage: React.FC = () => {
         </Grid>
       </Box>
 
-      <Snackbar
-        open={notification.open}
-        autoHideDuration={4000}
-        onClose={() => setNotification(prev => ({ ...prev, open: false }))}
-        anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
-      >
-        <Alert
-          onClose={() => setNotification(prev => ({ ...prev, open: false }))}
-          severity={notification.severity}
-          sx={{ width: '100%', borderRadius: 2 }}
-        >
-          {notification.message}
-        </Alert>
-      </Snackbar>
-
       <RouteAssignmentDialog
         open={assignmentDialogOpen}
         onClose={() => setAssignmentDialogOpen(false)}
         route={selectedRoute || optimizedRoute}
-        city={selectedCity ? `${selectedCity.name}, ${selectedCity.country}` : ''}
-        supervisorId={user?.id.toString() || ''}
+        city={selectedCity ? `${selectedCity.name}, ${selectedCity.country}` : ""}
+        supervisorId={user?.id.toString() || ""}
         onAssignmentComplete={() => window.location.reload()}
       />
     </Box>
-  )
-
-  function handleAssignTruck(route: any) {
-    setSelectedRoute(route)
-    setAssignmentDialogOpen(true)
-  }
-
+  );
 
 }
 

@@ -18,6 +18,8 @@ public interface CityService {
 
     public List<CityDto> findByCountry(String country);
 
+    public List<CityDto> findAll();
+
     public CityDto update(Long cityId, CityUpdateDto cityUpdateDto);
 
     public void delete(Long customerId);

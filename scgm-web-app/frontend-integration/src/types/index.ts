@@ -10,13 +10,15 @@ export interface Container {
 	id: string
 	latitude: number
 	longitude: number
-	wasteLevelStatus: WasteLevel
-	wasteLevelValue: number
 	temperature: number
+	wasteLevelValue: number
+	wasteLevelStatus: WasteLevel
 	address: string
 	cityId: number
+	customerId: number
 	createdAt: string
 	updatedAt: string
+	zoneId?: string
 }
 
 // Added to API
@@ -30,16 +32,16 @@ export interface StatusSummary {
 export interface RoutePoint {
 	lat: number
 	lng: number
-	id?: string
+	id: string
+	priority: number
 }
 
 export interface OptimizedRoute {
-	route?: RoutePoint[]
-	routes?: VRPRoute[]
+	routes: VRPRoute[]
 	totalDistance: number
 	containerCount: number
 	estimatedTime: number
-	trucksUsed?: number
+	trucksUsed: number
 }
 
 export interface VRPRoute {
@@ -60,9 +62,11 @@ export interface Truck {
 }
 
 export enum AssignmentStatus {
-	PENDING = 'pending',
-	IN_PROGRESS = 'in_progress',
-	COMPLETED = 'completed',
+	UNASSIGNED = 'UNASSIGNED',
+	PENDING = 'PENDING',
+	IN_PROGRESS = 'IN_PROGRESS',
+	COMPLETED = 'COMPLETED',
+	CANCELLED = 'CANCELLED',
 }
 
 export interface RouteAssignment {
@@ -155,11 +159,55 @@ export interface CountryDto {
 }
 
 export interface Customer {
-  id: number;
-  name: string;
-  description: string;
-  cityId: number;
-  createdAt: string;
-  updatedAt: string;
-  active: boolean;
+  id: number
+  name: string
+  description: string
+  cityId: number
+  createdAt: string
+  updatedAt: string
+  active: boolean
+}
+
+export interface ZoneAddDto {
+  centerLatitude: number
+  centerLongitude: number
+  name: string
+  cityId: number
+  customerId: number
+  startLat: number
+  startLng: number
+  endLat: number
+  endLng: number
+  description?: string
+  color: string
+}
+
+export interface ZoneDto {
+  id: string
+  centerLatitude: number
+  centerLongitude: number
+  name: string
+  cityId: number
+  customerId: number
+  startLat: number
+  startLng: number
+  endLat: number
+  endLng: number
+  description?: string
+  color: string
+  createdAt: string
+  updatedAt: string
+}
+
+export interface ContainerZoneUpdateDto {
+  containerId: string
+  zoneId: string
+}
+
+export interface OptimizeRouteDto {
+  cityId: number
+  zoneId: string
+  startLat: number
+  startLng: number
+  wasteTypes?: WasteLevel[]
 }
