@@ -7,7 +7,7 @@ public class TruckValidationException extends RuntimeException {
     private final List<String> errors;
 
     public TruckValidationException(String message, List<String> errors) {
-        super(message);
+        super(message + (errors.isEmpty() ? "" : (":\n- " + String.join("\n- ", errors))));
         this.errors = errors;
     }
 

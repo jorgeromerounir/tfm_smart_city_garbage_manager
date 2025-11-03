@@ -1,49 +1,33 @@
-import {
-	AccountCircle,
-	Dashboard,
-	LocationCity,
-	People,
-	Route,
-	MapRounded,
-} from '@mui/icons-material'
-import {
-	AppBar,
-	Box,
-	Button,
-	Menu,
-	MenuItem,
-	Toolbar,
-	Typography,
-} from '@mui/material'
-import React, { useState } from 'react'
-import { Link, useLocation } from 'react-router-dom'
-import { useAuth } from '../contexts/AuthContext'
-import { Profile } from '../types'
-import SignInForm from './SignInForm'
+import { AccountCircle, Dashboard, LocationCity, People, Route, MapRounded } from "@mui/icons-material";
+import { AppBar, Box, Button, Menu, MenuItem, Toolbar, Typography } from "@mui/material";
+import React, { useState } from "react";
+import { Link, useLocation } from "react-router-dom";
+import { useAuth } from "../contexts/AuthContext";
+import { Profile } from "../types";
+import SignInForm from "./SignInForm";
 
 const Navbar: React.FC = () => {
-	const location = useLocation()
-	const { user, isAuthenticated, signOut } = useAuth()
-	const [signInOpen, setSignInOpen] = useState(false)
-	const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
+  const location = useLocation();
+  const { user, isAuthenticated, signOut } = useAuth();
+  const [signInOpen, setSignInOpen] = useState(false);
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
 
-	const handleUserMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
-		setAnchorEl(event.currentTarget)
-	}
+  const handleUserMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
+    setAnchorEl(event.currentTarget);
+  };
 
-	const handleUserMenuClose = () => {
-		setAnchorEl(null)
-	}
+  const handleUserMenuClose = () => {
+    setAnchorEl(null);
+  };
 
-	const handleSignOut = () => {
-		signOut()
-		handleUserMenuClose()
-	}
+  const handleSignOut = () => {
+    signOut();
+    handleUserMenuClose();
+  };
 
-	const canAccessUsers =
-		user?.profile === Profile.ADMIN || user?.profile === Profile.SUPERVISOR
+  const canAccessUsers = user?.profile === Profile.ADMIN || user?.profile === Profile.SUPERVISOR;
 
-	return (
+  return (
     <>
       <AppBar position="static">
         <Toolbar>
@@ -63,7 +47,7 @@ const Navbar: React.FC = () => {
 
             {isAuthenticated && canAccessUsers && (
               <>
-				{user?.profile === Profile.ADMIN && (
+                {user?.profile === Profile.ADMIN && (
                   <Button
                     color="inherit"
                     component={Link}
@@ -77,13 +61,22 @@ const Navbar: React.FC = () => {
                 <Button
                   color="inherit"
                   component={Link}
+                  to="/trucks"
+                  startIcon={<MapRounded />}
+                  variant={location.pathname === "/trucks" ? "outlined" : "text"}
+                >
+                  Trucks
+                </Button>
+                <Button
+                  color="inherit"
+                  component={Link}
                   to="/zones"
                   startIcon={<MapRounded />}
                   variant={location.pathname === "/zones" ? "outlined" : "text"}
                 >
                   Zones
                 </Button>
-				<Button
+                <Button
                   color="inherit"
                   component={Link}
                   to="/routes"
@@ -101,7 +94,6 @@ const Navbar: React.FC = () => {
                 >
                   Users
                 </Button>
-                
               </>
             )}
 
@@ -118,6 +110,6 @@ const Navbar: React.FC = () => {
       <SignInForm open={signInOpen} onClose={() => setSignInOpen(false)} />
     </>
   );
-}
+};
 
-export default Navbar
+export default Navbar;

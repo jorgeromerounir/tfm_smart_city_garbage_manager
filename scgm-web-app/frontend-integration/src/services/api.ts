@@ -14,12 +14,14 @@ import {
 	City,
 	CityAddDto,
 	CountryDto,
-	WasteLevel,
 	Customer,
 	ZoneAddDto,
 	ZoneDto,
-	ContainerZoneUpdateDto,
 	OptimizeRouteDto,
+	TruckAddDto,
+	TruckDto,
+	TruckSearchParams,
+	TruckUpdateDto,
 } from '../types'
 
 const API_BASE = 'http://localhost:3001'
@@ -201,7 +203,8 @@ export const citiesApi = {
 }
 
 export const truckApi = {
-	getAll: (city?: string): Promise<Truck[]> => {
+	//old and deprecated
+	/*getAll: (city?: string): Promise<Truck[]> => {
 		const params = city ? { city } : {}
 		return apiBaseAxios.get('/routes/trucks', { params }).then(res => res.data)
 	},
@@ -211,7 +214,32 @@ export const truckApi = {
 		capacity: number
 		city: string
 	}): Promise<Truck> =>
-		apiBaseAxios.post('/routes/trucks', data).then(res => res.data),
+		apiBaseAxios.post('/routes/trucks', data).then(res => res.data),*/
+	//----new services
+	add: (customerId: number, data: TruckAddDto): Promise<TruckDto> =>
+		routesApiAxios.post(`/api/v1/trucks/by-customer/${customerId}`, 
+			{targetMethod: 'POST', body: data}).then(res => res.data),
+
+	findById: (customerId: number, truckId: string): Promise<TruckDto> =>
+		routesApiAxios.post(`/api/v1/trucks/by-customer/${customerId}/truck/${truckId}`, 
+			{targetMethod: 'GET'}).then(res => res.data),
+	
+	findByCustomerCity: (customerId: number, cityId: number, params: TruckSearchParams = {}): Promise<TruckDto[]> =>
+		routesApiAxios.post(`/api/v1/trucks/by-customer/${customerId}/city/${cityId}`, 
+			{targetMethod: 'GET', queryParams: {
+				available: [ params.available !== undefined ? params.available : null],
+				nameCoincidence: [ params.nameCoincidence || null],
+				limit: [ params.limit || null]
+			}})
+			.then(res => res.data),
+	
+	update: (customerId: number, truckId: string, data: TruckUpdateDto): Promise<TruckDto> =>
+		routesApiAxios.post(`/api/v1/trucks/by-customer/${customerId}/truck/${truckId}`, 
+			{targetMethod: 'PUT', body: data}).then(res => res.data),
+
+	delete: (customerId: number, truckId: string): Promise<void> =>
+		routesApiAxios.post(`/api/v1/trucks/by-customer/${customerId}/truck/${truckId}`, 
+			{targetMethod: 'DELETE'}).then(res => res.data),
 }
 
 export const assignmentApi = {

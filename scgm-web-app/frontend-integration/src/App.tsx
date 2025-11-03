@@ -16,6 +16,7 @@ import ZonesPage from './pages/ZonesPage'
 import { Profile } from './types'
 import ContentInit from './components/ContentInit'
 import useNoti from './hooks/useNoti'
+import TrucksPage from './pages/TrucksPage'
 
 const AppContent: React.FC = () => {
 	const { enqueueSnackbar } = useSnackbar()
@@ -144,6 +145,26 @@ const AppContent: React.FC = () => {
 							<Box component="main" sx={{ flexGrow: 1, p: 3 }}>
 								<ContentInit />
 								<CitiesPage />
+							</Box>
+						</Box>
+					</ProtectedRoute>
+				}
+			/>
+			<Route
+				path="/trucks"
+				element={
+					<ProtectedRoute requiredRole={Profile.ADMIN}>
+						<Box
+							sx={{
+								display: 'flex',
+								flexDirection: 'column',
+								minHeight: '100vh',
+							}}
+						>
+							<Navbar />
+							<Box component="main" sx={{ flexGrow: 1, p: 3 }}>
+								<ContentInit />
+								<TrucksPage />
 							</Box>
 						</Box>
 					</ProtectedRoute>

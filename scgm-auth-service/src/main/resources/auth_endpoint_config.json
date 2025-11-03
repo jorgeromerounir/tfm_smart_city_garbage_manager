@@ -112,6 +112,36 @@
       "allowProfiles": ["SUPERVISOR"],
       "enabled": true,
       "requireCustomerId": false
+    },
+    "POST::/api/v1/trucks/by-customer/([0-9]+)": {
+      "allowAllProfiles": false,
+      "allowProfiles": ["ADMIN", "SUPERVISOR"],
+      "enabled": true,
+      "requireCustomerId": false
+    },
+    "GET::/api/v1/trucks/by-customer/([0-9]+)/truck/([0-9a-fA-F]{24}$)": {
+      "allowAllProfiles": false,
+      "allowProfiles": ["ADMIN", "SUPERVISOR"],
+      "enabled": true,
+      "requireCustomerId": false
+    },
+    "GET::/api/v1/trucks/by-customer/([0-9]+)/city/([0-9]+)": {
+      "allowAllProfiles": false,
+      "allowProfiles": ["ADMIN", "SUPERVISOR"],
+      "enabled": true,
+      "requireCustomerId": false
+    },
+    "PUT::/api/v1/trucks/by-customer/([0-9]+)/truck/([0-9a-fA-F]{24}$)": {
+      "allowAllProfiles": false,
+      "allowProfiles": ["ADMIN", "SUPERVISOR"],
+      "enabled": true,
+      "requireCustomerId": false
+    },
+    "DELETE::/api/v1/trucks/by-customer/([0-9]+)/truck/([0-9a-fA-F]{24}$)": {
+      "allowAllProfiles": false,
+      "allowProfiles": ["ADMIN", "SUPERVISOR"],
+      "enabled": true,
+      "requireCustomerId": false
     }
   }
 }

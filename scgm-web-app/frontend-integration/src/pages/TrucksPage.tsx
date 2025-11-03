@@ -1,7 +1,6 @@
-import { Add, Delete, Edit, LocationCity, Search } from '@mui/icons-material'
+import { Add, Delete, Edit, LocalShipping, Search } from '@mui/icons-material'
 import {
 	Alert,
-	Autocomplete,
 	Box,
 	Button,
 	CircularProgress,
@@ -9,11 +8,15 @@ import {
 	DialogActions,
 	DialogContent,
 	DialogTitle,
+	FormControl,
 	FormControlLabel,
 	IconButton,
 	InputAdornment,
+	InputLabel,
+	MenuItem,
 	Pagination,
 	Paper,
+	Select,
 	Switch,
 	Table,
 	TableBody,
@@ -25,130 +28,136 @@ import {
 	Typography,
 } from '@mui/material'
 import React, { useEffect, useState } from 'react'
-import { AVAILABLE_CITIES } from '../data/cities'
-import { citiesApi } from '../services/api'
-import { City } from '../types'
+import { truckApi, citiesApi } from '../services/api'
+import { TruckDto, TruckAddDto, TruckUpdateDto, City } from '../types'
 import useNoti from '../hooks/useNoti'
 
-const CitiesPage: React.FC = () => {
+const TrucksPage: React.FC = () => {
+	const [trucks, setTrucks] = useState<TruckDto[]>([])
 	const [cities, setCities] = useState<City[]>([])
 	const [loading, setLoading] = useState(true)
 	const [error, setError] = useState<string | null>(null)
 	const [open, setOpen] = useState(false)
-	const [editingCity, setEditingCity] = useState<City | null>(null)
-	const [selectedCityOption, setSelectedCityOption] = useState<string>('')
+	const [editingTruck, setEditingTruck] = useState<TruckDto | null>(null)
 	const [searchTerm, setSearchTerm] = useState('')
 	const [currentPage, setCurrentPage] = useState(1)
 	const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
-	const [cityToDelete, setCityToDelete] = useState<number | null>(null)
+	const [truckToDelete, setTruckToDelete] = useState<string | null>(null)
 	const { showNoti, NotificationComponent } = useNoti()
-	const [formData, setFormData] = useState({
+	
+	// Mock values - in real app these would come from context/auth
+	const customerId = 1
+	const defaultCityId = 1
+	
+	const [formData, setFormData] = useState<TruckAddDto>({
 		name: '',
-		country: '',
-		latitude: 0,
-		longitude: 0,
-		active: true,
+		licensePlate: '',
+		capacity: 0,
+		cityId: defaultCityId,
+		customerId: customerId,
+		available: true,
 	})
 
 	useEffect(() => {
+		void fetchTrucks()
 		void fetchCities()
 	}, [])
 
-	const fetchCities = async () => {
+	const fetchTrucks = async () => {
 		try {
 			setLoading(true)
 			setError(null)
-			const data: City[] = await citiesApi.getAll()
-			setCities(data)
+			const data = await truckApi.findByCustomerCity(customerId, defaultCityId, { limit: 500 })
+			setTrucks(data)
 		} catch (error) {
-			console.error('Failed to fetch cities:', error)
-			setError('Failed to load cities. Please try again.')
+			console.error('Failed to fetch trucks:', error)
+			setError('Failed to load trucks. Please try again.')
 		} finally {
 			setLoading(false)
 		}
 	}
 
+	const fetchCities = async () => {
+		try {
+			const data = await citiesApi.getAll()
+			setCities(data)
+		} catch (error) {
+			console.error('Failed to fetch cities:', error)
+		}
+	}
+
 	const handleSubmit = async () => {
-		if (editingCity) {
-			citiesApi.update(editingCity.id, formData).then(() => {
-				fetchCities()
+		if (editingTruck) {
+			const updateData: TruckUpdateDto = {
+				name: formData.name,
+				licensePlate: formData.licensePlate,
+				capacity: formData.capacity,
+				available: formData.available,
+			}
+			truckApi.update(customerId, editingTruck.id, updateData).then(() => {
+				fetchTrucks()
 				handleClose()
-				showNoti('Your city has been updated successfully!', 'success')
+				showNoti('Your truck has been updated successfully!', 'success')
 			}).catch((error) => {
-				console.error('Failed to update city:', error)
-				showNoti('Failed to update city. Please try again.', 'error')
+				console.error('Failed to update truck:', error)
+				showNoti('Failed to update truck. Please try again.', 'error')
 			})
 		} else {
-			citiesApi.create(formData).then(() => {
-				fetchCities()
+			truckApi.add(customerId, formData).then(() => {
+				fetchTrucks()
 				handleClose()
-				showNoti('Your city has been created successfully!', 'success')
+				showNoti('Your truck has been created successfully!', 'success')
 			}).catch((error) => {
-				console.error('Failed to create city:', error)
-				showNoti('Failed to create city. Please try again.', 'error')
+				console.error('Failed to create truck:', error)
+				showNoti('Failed to create truck. Please try again.', 'error')
 			})
 		}
 	}
 
-	const handleDeleteClick = (id: number) => {
-		setCityToDelete(id)
+	const handleDeleteClick = (id: string) => {
+		setTruckToDelete(id)
 		setDeleteDialogOpen(true)
 	}
 
 	const handleDeleteConfirm = () => {
-		if (cityToDelete) {
-			citiesApi.delete(cityToDelete).then(() => {
-				fetchCities()
-				showNoti('City has been deleted successfully!', 'success')
+		if (truckToDelete) {
+			truckApi.delete(customerId, truckToDelete).then(() => {
+				fetchTrucks()
+				showNoti('Truck has been deleted successfully!', 'success')
 			}).catch((error) => {
-				console.error('Failed to delete city:', error)
-				showNoti('Failed to delete city. Please try again.', 'error')
+				console.error('Failed to delete truck:', error)
+				showNoti('Failed to delete truck. Please try again.', 'error')
 			})
 		}
 		setDeleteDialogOpen(false)
-		setCityToDelete(null)
+		setTruckToDelete(null)
 	}
 
 	const handleDeleteCancel = () => {
 		setDeleteDialogOpen(false)
-		setCityToDelete(null)
+		setTruckToDelete(null)
 	}
 
-	const handleCitySelect = (cityKey: string) => {
-		const cityOption = AVAILABLE_CITIES.find(
-			c => `${c.name}, ${c.country}` === cityKey,
-		)
-		if (cityOption) {
+	const handleOpen = (truck?: TruckDto) => {
+		if (truck) {
+			setEditingTruck(truck)
 			setFormData({
-				name: cityOption.name,
-				country: cityOption.country,
-				latitude: cityOption.latitude,
-				longitude: cityOption.longitude,
-				active: true,
-			})
-		}
-	}
-
-	const handleOpen = (city?: City) => {
-		if (city) {
-			setEditingCity(city)
-			setSelectedCityOption(`${city.name}, ${city.country}`)
-			setFormData({
-				name: city.name,
-				country: city.country,
-				latitude: city.latitude,
-				longitude: city.longitude,
-				active: city.active,
+				name: truck.name,
+				licensePlate: truck.licensePlate,
+				capacity: truck.capacity,
+				cityId: truck.cityId,
+				customerId: truck.customerId,
+				available: truck.available,
 			})
 		} else {
-			setEditingCity(null)
-			setSelectedCityOption('')
+			setEditingTruck(null)
 			setFormData({
 				name: '',
-				country: '',
-				latitude: 0,
-				longitude: 0,
-				active: true,
+				licensePlate: '',
+				capacity: 0,
+				cityId: defaultCityId,
+				customerId: customerId,
+				available: true,
 			})
 		}
 		setOpen(true)
@@ -156,17 +165,17 @@ const CitiesPage: React.FC = () => {
 
 	const handleClose = () => {
 		setOpen(false)
-		setEditingCity(null)
+		setEditingTruck(null)
 	}
 
-	const filteredCities = cities.filter(city => 
-		city.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-		city.country.toLowerCase().includes(searchTerm.toLowerCase())
+	const filteredTrucks = trucks.filter(truck => 
+		truck.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+		truck.licensePlate.toLowerCase().includes(searchTerm.toLowerCase())
 	)
 
 	const itemsPerPage = 6
-	const totalPages = Math.ceil(filteredCities.length / itemsPerPage)
-	const paginatedCities = filteredCities.slice(
+	const totalPages = Math.ceil(filteredTrucks.length / itemsPerPage)
+	const paginatedTrucks = filteredTrucks.slice(
 		(currentPage - 1) * itemsPerPage,
 		currentPage * itemsPerPage
 	)
@@ -189,8 +198,8 @@ const CitiesPage: React.FC = () => {
 				}}
 			>
 				<Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-					<LocationCity color="primary" />
-					<Typography variant="h4">Cities & Countries</Typography>
+					<LocalShipping color="primary" />
+					<Typography variant="h4">Fleet Management</Typography>
 				</Box>
 				<Button
 					variant="contained"
@@ -204,7 +213,7 @@ const CitiesPage: React.FC = () => {
 						py: 1.5,
 					}}
 				>
-					Add City
+					Add Truck
 				</Button>
 			</Box>
 
@@ -216,7 +225,7 @@ const CitiesPage: React.FC = () => {
 
 			<TextField
 				fullWidth
-				placeholder="Search cities by name or country..."
+				placeholder="Search trucks by name or license plate..."
 				value={searchTerm}
 				onChange={(e) => handleSearchChange(e.target.value)}
 				InputProps={{
@@ -232,8 +241,8 @@ const CitiesPage: React.FC = () => {
 			{!loading && (
 				<Box sx={{ mb: 2, p: 2, backgroundColor: '#f5f5f5', borderRadius: 1 }}>
 					<Typography variant="body2" color="text.secondary">
-						Showing {paginatedCities.length} of {filteredCities.length} cities
-						{searchTerm && ` (filtered from ${cities.length} total)`}
+						Showing {paginatedTrucks.length} of {filteredTrucks.length} trucks
+						{searchTerm && ` (filtered from ${trucks.length} total)`}
 					</Typography>
 				</Box>
 			)}
@@ -248,35 +257,33 @@ const CitiesPage: React.FC = () => {
 						<TableHead sx={{ backgroundColor: '#f1f8e9' }}>
 							<TableRow>
 								<TableCell>Name</TableCell>
-								<TableCell>Country</TableCell>
-								<TableCell>Coordinates</TableCell>
+								<TableCell>License Plate</TableCell>
+								<TableCell>Capacity (tons)</TableCell>
 								<TableCell>Status</TableCell>
 								<TableCell>Actions</TableCell>
 							</TableRow>
 						</TableHead>
 						<TableBody>
-							{paginatedCities.length === 0 ? (
+							{paginatedTrucks.length === 0 ? (
 								<TableRow>
 									<TableCell colSpan={5} align="center">
 										<Typography color="text.secondary">
-											{searchTerm ? 'No cities match your search.' : 'No cities found. Click "Add City" to create one.'}
+											{searchTerm ? 'No trucks match your search.' : 'No trucks found. Click "Add Truck" to create one.'}
 										</Typography>
 									</TableCell>
 								</TableRow>
 							) : (
-								paginatedCities.map(city => (
-									<TableRow key={city.id}>
-										<TableCell>{city.name}</TableCell>
-										<TableCell>{city.country}</TableCell>
+								paginatedTrucks.map(truck => (
+									<TableRow key={truck.id}>
+										<TableCell>{truck.name}</TableCell>
+										<TableCell>{truck.licensePlate}</TableCell>
+										<TableCell>{truck.capacity}</TableCell>
+										<TableCell>{truck.available ? 'Available' : 'Unavailable'}</TableCell>
 										<TableCell>
-											{city.latitude.toFixed(4)}, {city.longitude.toFixed(4)}
-										</TableCell>
-										<TableCell>{city.active ? 'Active' : 'Inactive'}</TableCell>
-										<TableCell>
-											<IconButton onClick={() => handleOpen(city)}>
+											<IconButton onClick={() => handleOpen(truck)}>
 												<Edit />
 											</IconButton>
-											<IconButton onClick={() => handleDeleteClick(city.id)}>
+											<IconButton onClick={() => handleDeleteClick(truck.id)}>
 												<Delete />
 											</IconButton>
 										</TableCell>
@@ -300,78 +307,52 @@ const CitiesPage: React.FC = () => {
 			)}
 
 			<Dialog open={open} onClose={handleClose} maxWidth="sm" fullWidth>
-				<DialogTitle>{editingCity ? 'Edit City' : 'Add New City'}</DialogTitle>
+				<DialogTitle>{editingTruck ? 'Edit Truck' : 'Add New Truck'}</DialogTitle>
 				<DialogContent>
-					{!editingCity && (
-						<Autocomplete
-							options={AVAILABLE_CITIES.map(
-								city => `${city.name}, ${city.country}`,
-							)}
-							value={selectedCityOption}
-							onChange={(_, newValue) => {
-								setSelectedCityOption(newValue || '')
-								if (newValue) handleCitySelect(newValue)
-							}}
-							renderInput={params => (
-								<TextField
-									{...params}
-									label="Searach your City for autocomple"
-									margin="normal"
-									fullWidth
-								/>
-							)}
-						/>
-					)}
-
 					<TextField
 						fullWidth
-						label="City Name"
+						label="Truck Name"
 						value={formData.name}
 						onChange={e => setFormData({ ...formData, name: e.target.value })}
 						margin="normal"
 					/>
 					<TextField
 						fullWidth
-						label="Country"
-						value={formData.country}
-						onChange={e =>
-							setFormData({ ...formData, country: e.target.value })
-						}
+						label="License Plate"
+						value={formData.licensePlate}
+						onChange={e => setFormData({ ...formData, licensePlate: e.target.value })}
 						margin="normal"
 					/>
 					<TextField
 						fullWidth
-						label="Latitude"
+						label="Capacity (tons)"
 						type="number"
-						value={formData.latitude}
-						onChange={e =>
-							setFormData({ ...formData, latitude: parseFloat(e.target.value) })
-						}
+						value={formData.capacity}
+						onChange={e => setFormData({ ...formData, capacity: parseFloat(e.target.value) || 0 })}
 						margin="normal"
 					/>
-					<TextField
-						fullWidth
-						label="Longitude"
-						type="number"
-						value={formData.longitude}
-						onChange={e =>
-							setFormData({
-								...formData,
-								longitude: parseFloat(e.target.value),
-							})
-						}
-						margin="normal"
-					/>
+					<FormControl fullWidth margin="normal">
+						<InputLabel>City</InputLabel>
+						<Select
+							value={formData.cityId}
+							label="City"
+							onChange={e => setFormData({ ...formData, cityId: e.target.value as number })}
+						>
+							{cities.map(city => (
+								<MenuItem key={city.id} value={city.id}>
+									{city.name}, {city.country}
+								</MenuItem>
+							))}
+						</Select>
+					</FormControl>
 					<FormControlLabel
 						control={
 							<Switch
-								checked={formData.active}
-								onChange={e =>
-									setFormData({ ...formData, active: e.target.checked })
-								}
+								checked={formData.available}
+								onChange={e => setFormData({ ...formData, available: e.target.checked })}
 							/>
 						}
-						label="Active"
+						label="Available"
 					/>
 					<Box sx={{ mt: 3, display: 'flex', gap: 2 }}>
 						<Button
@@ -386,7 +367,7 @@ const CitiesPage: React.FC = () => {
 								py: 1.5,
 							}}
 						>
-							{editingCity ? 'Update' : 'Create'}
+							{editingTruck ? 'Update' : 'Create'}
 						</Button>
 						<Button
 							onClick={handleClose}
@@ -410,7 +391,7 @@ const CitiesPage: React.FC = () => {
 				<DialogTitle>Confirm Delete</DialogTitle>
 				<DialogContent>
 					<Typography>
-						Are you sure you want to delete this city? This action cannot be undone.
+						Are you sure you want to delete this truck? This action cannot be undone.
 					</Typography>
 				</DialogContent>
 				<DialogActions>
@@ -425,4 +406,4 @@ const CitiesPage: React.FC = () => {
 	)
 }
 
-export default CitiesPage
+export default TrucksPage

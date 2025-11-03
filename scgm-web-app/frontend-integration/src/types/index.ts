@@ -211,3 +211,49 @@ export interface OptimizeRouteDto {
   startLng: number
   wasteTypes?: WasteLevel[]
 }
+
+export interface TruckDto {
+  id: string
+  name: string
+  licensePlate: string
+  capacity: number
+  cityId: number
+  customerId: number
+  available: boolean
+  createdAt: string
+  updatedAt: string
+}
+
+export interface TruckAddDto {
+  name: string
+  licensePlate: string
+  capacity: number
+  cityId: number
+  customerId: number
+  available: boolean
+}
+
+export interface TruckUpdateDto {
+  name: string
+  licensePlate: string
+  capacity: number
+  available: boolean
+}
+
+export interface TruckSearchParams {
+  available?: boolean
+  nameCoincidence?: string
+  limit?: number
+}
+
+export interface City {
+	id: number
+	name: string
+	country: string
+	latitude: number
+	longitude: number
+	active: boolean
+	createdAt: string
+	updatedAt: string
+}
+

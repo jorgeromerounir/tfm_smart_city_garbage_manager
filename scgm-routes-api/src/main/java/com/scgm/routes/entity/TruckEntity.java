@@ -32,7 +32,7 @@ public class TruckEntity {
         Pattern.UNICODE_CHARACTER_CLASS
     );
 
-    public static final Pattern UUID_PATTERN = Pattern.compile("^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$");
+    public static final Pattern ID_PATTERN = Pattern.compile("^[0-9a-fA-F]{24}$");
 
     public static final Pattern LICENSE_PLATE_PATTERN = Pattern.compile("^[A-Z0-9\\-\\s]{3,15}$");
 
@@ -66,7 +66,7 @@ public class TruckEntity {
 
     public List<String> validate() {
         List<String> listErrors = new ArrayList<>();
-        if (!StringUtils.isEmpty(getId()) && !UUID_PATTERN.matcher(getId()).matches()) {
+        if (!StringUtils.isEmpty(getId()) && !ID_PATTERN.matcher(getId()).matches()) {
             listErrors.add("id: invalid UUID format");
         }
         if (StringUtils.isEmpty(getName())) {
