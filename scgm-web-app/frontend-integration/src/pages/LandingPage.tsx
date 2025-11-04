@@ -31,12 +31,12 @@ const LandingPage: React.FC = () => {
 		{
 			icon: <RouteOutlined sx={{ fontSize: 40 }} />,
 			title: 'Route Optimization',
-			description: 'AI-powered route planning for efficient waste collection',
+			description: 'Powered route planning for efficient waste collection',
 		},
 		{
 			icon: <PeopleOutlined sx={{ fontSize: 40 }} />,
 			title: 'Multi-city Support',
-			description: 'Manage waste collection across multiple cities and regions',
+			description: 'Manage waste collection across multiple cities and zones',
 		},
 	]
 
@@ -65,7 +65,7 @@ const LandingPage: React.FC = () => {
 							<Typography variant="body1" sx={{ mb: 4, fontSize: '1.1rem' }}>
 								Monitor waste container levels in real-time, optimize collection
 								routes, and manage urban waste efficiently across multiple
-								cities.
+								cities (Open Source).
 							</Typography>
 							<Button
 								variant="contained"
@@ -92,7 +92,6 @@ const LandingPage: React.FC = () => {
 								sx={{
 									p: 3,
 									borderRadius: 3,
-									bgcolor: 'rgba(255,255,255,0.1)',
 									backdropFilter: 'blur(10px)',
 								}}
 							>
@@ -107,7 +106,7 @@ const LandingPage: React.FC = () => {
 									}}
 								>
 									<Typography>Active Containers:</Typography>
-									<Typography fontWeight="bold">1,247</Typography>
+									<Typography fontWeight="bold">10.500</Typography>
 								</Box>
 								<Box
 									sx={{
@@ -117,7 +116,7 @@ const LandingPage: React.FC = () => {
 									}}
 								>
 									<Typography>Cities Monitored:</Typography>
-									<Typography fontWeight="bold">2</Typography>
+									<Typography fontWeight="bold">1</Typography>
 								</Box>
 								<Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
 									<Typography>Collection Routes:</Typography>

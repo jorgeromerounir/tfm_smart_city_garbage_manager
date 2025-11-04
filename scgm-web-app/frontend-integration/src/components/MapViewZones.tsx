@@ -3,7 +3,7 @@ import { KeyboardArrowUp, KeyboardArrowDown, KeyboardArrowLeft, KeyboardArrowRig
 import { Icon } from 'leaflet'
 import React, { useEffect, useState } from 'react'
 import { MapContainer, Marker, Rectangle, TileLayer, useMapEvents, Tooltip, Popup } from 'react-leaflet'
-import { City, Container } from '../types'
+import { City, Container, ContainerZoneUpdateDto } from '../types'
 import useZones, { Zone } from '../hooks/useZones'
 import useDeleteZone from '../hooks/useDeleteZone'
 import useUpdateMultipleZonesId from '../hooks/useUpdateMultipleZonesId'
@@ -176,7 +176,7 @@ const MapViewZones: React.FC<MapViewZonesProps> = ({
 		if (zoneToDelete) {
 			console.log('---> Delete zone: ', zoneToDelete)
       deleteZoneHook.deleteZone(customerId, zoneToDelete).finally(() => {
-        setZones(prev => prev.filter(zone => zone.id !== zoneToDelete))
+        setZones((prev) => prev.filter(zone => zone.id !== zoneToDelete))
       })
 		}
 		setDeleteDialogOpen(false)
@@ -214,7 +214,7 @@ const MapViewZones: React.FC<MapViewZonesProps> = ({
 					container.longitude >= minLng && container.longitude <= maxLng &&
 					container.zoneId == null
 				)
-				const containerZoneUpdates = containersInZone.map(container => ({
+				const containerZoneUpdates: ContainerZoneUpdateDto[] = containersInZone.map(container => ({
 					containerId: container.id,
 					zoneId: zoneToAddContainers
 				}))

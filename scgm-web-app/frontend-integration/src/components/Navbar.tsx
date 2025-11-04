@@ -1,4 +1,4 @@
-import { AccountCircle, Dashboard, LocationCity, People, Route, MapRounded } from "@mui/icons-material";
+import { AccountCircle, Dashboard, LocationCity, People, Route, MapRounded, FireTruck, Recycling } from "@mui/icons-material";
 import { AppBar, Box, Button, Menu, MenuItem, Toolbar, Typography } from "@mui/material";
 import React, { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
@@ -62,10 +62,19 @@ const Navbar: React.FC = () => {
                   color="inherit"
                   component={Link}
                   to="/trucks"
-                  startIcon={<MapRounded />}
+                  startIcon={<FireTruck />}
                   variant={location.pathname === "/trucks" ? "outlined" : "text"}
                 >
                   Trucks
+                </Button>
+                <Button
+                  color="inherit"
+                  component={Link}
+                  to="/containers"
+                  startIcon={<Recycling />}
+                  variant={location.pathname === "/containers" ? "outlined" : "text"}
+                >
+                  Containers
                 </Button>
                 <Button
                   color="inherit"

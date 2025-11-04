@@ -53,25 +53,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 			if (currentUser) {
 				setUser(currentUser)
 				setIsAuthenticated(true)
-				navigate('/dashboard')
+				// Don't navigate - stay on current route
 			}
 		} catch (error) {
 			console.error('Failed to fetch user:', error)
-			// Keep user authenticated if token exists, use fallback user data
-			/*if (localStorage.getItem('accessToken')) {
-				// Create a fallback user based on email
-				const fallbackUser = {
-					id: 1,
-					name: email.split('@')[0],
-					email,
-					profile: email.includes('admin') ? Profile.ADMIN : Profile.SUPERVISOR,
-					country: 'Colombia',
-					createdAt: new Date().toISOString(),
-					updatedAt: new Date().toISOString()
-				}
-				setUser(fallbackUser)
-				setIsAuthenticated(true)
-			}*/
 		}
 	}
 

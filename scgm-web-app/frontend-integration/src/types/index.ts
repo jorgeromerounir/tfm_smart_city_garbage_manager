@@ -50,17 +50,6 @@ export interface VRPRoute {
 	points: RoutePoint[]
 }
 
-export interface Truck {
-	id: string
-	name: string
-	licensePlate: string
-	capacity: number
-	city: string
-	available: boolean
-	createdAt: string
-	updatedAt: string
-}
-
 export enum AssignmentStatus {
 	UNASSIGNED = 'UNASSIGNED',
 	PENDING = 'PENDING',
@@ -201,7 +190,7 @@ export interface ZoneDto {
 
 export interface ContainerZoneUpdateDto {
   containerId: string
-  zoneId: string
+  zoneId: string | null
 }
 
 export interface OptimizeRouteDto {
@@ -255,5 +244,37 @@ export interface City {
 	active: boolean
 	createdAt: string
 	updatedAt: string
+}
+
+export interface ContainerAddDto {
+  latitude: number
+  longitude: number
+  wasteLevelValue: number
+  wasteLevelStatus?: WasteLevel
+  temperature: number
+  address: string
+  cityId: number
+  customerId: number
+  zoneId?: string | undefined
+}
+
+export interface ContainerSearchParamsDto {
+  addressCoincidence?: string
+  zoneId?: string
+  limit?: number
+  wasteLevelStatus?: WasteLevel
+  betweenLatitude?: number
+  betweenLongitude?: number
+}
+
+export interface ContainerUpdateDto {
+  latitude: number
+  longitude: number
+  wasteLevelValue: number
+  temperature: number
+  address: string
+  cityId: number
+  customerId: number
+  zoneId?: string
 }
 

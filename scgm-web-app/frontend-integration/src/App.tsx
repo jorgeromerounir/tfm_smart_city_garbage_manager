@@ -1,5 +1,4 @@
 import { Box } from '@mui/material'
-import { useSnackbar } from 'notistack'
 import React, { useEffect } from 'react'
 import { Route, Routes } from 'react-router-dom'
 import Navbar from './components/Navbar'
@@ -12,37 +11,22 @@ import LoginPage from './pages/LoginPage'
 import RoutesPage from './pages/RoutesPage'
 import UsersPage from './pages/UsersPage'
 import ZonesPage from './pages/ZonesPage'
-//import { socketService } from './services/socket'
 import { Profile } from './types'
 import ContentInit from './components/ContentInit'
 import useNoti from './hooks/useNoti'
 import TrucksPage from './pages/TrucksPage'
+import ContainersPage from './pages/ContainersPage'
 
 const AppContent: React.FC = () => {
-	const { enqueueSnackbar } = useSnackbar()
 	const { isAuthenticated } = useAuth()
 	const { showNoti, NotificationComponent } = useNoti()
 
 	useEffect(() => {
-		
 		if (isAuthenticated) {
 			console.log('----> isAuthenticated: ', isAuthenticated);
-			/*socketService.connect()
-			socketService.onContainerUpdate((container: Container) => {
-				enqueueSnackbar(
-					`Container ${container.id.slice(0, 8)} status changed to ${container.wasteLevel}`,
-					{
-						variant: container.wasteLevelStatus === 'heavy' ? 'warning' : 'info',
-						autoHideDuration: 3000,
-					},
-				)
-			})
-			return () => {
-				socketService.disconnect()
-			}*/
-			showNoti('Wellcome to your portal!', 'success')   
+			showNoti('Wellcome to your SCGM portal!', 'success')   
 		}
-	}, [enqueueSnackbar, isAuthenticated])
+	}, [isAuthenticated])
 
 	return (
 		<>
@@ -165,6 +149,26 @@ const AppContent: React.FC = () => {
 							<Box component="main" sx={{ flexGrow: 1, p: 3 }}>
 								<ContentInit />
 								<TrucksPage />
+							</Box>
+						</Box>
+					</ProtectedRoute>
+				}
+			/>
+			<Route
+				path="/containers"
+				element={
+					<ProtectedRoute requiredRole={Profile.ADMIN}>
+						<Box
+							sx={{
+								display: 'flex',
+								flexDirection: 'column',
+								minHeight: '100vh',
+							}}
+						>
+							<Navbar />
+							<Box component="main" sx={{ flexGrow: 1, p: 3 }}>
+								<ContentInit />
+								<ContainersPage />
 							</Box>
 						</Box>
 					</ProtectedRoute>

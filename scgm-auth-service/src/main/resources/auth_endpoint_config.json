@@ -41,9 +41,27 @@
       "enabled": true,
       "requireCustomerId": false
     },
-    "GET::/api/v1/containers/status-summary/([0-9]+)": {
+    "GET::/api/v1/containers/by-customer/([0-9]+)/container/([0-9]+)": {
+      "allowAllProfiles": false,
+      "allowProfiles": ["SUPERVISOR", "ADMIN"],
+      "enabled": true,
+      "requireCustomerId": false
+    },
+    "GET::/api/v1/containers/by-customer/([0-9]+)/city/([0-9]+)/paginated": {
+      "allowAllProfiles": false,
+      "allowProfiles": ["SUPERVISOR", "ADMIN"],
+      "enabled": true,
+      "requireCustomerId": false
+    },
+    "GET::/api/v1/containers/by-customer/([0-9]+)/status-summary/([0-9]+)": {
       "allowAllProfiles": false,
       "allowProfiles": ["OPERATOR", "SUPERVISOR", "ADMIN"],
+      "enabled": true,
+      "requireCustomerId": false
+    },
+    "POST::/api/v1/containers/by-customer/([0-9]+)": {
+      "allowAllProfiles": false,
+      "allowProfiles": ["ADMIN", "SUPERVISOR"],
       "enabled": true,
       "requireCustomerId": false
     },

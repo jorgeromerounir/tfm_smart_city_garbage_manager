@@ -14,6 +14,7 @@ import com.scgm.containers.dto.BoundsDto;
 import com.scgm.containers.dto.ContainerAddDto;
 import com.scgm.containers.dto.ContainerAddSendorDto;
 import com.scgm.containers.dto.ContainerDto;
+import com.scgm.containers.dto.ContainerSearchParamsDto;
 import com.scgm.containers.dto.ContainerStatusSummaryDto;
 import com.scgm.containers.dto.ContainerUpdateDto;
 import com.scgm.containers.dto.ContainerZoneUpdateDto;
@@ -113,6 +114,33 @@ public class ContainerServiceImpl implements ContainerService {
                 .collect(Collectors.toList());
         } catch (Exception e) {
             log.error("Error trying to find containers by customer ID: {} and city ID: {}", customerId, cityId, e);
+            throw new ContainersDatabaseException("Error trying to find containers", e);
+        }
+    }
+
+    @Override
+    public List<ContainerDto> findByCustomerIdAndCityIdPaginated(Long customerId, Long cityId, ContainerSearchParamsDto searchParams) {
+        var reqListErrors = searchParams.validate();
+        if (!reqListErrors.isEmpty())
+            throw new ContainerValidationException("Error in search parameters validation.", reqListErrors);
+        
+        log.info("Finding containers paginated for customer ID: {}, city ID: {} with search params", customerId, cityId);
+        try {
+            Integer limit = searchParams.getLimit();
+            if (limit == null || limit < 0)
+                limit = 500;
+            if (limit > 2000)
+                limit = 2000;
+            String wasteLevelStatus = searchParams.getWasteLevelStatus() != null ? 
+                searchParams.getWasteLevelStatus().toString() : null;
+            return containerRepository.findByCustomerIdAndCityIdPaginatedDynamic(
+                customerId, 
+                cityId, 
+                searchParams
+            ).stream().map(ContainerDto::toDto)
+            .collect(Collectors.toList());
+        } catch (Exception e) {
+            log.error("Error trying to find containers paginated by customer ID: {} and city ID: {}", customerId, cityId, e);
             throw new ContainersDatabaseException("Error trying to find containers", e);
         }
     }

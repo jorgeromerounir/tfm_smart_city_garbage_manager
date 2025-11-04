@@ -9,7 +9,6 @@ import {
 	RouteAssignment,
 	SignInRequest,
 	StatusSummary,
-	Truck,
 	User,
 	City,
 	CityAddDto,
@@ -22,6 +21,10 @@ import {
 	TruckDto,
 	TruckSearchParams,
 	TruckUpdateDto,
+	ContainerZoneUpdateDto,
+	ContainerAddDto,
+	ContainerUpdateDto,
+	ContainerSearchParamsDto,
 } from '../types'
 
 const API_BASE = 'http://localhost:3001'
@@ -101,9 +104,44 @@ export const containerApi = {
 				hasZoneId:[!hasZoneId ? null : (hasZoneId == 'true')]}})
 				.then(res => res.data),
 
-	getStatusByCity: (cityId: number): Promise<StatusSummary> =>
-		containersApiAxios.post(`/api/v1/containers/status-summary/${cityId}`, 
+	getStatusByCity: (customerId: number, cityId: number): Promise<StatusSummary> =>
+		containersApiAxios.post(`/api/v1/containers/by-customer/${customerId}/status-summary/${cityId}`, 
 			{targetMethod: 'GET'}).then(res => res.data),
+
+	updateMultipleZonesId: (customerId: number, data: ContainerZoneUpdateDto[]): Promise<void> =>
+		containersApiAxios.post(`/api/v1/containers/by-customer/${customerId}/multiple-zones`, 
+			{targetMethod: 'PUT', body: data}).then(res => res.data),
+
+	//new services
+	add: (customerId: number, data: ContainerAddDto): Promise<Container> =>
+		containersApiAxios.post(`/api/v1/containers/by-customer/${customerId}`, 
+			{targetMethod: 'POST', body: data}).then(res => res.data),
+
+	findById: (customerId: number, containerId: string): Promise<Container> =>
+		containersApiAxios.post(`/api/v1/containers/by-customer/${customerId}/container/${containerId}`, 
+			{targetMethod: 'GET'}).then(res => res.data),
+	
+	findByCustomerCityPaginated: (customerId: number, cityId: number, params: ContainerSearchParamsDto = {}): Promise<Container[]> =>
+		containersApiAxios.post(`/api/v1/containers/by-customer/${customerId}/city/${cityId}/paginated`, 
+			{targetMethod: 'GET', queryParams: (() => {
+				const qp: any = {};
+				if (params.addressCoincidence)
+					qp.addressCoincidence = [params.addressCoincidence];
+				if (params.zoneId)
+					qp.zoneId = [params.zoneId];
+				if (params.limit)
+					qp.limit = [params.limit];
+				return qp;
+			})()})
+			.then(res => res.data),
+	
+	update: (customerId: number, containerId: string, data: ContainerUpdateDto): Promise<Container> =>
+		containersApiAxios.post(`/api/v1/containers/by-customer/${customerId}/container/${containerId}`, 
+			{targetMethod: 'PUT', body: data}).then(res => res.data),
+
+	delete: (customerId: number, containerId: string): Promise<void> =>
+		containersApiAxios.post(`/api/v1/containers/by-customer/${customerId}/container/${containerId}`, 
+			{targetMethod: 'DELETE'}).then(res => res.data),
 }
 
 export const zonesApi = {
@@ -118,6 +156,7 @@ export const zonesApi = {
 	deleteZone: (customerId: number, zoneId: string): Promise<void> =>
 		containersApiAxios.post(`/api/v1/zones/by-customer/${customerId}/zone-id/${zoneId}`, 
 			{targetMethod: 'DELETE'}).then(res => res.data),
+
 }
 
 export const routeApi = {
@@ -203,19 +242,6 @@ export const citiesApi = {
 }
 
 export const truckApi = {
-	//old and deprecated
-	/*getAll: (city?: string): Promise<Truck[]> => {
-		const params = city ? { city } : {}
-		return apiBaseAxios.get('/routes/trucks', { params }).then(res => res.data)
-	},
-	create: (data: {
-		name: string
-		licensePlate: string
-		capacity: number
-		city: string
-	}): Promise<Truck> =>
-		apiBaseAxios.post('/routes/trucks', data).then(res => res.data),*/
-	//----new services
 	add: (customerId: number, data: TruckAddDto): Promise<TruckDto> =>
 		routesApiAxios.post(`/api/v1/trucks/by-customer/${customerId}`, 
 			{targetMethod: 'POST', body: data}).then(res => res.data),

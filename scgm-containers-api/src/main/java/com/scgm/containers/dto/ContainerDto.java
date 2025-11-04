@@ -27,9 +27,9 @@ public class ContainerDto {
     private String address;
     private Long cityId;
     private Long customerId;
-    private String zoneId;
     private Instant createdAt;
     private Instant updatedAt;
+    private String zoneId;
 
     public static ContainerEntity toEntity(ContainerDto containerDto) {
         return ContainerEntity.builder()

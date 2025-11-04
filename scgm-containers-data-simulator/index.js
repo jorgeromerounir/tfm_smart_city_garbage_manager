@@ -7,7 +7,6 @@ import fs from 'fs'
 
 const EXCHANGE_NAME = 'container.updated.exchange'
 const EXCHANGE_TYPE = 'topic'
-const WASTE_LEVELS = ['light', 'medium', 'heavy']
 const NUM_PROCESSES = 10
 const INTERVAL_MS = 30_000 // 30 seconds
 
@@ -32,16 +31,8 @@ function scheduleDataSending(processId) {
   )
 }
 
-function generateContainerId() {
-  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
-    const r = (Math.random() * 16) | 0
-    const v = c === 'x' ? r : (r & 0x3) | 0x8
-    return v.toString(16)
-  })
-}
 
 // Load container IDs from JSON file
-//const containerIds = Array.from({ length: 200 }, () => generateContainerId())
 const containerData = JSON.parse(fs.readFileSync('./containers_id_list.json', 'utf8'))
 const containerIds = containerData.container_ids
 

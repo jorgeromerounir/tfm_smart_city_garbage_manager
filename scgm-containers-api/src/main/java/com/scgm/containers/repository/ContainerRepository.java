@@ -14,7 +14,7 @@ import org.springframework.stereotype.Repository;
 import com.scgm.containers.entity.ContainerEntity;
 
 @Repository
-public interface ContainerRepository extends JpaRepository<ContainerEntity, String>, JpaSpecificationExecutor<ContainerEntity> {
+public interface ContainerRepository extends JpaRepository<ContainerEntity, String>, JpaSpecificationExecutor<ContainerEntity>, ContainerRepositoryCustom {
 
     List<ContainerEntity> findByAddressContaining(String address);
 

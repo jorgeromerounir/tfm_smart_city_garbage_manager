@@ -18,7 +18,7 @@ const Dashboard: React.FC = () => {
 	const { customer } = useCustomer(user?.customerId);
 	const [status, setStatus] = useState<StatusSummary | null>(null)
 	const [loading, setLoading] = useState(true)
-	const secondsToRefresh = 30
+	const secondsToRefresh = 10
 	const millisecondsToRefresh = secondsToRefresh * 1000;
 
 	useEffect(() => {
@@ -34,7 +34,7 @@ const Dashboard: React.FC = () => {
 					})
 					return
 				}
-				const data = await containerApi.getStatusByCity(customer?.cityId);
+				const data = await containerApi.getStatusByCity(customer?.id, customer?.cityId);
 				setStatus(data)
 			} catch (error) {
 				console.error('Failed to fetch status:', error)
@@ -45,7 +45,7 @@ const Dashboard: React.FC = () => {
 		void fetchStatus()
 		const interval = setInterval(fetchStatus, millisecondsToRefresh) // Update every time
 		return () => clearInterval(interval)
-	}, [customer?.cityId])
+	}, [customer?.id, customer?.cityId])
 
 	if (loading) {
 		return (
@@ -93,7 +93,7 @@ const Dashboard: React.FC = () => {
 		<Box>
 			<Typography variant="h4" gutterBottom>Dashboard {customerName ? `- ${customerName}` : ''}</Typography>
 			<Typography variant="subtitle1" color="text.secondary" gutterBottom>
-				Real-time overview of waste container status (every {secondsToRefresh} seconds) for customer {customerName ? `${customerName}` : ''}
+				Real-time overview of waste container status (every {secondsToRefresh} seconds) for customer <b>{customerName ? `${customerName}` : ''}</b>
 			</Typography>
 
 			<Grid container spacing={3} sx={{ mt: 2 }}>

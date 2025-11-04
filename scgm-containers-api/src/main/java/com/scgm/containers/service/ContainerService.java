@@ -6,6 +6,7 @@ import java.util.Optional;
 import com.scgm.containers.dto.BoundsDto;
 import com.scgm.containers.dto.ContainerAddDto;
 import com.scgm.containers.dto.ContainerDto;
+import com.scgm.containers.dto.ContainerSearchParamsDto;
 import com.scgm.containers.dto.ContainerUpdateDto;
 import com.scgm.containers.dto.ContainerAddSendorDto;
 import com.scgm.containers.dto.ContainerStatusSummaryDto;
@@ -27,6 +28,8 @@ public interface ContainerService {
     public List<ContainerDto> findByCustomerId(Long customerId);
 
     public List<ContainerDto> findByCustomerIdAndCityId(Long customerId, Long cityId, Integer limit, Boolean hasZoneId);
+
+    public List<ContainerDto> findByCustomerIdAndCityIdPaginated(Long customerId, Long cityId, ContainerSearchParamsDto searchParams);
 
     public List<ContainerDto> findByCustomerIdAndCityIdAndZoneId(Long customerId, Long cityId, String zoneId, Integer limit);
 

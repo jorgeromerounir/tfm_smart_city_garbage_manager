@@ -5,7 +5,6 @@ import amqp from 'amqplib'
  * @type {Object}
  */
 const config = {
-  //url: 'amqp://localhost:5672',
   url: 'amqp://admin:admin123@localhost:5672',
   reconnectTimeout: 5000
 }

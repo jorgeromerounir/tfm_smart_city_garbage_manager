@@ -13,7 +13,7 @@ import {
 } from '@mui/material'
 import { useState, useEffect } from 'react'
 import { assignmentApi, truckApi, userApi } from '../services/api'
-import { OptimizedRoute, Profile, Truck, User, SavedRoute } from '../types'
+import { OptimizedRoute, Profile, User, SavedRoute } from '../types'
 
 interface RouteAssignmentDialogProps {
   open: boolean
@@ -54,7 +54,8 @@ export default function RouteAssignmentDialog({
 
   const loadTrucks = async () => {
     try {
-      const data = await truckApi.getAll(city)
+      //TODO pass customerId and cityId
+      const data = await truckApi.findByCustomerCity(1, 1, { available: true })
       setTrucks(data.filter(t => t.available))
     } catch (error) {
       console.error('Failed to load trucks:', error)

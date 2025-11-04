@@ -19,6 +19,7 @@ import com.scgm.containers.dto.BoundsDto;
 import com.scgm.containers.dto.ContainerAddDto;
 import com.scgm.containers.dto.ContainerAddSendorDto;
 import com.scgm.containers.dto.ContainerDto;
+import com.scgm.containers.dto.ContainerSearchParamsDto;
 import com.scgm.containers.dto.ContainerStatusSummaryDto;
 import com.scgm.containers.dto.ContainerUpdateDto;
 import com.scgm.containers.dto.ContainerZoneUpdateDto;
@@ -36,24 +37,26 @@ public class ContainerController {
 
     private final ContainerService containerService;
 
-    @PostMapping
-    public ResponseEntity<ContainerDto> add(@RequestBody ContainerAddDto containerAdd) {
-        log.info("Trying to add new container");
+    @PostMapping("/by-customer/{customerId}")
+    public ResponseEntity<ContainerDto> add(@PathVariable Long customerId, 
+        @RequestBody ContainerAddDto containerAdd) {
+        log.info("Trying to add new container, customerId: {}", customerId);
         var containerDto = containerService.add(containerAdd);
         return new ResponseEntity<>(containerDto, HttpStatus.CREATED);
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<ContainerDto> findById(@PathVariable String id) {
-        log.info("Finding container by ID");
+    @GetMapping("/by-customer/{customerId}/container/{id}")
+    public ResponseEntity<ContainerDto> findById(@PathVariable Long customerId, @PathVariable String id) {
+        log.info("Finding container by ID, customerId: {}", customerId);
         var containerOpt = containerService.findById(id);
         return containerOpt.map(container -> new ResponseEntity<>(container, HttpStatus.OK))
                 .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
 
-    @GetMapping("/by-address")
-    public ResponseEntity<List<ContainerDto>> findByAddressContaining(@RequestParam String address) {
-        log.info("Finding containers by address containing");
+    @GetMapping("/by-customer/{customerId}/by-address")
+    public ResponseEntity<List<ContainerDto>> findByAddressContaining(@PathVariable Long customerId,
+        @RequestParam String address) {
+        log.info("Finding containers by address containing, customerId: {}", customerId);
         List<ContainerDto> containers = containerService.findByAddressContaining(address);
         if (containers.isEmpty())
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
@@ -69,6 +72,19 @@ public class ContainerController {
         return new ResponseEntity<>(containers, HttpStatus.OK);
     }
 
+
+    @GetMapping("/by-customer/{customerId}/city/{cityId}/paginated")
+    public ResponseEntity<List<ContainerDto>> findByCustomerIdAndCityIdPaginated(
+        @PathVariable Long customerId, 
+        @PathVariable Long cityId,
+        @ModelAttribute ContainerSearchParamsDto searchParams) {
+        log.info("Finding paginated containers for customer ID: {}, city ID: {}", customerId, cityId);
+        List<ContainerDto> containers = containerService.findByCustomerIdAndCityIdPaginated(
+            customerId, cityId, searchParams);
+        return new ResponseEntity<>(containers, HttpStatus.OK);
+    }
+
+
     @GetMapping("/by-customer/{customerId}/city/{cityId}")
     public ResponseEntity<List<ContainerDto>> findByCustomerIdAndCityId(
         @PathVariable Long customerId, 
@@ -77,7 +93,8 @@ public class ContainerController {
         @RequestParam(required = false) Boolean hasZoneId) {
         log.info("Finding containers for customer ID: {}, city ID: {} with limit: {}, hasZoneId:{}", 
             customerId, cityId, limit, hasZoneId);
-        List<ContainerDto> containers = containerService.findByCustomerIdAndCityId(customerId, cityId, limit, hasZoneId);
+        List<ContainerDto> containers = containerService.findByCustomerIdAndCityId(
+            customerId, cityId, limit, hasZoneId);
         if (containers.isEmpty())
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         return new ResponseEntity<>(containers, HttpStatus.OK);
@@ -89,7 +106,8 @@ public class ContainerController {
         @PathVariable Long cityId,
         @PathVariable String zoneId,
         @RequestParam(required = false) Integer limit) {
-        log.info("Finding containers for customer ID: {}, city ID: {} and zoneId: {}", customerId, cityId, zoneId);
+        log.info("Finding containers for customer ID: {}, city ID: {} and zoneId: {}", 
+            customerId, cityId, zoneId);
         List<ContainerDto> containers = containerService.findByCustomerIdAndCityIdAndZoneId(
             customerId, cityId, zoneId, limit);
         if (containers.isEmpty())
@@ -97,24 +115,27 @@ public class ContainerController {
         return new ResponseEntity<>(containers, HttpStatus.OK);
     }
 
-    @PutMapping("/{containerId}")
-    public ResponseEntity<ContainerDto> update(@PathVariable String containerId, 
+    @PutMapping("/by-customer/{customerId}/container/{containerId}")
+    public ResponseEntity<ContainerDto> update(@PathVariable Long customerId, 
+        @PathVariable String containerId, 
         @RequestBody ContainerUpdateDto containerUpdate) {
-        log.info("Trying to update container");
+        log.info("Trying to update container, customerId: {}", customerId);
         var containerDto = containerService.update(containerId, containerUpdate);
         return new ResponseEntity<>(containerDto, HttpStatus.OK);
     }
 
-    @DeleteMapping("/{containerId}")
-    public ResponseEntity<Void> delete(@PathVariable String containerId) {
-        log.info("Trying to delete container by ID");
+    @DeleteMapping("/by-customer/{customerId}/container/{containerId}")
+    public ResponseEntity<Void> delete(@PathVariable Long customerId, 
+        @PathVariable String containerId) {
+        log.info("Trying to delete container by ID, customerId: {}", customerId);
         containerService.delete(containerId);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
-    @GetMapping("/status-summary/{cityId}")
-    public ResponseEntity<ContainerStatusSummaryDto> getStatusSummary(@PathVariable Long cityId) {
-        log.info("Getting status summary for city ID: {}", cityId);
+    @GetMapping("/by-customer/{customerId}/status-summary/{cityId}")
+    public ResponseEntity<ContainerStatusSummaryDto> getStatusSummary(@PathVariable Long customerId, 
+        @PathVariable Long cityId) {
+        log.info("Getting status summary for customerId: {}, city ID: {}", customerId, cityId);
         var summaryOpt = containerService.getStatusSummary(cityId);
         return summaryOpt.map(summary -> new ResponseEntity<>(summary, HttpStatus.OK))
                 .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));

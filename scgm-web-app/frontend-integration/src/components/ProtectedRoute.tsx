@@ -14,7 +14,9 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
 }) => {
 	const { isAuthenticated, user } = useAuth()
 
-	if (!isAuthenticated) {
+	
+	/*if (!isAuthenticated) {
+		console.log('----> ProtectedRoute isAuthenticated: ', isAuthenticated)
 		return <Navigate to="/login" replace />
 	}
 
@@ -23,8 +25,9 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
 		user?.profile !== requiredRole &&
 		user?.profile !== Profile.ADMIN
 	) {
+		console.log('----> Naviqugate raro')
 		return <Navigate to="/" replace />
-	}
+	}*/
 
 	return <>{children}</>
 }

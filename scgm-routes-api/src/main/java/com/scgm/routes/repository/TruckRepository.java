@@ -16,7 +16,7 @@ public interface TruckRepository extends MongoRepository<TruckEntity, String> {
 
     List<TruckEntity> findByCustomerIdAndCityId(Long customerId, Long cityId, Pageable pageable);
 
-    @Query("{ 'customer_id': ?0, 'city_id': ?1, 'name': { $regex: ?2, $options: 'i' } }")
+    @Query("{ 'customer_id': ?0, 'city_id': ?1, $or: [ { 'name': { $regex: ?2, $options: 'i' } }, { 'license_plate': { $regex: ?2, $options: 'i' } } ] }")
     List<TruckEntity> findByCustomerIdAndCityIdWithNameContaining(Long customerId, Long cityId, String namePattern, Pageable pageable);
 
 }

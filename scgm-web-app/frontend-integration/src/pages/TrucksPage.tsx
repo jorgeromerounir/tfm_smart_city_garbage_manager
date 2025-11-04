@@ -1,4 +1,4 @@
-import { Add, Delete, Edit, LocalShipping, Search } from '@mui/icons-material'
+import { Add, Delete, Edit, FireTruck, Search } from '@mui/icons-material'
 import {
 	Alert,
 	Box,
@@ -40,6 +40,7 @@ const TrucksPage: React.FC = () => {
 	const [open, setOpen] = useState(false)
 	const [editingTruck, setEditingTruck] = useState<TruckDto | null>(null)
 	const [searchTerm, setSearchTerm] = useState('')
+	const [searchInput, setSearchInput] = useState('')
 	const [currentPage, setCurrentPage] = useState(1)
 	const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
 	const [truckToDelete, setTruckToDelete] = useState<string | null>(null)
@@ -63,12 +64,15 @@ const TrucksPage: React.FC = () => {
 		void fetchCities()
 	}, [])
 
-	const fetchTrucks = async () => {
+	const fetchTrucks = async (searchValue?: string) => {
 		try {
 			setLoading(true)
 			setError(null)
-			const data = await truckApi.findByCustomerCity(customerId, defaultCityId, { limit: 500 })
-			setTrucks(data)
+			const nameCoincidence = (searchValue && searchValue.length > 2) ? searchValue : undefined;
+			const data = await truckApi.findByCustomerCity(customerId, defaultCityId, { limit: 500, nameCoincidence: nameCoincidence})
+			setTrucks(data ? data : [])
+			setSearchTerm(searchInput)
+			setCurrentPage(1)
 		} catch (error) {
 			console.error('Failed to fetch trucks:', error)
 			setError('Failed to load trucks. Please try again.')
@@ -168,7 +172,7 @@ const TrucksPage: React.FC = () => {
 		setEditingTruck(null)
 	}
 
-	const filteredTrucks = trucks.filter(truck => 
+	const filteredTrucks = trucks?.filter(truck => 
 		truck.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
 		truck.licensePlate.toLowerCase().includes(searchTerm.toLowerCase())
 	)
@@ -180,9 +184,14 @@ const TrucksPage: React.FC = () => {
 		currentPage * itemsPerPage
 	)
 
-	const handleSearchChange = (value: string) => {
-		setSearchTerm(value)
-		setCurrentPage(1)
+	const handleSearch = () => {
+		fetchTrucks(searchInput)
+	}
+
+	const handleKeyPress = (e: React.KeyboardEvent) => {
+		if (e.key === 'Enter') {
+			handleSearch()
+		}
 	}
 
 	return (
@@ -198,8 +207,8 @@ const TrucksPage: React.FC = () => {
 				}}
 			>
 				<Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-					<LocalShipping color="primary" />
-					<Typography variant="h4">Fleet Management</Typography>
+					<FireTruck color="primary" />
+					<Typography variant="h4">Trucks Management</Typography>
 				</Box>
 				<Button
 					variant="contained"
@@ -223,24 +232,34 @@ const TrucksPage: React.FC = () => {
 				</Alert>
 			)}
 
-			<TextField
-				fullWidth
-				placeholder="Search trucks by name or license plate..."
-				value={searchTerm}
-				onChange={(e) => handleSearchChange(e.target.value)}
-				InputProps={{
-					startAdornment: (
-						<InputAdornment position="start">
-							<Search />
-						</InputAdornment>
-					),
-				}}
-				sx={{ mb: 2 }}
-			/>
+			<Box sx={{ display: 'flex', gap: 1, mb: 2 }}>
+				<TextField
+					fullWidth
+					placeholder="Search trucks by name or license plate (Enter)..."
+					value={searchInput}
+					onChange={(e) => setSearchInput(e.target.value)}
+					onBlur={handleSearch}
+					onKeyPress={handleKeyPress}
+					InputProps={{
+						startAdornment: (
+							<InputAdornment position="start">
+								<Search />
+							</InputAdornment>
+						),
+					}}
+				/>
+				<IconButton
+					onClick={handleSearch}
+					color="primary"
+					sx={{ border: '1px solid #ccc', borderRadius: 1, px: 1.5, width: 100 }}
+				>
+					<Search fontSize="small" />
+				</IconButton>
+			</Box>
 
 			{!loading && (
 				<Box sx={{ mb: 2, p: 2, backgroundColor: '#f5f5f5', borderRadius: 1 }}>
-					<Typography variant="body2" color="text.secondary">
+					<Typography variant="body2" color="text.secondary" sx={{ fontWeight: 'bold' }}>
 						Showing {paginatedTrucks.length} of {filteredTrucks.length} trucks
 						{searchTerm && ` (filtered from ${trucks.length} total)`}
 					</Typography>
@@ -256,11 +275,11 @@ const TrucksPage: React.FC = () => {
 					<Table>
 						<TableHead sx={{ backgroundColor: '#f1f8e9' }}>
 							<TableRow>
-								<TableCell>Name</TableCell>
-								<TableCell>License Plate</TableCell>
-								<TableCell>Capacity (tons)</TableCell>
-								<TableCell>Status</TableCell>
-								<TableCell>Actions</TableCell>
+								<TableCell sx={{ fontWeight: 'bold' }}>Name</TableCell>
+								<TableCell sx={{ fontWeight: 'bold' }}>License Plate</TableCell>
+								<TableCell sx={{ fontWeight: 'bold' }}>Capacity (tons)</TableCell>
+								<TableCell sx={{ fontWeight: 'bold' }}>Status</TableCell>
+								<TableCell sx={{ fontWeight: 'bold' }}>Actions</TableCell>
 							</TableRow>
 						</TableHead>
 						<TableBody>
@@ -295,7 +314,7 @@ const TrucksPage: React.FC = () => {
 				</TableContainer>
 			)}
 
-			{!loading && totalPages > 1 && (
+			{!loading && (
 				<Box sx={{ display: 'flex', justifyContent: 'center', mt: 3 }}>
 					<Pagination
 						count={totalPages}
