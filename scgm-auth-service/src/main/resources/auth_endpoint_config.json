@@ -65,6 +65,18 @@
       "enabled": true,
       "requireCustomerId": false
     },
+    "PUT::/api/v1/containers/by-customer/([0-9]+)/container/([a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12})": {
+      "allowAllProfiles": false,
+      "allowProfiles": ["ADMIN", "SUPERVISOR"],
+      "enabled": true,
+      "requireCustomerId": false
+    },
+    "DELETE::/api/v1/containers/by-customer/([0-9]+)/container/([a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12})": {
+      "allowAllProfiles": false,
+      "allowProfiles": ["ADMIN", "SUPERVISOR"],
+      "enabled": true,
+      "requireCustomerId": false
+    },
     "PUT::/api/v1/containers/by-customer/([0-9]+)/multiple-zones": {
       "allowAllProfiles": false,
       "allowProfiles": ["ADMIN", "SUPERVISOR"],

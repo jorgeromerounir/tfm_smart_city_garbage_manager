@@ -9,6 +9,7 @@ import {
 	DialogContent,
 	DialogTitle,
 	FormControl,
+	Grid,
 	IconButton,
 	InputAdornment,
 	InputLabel,
@@ -29,6 +30,24 @@ import React, { useEffect, useState } from 'react'
 import { containerApi, citiesApi, zonesApi } from '../services/api'
 import { Container, ContainerAddDto, ContainerUpdateDto, City, ZoneDto, WasteLevel } from '../types'
 import useNoti from '../hooks/useNoti'
+import { useAuth } from '../contexts/AuthContext'
+import useCustomer from '../hooks/useCustomer'
+import { MapContainer, TileLayer, Marker, useMapEvents } from 'react-leaflet'
+import { LatLngExpression } from 'leaflet'
+
+interface LocationPickerProps {
+	position: [number, number]
+	onLocationSelect: (lat: number, lng: number) => void
+}
+
+const LocationPicker: React.FC<LocationPickerProps> = ({ position, onLocationSelect }) => {
+	useMapEvents({
+		click: (e) => {
+			onLocationSelect(e.latlng.lat, e.latlng.lng)
+		}
+	})
+	return position[0] !== 0 || position[1] !== 0 ? <Marker position={position} /> : null
+}
 
 const ContainersPage: React.FC = () => {
 	const [containers, setContainers] = useState<Container[]>([])
@@ -45,35 +64,49 @@ const ContainersPage: React.FC = () => {
 	const [containerToDelete, setContainerToDelete] = useState<string | null>(null)
 	const { showNoti, NotificationComponent } = useNoti()
 	
-	// Mock values - in real app these would come from context/auth
-	const customerId = 1
-	const defaultCityId = 1
+	const { user } = useAuth()
+	const { customer } = useCustomer(user?.customerId)
+	const [selectedCityId, setSelectedCityId] = useState<number>(customer?.cityId || 1)
+	const [selectedZoneId, setSelectedZoneId] = useState<string | undefined>(undefined)
+	
+	const customerId = customer?.id || 1
 	
 	const [formData, setFormData] = useState<ContainerAddDto>({
 		latitude: 0,
 		longitude: 0,
 		wasteLevelValue: 0,
-		temperature: 20,
+		temperature: 0,
 		address: '',
-		cityId: defaultCityId,
+		cityId: selectedCityId,
 		customerId: customerId,
 		zoneId: undefined,
 	})
 
 	useEffect(() => {
+		if (customer?.cityId) {
+			setSelectedCityId(customer.cityId)
+		}
+	}, [customer?.cityId])
+
+	useEffect(() => {
+		setSelectedZoneId(undefined)
+		void fetchZones()
+	}, [selectedCityId])
+
+	useEffect(() => {
 		void fetchContainers()
 		void fetchCities()
-		void fetchZones()
-	}, [])
+	}, [selectedCityId, selectedZoneId])
 
 	const fetchContainers = async (searchValue?: string) => {
 		try {
 			setLoading(true)
 			setError(null)
 			const addressCoincidence = (searchValue && searchValue.length > 2) ? searchValue : undefined
-			const data = await containerApi.findByCustomerCityPaginated(customerId, defaultCityId, { 
+			const data = await containerApi.findByCustomerCityPaginated(customerId, selectedCityId, { 
 				limit: 2000, 
-				addressCoincidence: addressCoincidence
+				addressCoincidence: addressCoincidence,
+				zoneId: selectedZoneId
 			})
 			setContainers(data ? data : [])
 			setSearchTerm(searchInput)
@@ -89,7 +122,7 @@ const ContainersPage: React.FC = () => {
 	const fetchCities = async () => {
 		try {
 			const data = await citiesApi.getAll()
-			setCities(data)
+			setCities(data? data: [])
 		} catch (error) {
 			console.error('Failed to fetch cities:', error)
 		}
@@ -97,8 +130,8 @@ const ContainersPage: React.FC = () => {
 
 	const fetchZones = async () => {
 		try {
-			const data = await zonesApi.getZonesByCustomerIdAndCityId(customerId, defaultCityId)
-			setZones(data)
+			const data = await zonesApi.getZonesByCustomerIdAndCityId(customerId, selectedCityId)
+			setZones(data? data: [])
 		} catch (error) {
 			console.error('Failed to fetch zones:', error)
 		}
@@ -179,9 +212,9 @@ const ContainersPage: React.FC = () => {
 				latitude: 0,
 				longitude: 0,
 				wasteLevelValue: 0,
-				temperature: 20,
+				temperature: 0,
 				address: '',
-				cityId: defaultCityId,
+				cityId: selectedCityId,
 				customerId: customerId,
 				zoneId: undefined,
 			})
@@ -224,6 +257,15 @@ const ContainersPage: React.FC = () => {
 		}
 	}
 
+	const getSelectedCityCenter = (): [number, number] => {
+		const selectedCity = cities.find(city => city.id === formData.cityId)
+		return selectedCity ? [selectedCity.latitude, selectedCity.longitude] : [0, 0]
+	}
+
+	const handleLocationSelect = (lat: number, lng: number) => {
+		setFormData({ ...formData, latitude: lat, longitude: lng })
+	}
+
 	return (
 		<>
 		<NotificationComponent/>
@@ -240,20 +282,51 @@ const ContainersPage: React.FC = () => {
 					<Inventory color="primary" />
 					<Typography variant="h4">Container Management</Typography>
 				</Box>
-				<Button
-					variant="contained"
-					startIcon={<Add />}
-					onClick={() => handleOpen()}
-					sx={{
-						borderRadius: 2,
-						textTransform: 'none',
-						fontWeight: 600,
-						px: 3,
-						py: 1.5,
-					}}
-				>
-					Add Container
-				</Button>
+				<Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+					<FormControl sx={{ minWidth: 200 }}>
+						<InputLabel>City</InputLabel>
+						<Select
+							value={selectedCityId}
+							label="City"
+							onChange={(e) => setSelectedCityId(e.target.value as number)}
+						>
+							{cities.map(city => (
+								<MenuItem key={city.id} value={city.id}>
+									{city.name}, {city.country}
+								</MenuItem>
+							))}
+						</Select>
+					</FormControl>
+					<FormControl sx={{ minWidth: 200 }}>
+						<InputLabel>Zone</InputLabel>
+						<Select
+							value={selectedZoneId || ''}
+							label="Zone"
+							onChange={(e) => setSelectedZoneId(e.target.value || undefined)}
+						>
+							<MenuItem value="">All Zones</MenuItem>
+							{zones.map(zone => (
+								<MenuItem key={zone.id} value={zone.id}>
+									{zone.name}
+								</MenuItem>
+							))}
+						</Select>
+					</FormControl>
+					<Button
+						variant="contained"
+						startIcon={<Add />}
+						onClick={() => handleOpen()}
+						sx={{
+							borderRadius: 2,
+							textTransform: 'none',
+							fontWeight: 600,
+							px: 3,
+							py: 1.5,
+						}}
+					>
+						Add Container
+					</Button>
+				</Box>
 			</Box>
 
 			{error && (
@@ -368,78 +441,102 @@ const ContainersPage: React.FC = () => {
 				</Box>
 			)}
 
-			<Dialog open={open} onClose={handleClose} maxWidth="sm" fullWidth>
+			<Dialog open={open} onClose={handleClose} maxWidth="lg" fullWidth>
 				<DialogTitle>{editingContainer ? 'Edit Container' : 'Add New Container'}</DialogTitle>
 				<DialogContent>
-					<TextField
-						fullWidth
-						label="Address"
-						value={formData.address}
-						onChange={e => setFormData({ ...formData, address: e.target.value })}
-						margin="normal"
-					/>
-					<TextField
-						fullWidth
-						label="Latitude"
-						type="number"
-						value={formData.latitude}
-						onChange={e => setFormData({ ...formData, latitude: parseFloat(e.target.value) || 0 })}
-						margin="normal"
-					/>
-					<TextField
-						fullWidth
-						label="Longitude"
-						type="number"
-						value={formData.longitude}
-						onChange={e => setFormData({ ...formData, longitude: parseFloat(e.target.value) || 0 })}
-						margin="normal"
-					/>
-					<TextField
-						fullWidth
-						label="Waste Level (%)"
-						type="number"
-						inputProps={{ min: 0, max: 100 }}
-						value={formData.wasteLevelValue}
-						onChange={e => setFormData({ ...formData, wasteLevelValue: parseFloat(e.target.value) || 0 })}
-						margin="normal"
-					/>
-					<TextField
-						fullWidth
-						label="Temperature (°C)"
-						type="number"
-						value={formData.temperature}
-						onChange={e => setFormData({ ...formData, temperature: parseFloat(e.target.value) || 0 })}
-						margin="normal"
-					/>
-					<FormControl fullWidth margin="normal">
-						<InputLabel>City</InputLabel>
-						<Select
-							value={formData.cityId}
-							label="City"
-							onChange={e => setFormData({ ...formData, cityId: e.target.value as number })}
-						>
-							{cities.map(city => (
-								<MenuItem key={city.id} value={city.id}>
-									{city.name}, {city.country}
-								</MenuItem>
-							))}
-						</Select>
-					</FormControl>
-					<FormControl fullWidth margin="normal">
-						<InputLabel>Zone (Optional)</InputLabel>
-						<Select
-							value={formData.zoneId || ''}
-							label="Zone (Optional)"
-							onChange={e => setFormData({ ...formData, zoneId: e.target.value || undefined })}
-						>
-							<MenuItem value="">No Zone</MenuItem>
-							{zones.map(zone => (
-								<MenuItem key={zone.id} value={zone.id}>
-									{zone.name}
-								</MenuItem>
-							))}
-						</Select>
-					</FormControl>
+					<Grid container spacing={3}>
+						<Grid item xs={6}>
+							<TextField
+								fullWidth
+								label="Address"
+								value={formData.address}
+								onChange={e => setFormData({ ...formData, address: e.target.value })}
+								margin="normal"
+							/>
+							<TextField
+								fullWidth
+								label="Latitude"
+								type="number"
+								value={formData.latitude}
+								onChange={e => setFormData({ ...formData, latitude: parseFloat(e.target.value) || 0 })}
+								margin="normal"
+							/>
+							<TextField
+								fullWidth
+								label="Longitude"
+								type="number"
+								value={formData.longitude}
+								onChange={e => setFormData({ ...formData, longitude: parseFloat(e.target.value) || 0 })}
+								margin="normal"
+							/>
+							<TextField
+								fullWidth
+								label="Waste Level (%)"
+								type="number"
+								inputProps={{ min: 0, max: 100 }}
+								value={formData.wasteLevelValue}
+								onChange={e => setFormData({ ...formData, wasteLevelValue: parseFloat(e.target.value) || 0 })}
+								margin="normal"
+							/>
+							<TextField
+								fullWidth
+								label="Temperature (°C)"
+								type="number"
+								value={formData.temperature}
+								onChange={e => setFormData({ ...formData, temperature: parseFloat(e.target.value) || 0 })}
+								margin="normal"
+							/>
+							<FormControl fullWidth margin="normal">
+								<InputLabel>City</InputLabel>
+								<Select
+									value={formData.cityId}
+									label="City"
+									onChange={e => setFormData({ ...formData, cityId: e.target.value as number })}
+								>
+									{cities.map(city => (
+										<MenuItem key={city.id} value={city.id}>
+											{city.name}, {city.country}
+										</MenuItem>
+									))}
+								</Select>
+							</FormControl>
+							<FormControl fullWidth margin="normal">
+								<InputLabel>Zone (Optional)</InputLabel>
+								<Select
+									value={formData.zoneId || ''}
+									label="Zone (Optional)"
+									onChange={e => setFormData({ ...formData, zoneId: e.target.value || undefined })}
+								>
+									<MenuItem value="">No Zone</MenuItem>
+									{zones.map(zone => (
+										<MenuItem key={zone.id} value={zone.id}>
+											{zone.name}
+										</MenuItem>
+									))}
+								</Select>
+							</FormControl>
+						</Grid>
+						<Grid item xs={6}>
+							<Typography variant="subtitle2" sx={{ mb: 1 }}>Click on map to select location</Typography>
+							<Box sx={{ height: 400, border: '1px solid #ccc', borderRadius: 1 }}>
+								<MapContainer
+									center={getSelectedCityCenter() as LatLngExpression}
+									zoom={11}
+									style={{ height: '100%', width: '100%' }}
+									key={`${formData.cityId}-${getSelectedCityCenter()[0]}-${getSelectedCityCenter()[1]}`}
+								>
+									<TileLayer
+										url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+										attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+									/>
+									<LocationPicker
+										position={[formData.latitude, formData.longitude]}
+										onLocationSelect={handleLocationSelect}
+									/>
+								</MapContainer>
+							</Box>
+						</Grid>
+					</Grid>
 					<Box sx={{ mt: 3, display: 'flex', gap: 2 }}>
 						<Button
 							onClick={handleSubmit}

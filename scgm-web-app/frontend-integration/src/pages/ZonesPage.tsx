@@ -11,7 +11,11 @@ import {
   Dialog,
   DialogTitle,
   DialogContent,
-  DialogActions
+  DialogActions,
+  FormControl,
+  InputLabel,
+  MenuItem,
+  Select
 } from '@mui/material'
 import React, { useState } from 'react'
 import MapViewZones from '../components/MapViewZones.tsx'
@@ -19,11 +23,12 @@ import OperatorDashboard from '../components/OperatorDashboard.tsx'
 import { useAuth } from '../contexts/AuthContext.tsx'
 import useContainers from '../hooks/useContainers.ts'
 import useCustomer from '../hooks/useCustomer.ts'
-import { Profile, ZoneAddDto } from '../types/index.ts'
+import { Profile, ZoneAddDto, City } from '../types/index.ts'
 import useGetCity from '../hooks/useGetCity.ts'
 import useZones, { Zone } from '../hooks/useZones.ts'
 import useAddMultipleZones from '../hooks/useAddMultipleZones.ts'
 import useNoti from '../hooks/useNoti.tsx'
+import { citiesApi } from '../services/api'
 
 const ZonesPage: React.FC = () => {
   const { user } = useAuth()
@@ -33,17 +38,38 @@ const ZonesPage: React.FC = () => {
   const [editableZones, setEditableZones] = useState<{[key: string]: {name: string, description: string}}>({})
   const [infoPopupOpen, setInfoPopupOpen] = useState(false)
   const [refreshKey, setRefreshKey] = useState(0)
+  const [cities, setCities] = useState<City[]>([])
   const { showNoti, NotificationComponent } = useNoti()
-  const { customer } = useCustomer(user?.customerId);
-  const { filteredContainers } = useContainers(customer?.id, customer?.cityId, 1000, 'false', refreshKey)
-  const zonesHook = useZones(customer?.id, customer?.cityId, refreshKey)
+  const { customer } = useCustomer(user?.customerId)
+  const [selectedCityId, setSelectedCityId] = useState<number>(customer?.cityId || 1)
+
+  React.useEffect(() => {
+    if (customer?.cityId) {
+      setSelectedCityId(customer.cityId)
+    }
+  }, [customer?.cityId])
+
+  React.useEffect(() => {
+    void fetchCities()
+  }, [])
+
+  const fetchCities = async () => {
+    try {
+      const data = await citiesApi.getAll()
+      setCities(data ? data : [])
+    } catch (error) {
+      console.error('Failed to fetch cities:', error)
+    }
+  }
+  const { filteredContainers } = useContainers(customer?.id, selectedCityId, 1000, 'false', refreshKey)
+  const zonesHook = useZones(customer?.id, selectedCityId, refreshKey)
 
   // Show operator dashboard for operators
   if (user?.profile === Profile.OPERATOR) {
     return <OperatorDashboard user={user}/>
   }
   
-  const { city } = useGetCity(customer?.cityId)
+  const { city } = useGetCity(selectedCityId)
 
   if (!city) {
     console.error('Error: City could not be loaded')
@@ -63,7 +89,7 @@ const ZonesPage: React.FC = () => {
       centerLatitude: zone.center[0],
       centerLongitude: zone.center[1],
       name: zone.name,
-      cityId: city.id,
+      cityId: selectedCityId,
       customerId: customer.id,
       startLat: zone.bounds[0][0],
       startLng: zone.bounds[0][1],
@@ -73,8 +99,6 @@ const ZonesPage: React.FC = () => {
       color: zone.color
     }))
   }
-
-  
 
   const saveZonesConfig = async () => {
     const finalZones = zonesHook.zones.map(zone => ({
@@ -100,58 +124,73 @@ const ZonesPage: React.FC = () => {
     <>
     <NotificationComponent />
     <Box>
-      <Box sx={{ position: "relative" }}>
-        <Typography variant="h4" gutterBottom sx={{ display: 'inline-block', mr: 2 }}>
-          Zones Management
-        </Typography>
-        <IconButton 
-          color="warning"
-          onClick={() => setInfoPopupOpen(true)}
-          sx={{ ml: 1, mb: 1}}
-        >
-          <Info />
-        </IconButton>
-        
-        <Button
-          variant="contained"
-          sx={{
-            borderRadius: 2,
-            textTransform: "none",
-            fontWeight: 600,
-            px: 3,
-            py: 1.5,
-            marginBottom: 2,
-            marginLeft: 2,
-            float: 'right',
-            mr: 1
-          }}
-          onClick={() => { setZonesDrawerOpen(true)
-            console.log('---> zones: ', zonesHook.zones)
-          }}
-        >
-          Manage Zones
-        </Button>
-        <Button
-          variant="contained"
-          sx={{
-            borderRadius: 2,
-            textTransform: "none",
-            fontWeight: 600,
-            px: 3,
-            py: 1.5,
-            marginBottom: 2,
-            marginLeft: 2,
-            float: 'right',
-            mr: 1
-          }}
-          onClick={() => {
-            setRefreshKey(prev => prev + 1)
-            setZonesDrawerOpen(false)
-            setInfoPopupOpen(false)
-          }}
-        >
-          Refresh
-        </Button>
+      <Box
+        sx={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          mb: 3,
+        }}
+      >
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          <Typography variant="h4">Zones Management</Typography>
+          <IconButton 
+            color="warning"
+            onClick={() => setInfoPopupOpen(true)}
+            sx={{ ml: 1 }}
+          >
+            <Info />
+          </IconButton>
+        </Box>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+          <FormControl sx={{ minWidth: 200 }}>
+            <InputLabel>City</InputLabel>
+            <Select
+              value={selectedCityId}
+              label="City"
+              onChange={(e) => setSelectedCityId(e.target.value as number)}
+            >
+              {cities.map(city => (
+                <MenuItem key={city.id} value={city.id}>
+                  {city.name}, {city.country}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+          <Button
+            variant="contained"
+            onClick={() => {
+              setRefreshKey(prev => prev + 1)
+              setZonesDrawerOpen(false)
+              setInfoPopupOpen(false)
+            }}
+            sx={{
+              borderRadius: 2,
+              textTransform: 'none',
+              fontWeight: 600,
+              px: 3,
+              py: 1.5,
+            }}
+          >
+            Refresh
+          </Button>
+          <Button
+            variant="contained"
+            onClick={() => { 
+              setZonesDrawerOpen(true)
+              console.log('---> zones: ', zonesHook.zones)
+            }}
+            sx={{
+              borderRadius: 2,
+              textTransform: 'none',
+              fontWeight: 600,
+              px: 3,
+              py: 1.5,
+            }}
+          >
+            Manage Zones
+          </Button>
+        </Box>
       </Box>
       
       <MapViewZones

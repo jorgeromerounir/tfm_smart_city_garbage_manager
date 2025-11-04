@@ -232,8 +232,8 @@ const CitiesPage: React.FC = () => {
 			{!loading && (
 				<Box sx={{ mb: 2, p: 2, backgroundColor: '#f5f5f5', borderRadius: 1 }}>
 					<Typography variant="body2" color="text.secondary">
-						Showing {paginatedCities.length} of {filteredCities.length} cities
-						{searchTerm && ` (filtered from ${cities.length} total)`}
+						<b>Showing {paginatedCities.length} of {filteredCities.length} cities
+						{searchTerm && ` (filtered from ${cities.length} total)`}</b>
 					</Typography>
 				</Box>
 			)}

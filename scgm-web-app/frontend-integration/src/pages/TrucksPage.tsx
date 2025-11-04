@@ -31,6 +31,8 @@ import React, { useEffect, useState } from 'react'
 import { truckApi, citiesApi } from '../services/api'
 import { TruckDto, TruckAddDto, TruckUpdateDto, City } from '../types'
 import useNoti from '../hooks/useNoti'
+import { useAuth } from '../contexts/AuthContext'
+import useCustomer from '../hooks/useCustomer'
 
 const TrucksPage: React.FC = () => {
 	const [trucks, setTrucks] = useState<TruckDto[]>([])
@@ -46,30 +48,38 @@ const TrucksPage: React.FC = () => {
 	const [truckToDelete, setTruckToDelete] = useState<string | null>(null)
 	const { showNoti, NotificationComponent } = useNoti()
 	
-	// Mock values - in real app these would come from context/auth
-	const customerId = 1
-	const defaultCityId = 1
+	const { user } = useAuth()
+	const { customer } = useCustomer(user?.customerId)
+	const [selectedCityId, setSelectedCityId] = useState<number>(customer?.cityId || 1)
+	
+	const customerId = customer?.id || 1
 	
 	const [formData, setFormData] = useState<TruckAddDto>({
 		name: '',
 		licensePlate: '',
 		capacity: 0,
-		cityId: defaultCityId,
+		cityId: selectedCityId,
 		customerId: customerId,
 		available: true,
 	})
 
 	useEffect(() => {
+		if (customer?.cityId) {
+			setSelectedCityId(customer.cityId)
+		}
+	}, [customer?.cityId])
+
+	useEffect(() => {
 		void fetchTrucks()
 		void fetchCities()
-	}, [])
+	}, [selectedCityId])
 
 	const fetchTrucks = async (searchValue?: string) => {
 		try {
 			setLoading(true)
 			setError(null)
 			const nameCoincidence = (searchValue && searchValue.length > 2) ? searchValue : undefined;
-			const data = await truckApi.findByCustomerCity(customerId, defaultCityId, { limit: 500, nameCoincidence: nameCoincidence})
+			const data = await truckApi.findByCustomerCity(customerId, selectedCityId, { limit: 500, nameCoincidence: nameCoincidence})
 			setTrucks(data ? data : [])
 			setSearchTerm(searchInput)
 			setCurrentPage(1)
@@ -84,7 +94,7 @@ const TrucksPage: React.FC = () => {
 	const fetchCities = async () => {
 		try {
 			const data = await citiesApi.getAll()
-			setCities(data)
+			setCities(data ? data : [])
 		} catch (error) {
 			console.error('Failed to fetch cities:', error)
 		}
@@ -159,7 +169,7 @@ const TrucksPage: React.FC = () => {
 				name: '',
 				licensePlate: '',
 				capacity: 0,
-				cityId: defaultCityId,
+				cityId: selectedCityId,
 				customerId: customerId,
 				available: true,
 			})
@@ -210,20 +220,36 @@ const TrucksPage: React.FC = () => {
 					<FireTruck color="primary" />
 					<Typography variant="h4">Trucks Management</Typography>
 				</Box>
-				<Button
-					variant="contained"
-					startIcon={<Add />}
-					onClick={() => handleOpen()}
-					sx={{
-						borderRadius: 2,
-						textTransform: 'none',
-						fontWeight: 600,
-						px: 3,
-						py: 1.5,
-					}}
-				>
-					Add Truck
-				</Button>
+				<Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+					<FormControl sx={{ minWidth: 200 }}>
+						<InputLabel>City</InputLabel>
+						<Select
+							value={selectedCityId}
+							label="City"
+							onChange={(e) => setSelectedCityId(e.target.value as number)}
+						>
+							{cities.map(city => (
+								<MenuItem key={city.id} value={city.id}>
+									{city.name}, {city.country}
+								</MenuItem>
+							))}
+						</Select>
+					</FormControl>
+					<Button
+						variant="contained"
+						startIcon={<Add />}
+						onClick={() => handleOpen()}
+						sx={{
+							borderRadius: 2,
+							textTransform: 'none',
+							fontWeight: 600,
+							px: 3,
+							py: 1.5,
+						}}
+					>
+						Add Truck
+					</Button>
+				</Box>
 			</Box>
 
 			{error && (

@@ -7,16 +7,13 @@ import useNoti from './useNoti.tsx'
 
 export default function useRoutes(
 	customer?: Customer,
-	user?: User,
 	selectedWasteTypes: WasteLevel[] = [],
 ) {
 	const [optimizedRoute, setOptimizedRoute] = useState<OptimizedRoute | null>(
 		null,
 	)
 	const [currentZone, setCurrentZone] = useState<ZoneDto | null>()
-	
-	//console.log('----> useRoutes user: ', user)
-	const { cities, selectedCity } = useCities(customer)
+	const { selectedCity } = useCities(customer)
 	const { savedRoutes, setSavedRoutes } = useSavedRoutes()
 	const [loading, setLoading] = useState(false)
 	const [routeName, setRouteName] = useState('')
@@ -163,7 +160,6 @@ export default function useRoutes(
 
 	return {
 		tabValue,
-		cities,
 		selectedCity,
 		currentZone,
 		optimizedRoute,

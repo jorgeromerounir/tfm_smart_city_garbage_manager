@@ -29,19 +29,41 @@ import { useAuth } from '../contexts/AuthContext.tsx'
 import useContainers from '../hooks/useContainers.ts'
 import useCustomer from '../hooks/useCustomer.ts'
 import useRoutes from '../hooks/useRoutes.ts'
-import { Profile } from '../types/index.ts'
+import { Profile, City } from '../types/index.ts'
 import useGetZones from '../hooks/useGetZones.ts'
+import { citiesApi } from '../services/api'
 
 const RoutesPage: React.FC = () => {
   const { user } = useAuth()
   const [assignmentDialogOpen, setAssignmentDialogOpen] = useState(false)
   const [sidenavOpen, setSidenavOpen] = useState(false)
   const [selectedRoute, setSelectedRoute] = useState<any>(null)
+  const [cities, setCities] = useState<City[]>([])
   //console.log('---> user data: ', user);
-  const { customer } = useCustomer(user?.customerId);
+  const { customer } = useCustomer(user?.customerId)
+  const [selectedCityId, setSelectedCityId] = useState<number>(customer?.cityId || 1)
+
+  React.useEffect(() => {
+    if (customer?.cityId) {
+      setSelectedCityId(customer.cityId)
+    }
+  }, [customer?.cityId])
+
+  React.useEffect(() => {
+    void fetchCities()
+  }, [])
+
+  const fetchCities = async () => {
+    try {
+      const data = await citiesApi.getAll()
+      setCities(data ? data : [])
+    } catch (error) {
+      console.error('Failed to fetch cities:', error)
+    }
+  }
 
   //console.log('---> customer data: ', customer);
-  const { zones } = useGetZones(customer?.id, customer?.cityId)
+  const { zones } = useGetZones(customer?.id, selectedCityId)
   
   // Show operator dashboard for operators
   if (user?.profile === Profile.OPERATOR) {
@@ -49,11 +71,10 @@ const RoutesPage: React.FC = () => {
   }
   
   const { filteredContainers, selectedWasteTypes, setSelectedWasteTypes } =
-    useContainers(customer?.id, customer?.cityId, 500, 'true')
+    useContainers(customer?.id, selectedCityId, 500, 'true')
   //console.log('---> filteredContainers: ', filteredContainers);
   const {
     tabValue,
-    cities,
     selectedCity,
     setRouteName,
     setTabValue,
@@ -67,7 +88,7 @@ const RoutesPage: React.FC = () => {
     handleLoadRoute,
     handleSaveRoute,
     savedRoutes,
-  } = useRoutes(customer ?? undefined, user ?? undefined, selectedWasteTypes)
+  } = useRoutes(customer ?? undefined, selectedWasteTypes)
 
   function handleAssignTruck(route: any) {
     setSelectedRoute(route)
@@ -76,27 +97,48 @@ const RoutesPage: React.FC = () => {
 
   return (
     <Box>
-      <Box sx={{ position: "relative" }}>
-        <Typography variant="h4" gutterBottom sx={{ display: 'inline-block', mr: 2 }}>
-          Route Optimization
-        </Typography>
-        <Button
-          type="submit"
-          variant="contained"
-          disabled={loading}
-          sx={{
-            borderRadius: 2,
-            textTransform: "none",
-            fontWeight: 600,
-            px: 3,
-            py: 1.5,
-            marginBottom: 2,
-            float: 'right'
-          }}
-          onClick={() => setSidenavOpen(true)}
-        >
-          {loading ? 'Loading...' : 'Manage routes'}
-        </Button>
+      <Box
+        sx={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          mb: 3,
+        }}
+      >
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          <Typography variant="h4">Route Optimization</Typography>
+        </Box>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+          <FormControl sx={{ minWidth: 200 }}>
+            <InputLabel>City</InputLabel>
+            <Select
+              value={selectedCityId}
+              label="City"
+              onChange={(e) => setSelectedCityId(e.target.value as number)}
+            >
+              {cities.map(city => (
+                <MenuItem key={city.id} value={city.id}>
+                  {city.name}, {city.country}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+          <Button
+            type="submit"
+            variant="contained"
+            disabled={loading}
+            onClick={() => setSidenavOpen(true)}
+            sx={{
+              borderRadius: 2,
+              textTransform: 'none',
+              fontWeight: 600,
+              px: 3,
+              py: 1.5,
+            }}
+          >
+            {loading ? 'Loading...' : 'Manage routes'}
+          </Button>
+        </Box>
       </Box>
 
       <Box sx={{ position: "relative" }}>

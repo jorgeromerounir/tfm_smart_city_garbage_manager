@@ -44,7 +44,7 @@ const Navbar: React.FC = () => {
             >
               Dashboard
             </Button>
-
+            <p>&gt;&gt;</p>
             {isAuthenticated && canAccessUsers && (
               <>
                 {user?.profile === Profile.ADMIN && (
@@ -55,7 +55,7 @@ const Navbar: React.FC = () => {
                     startIcon={<LocationCity />}
                     variant={location.pathname === "/cities" ? "outlined" : "text"}
                   >
-                    Cities
+                    1. Cities
                   </Button>
                 )}
                 <Button
@@ -65,7 +65,7 @@ const Navbar: React.FC = () => {
                   startIcon={<FireTruck />}
                   variant={location.pathname === "/trucks" ? "outlined" : "text"}
                 >
-                  Trucks
+                  2. Trucks
                 </Button>
                 <Button
                   color="inherit"
@@ -74,7 +74,7 @@ const Navbar: React.FC = () => {
                   startIcon={<Recycling />}
                   variant={location.pathname === "/containers" ? "outlined" : "text"}
                 >
-                  Containers
+                  3. Containers
                 </Button>
                 <Button
                   color="inherit"
@@ -83,7 +83,7 @@ const Navbar: React.FC = () => {
                   startIcon={<MapRounded />}
                   variant={location.pathname === "/zones" ? "outlined" : "text"}
                 >
-                  Zones
+                  4. Zones
                 </Button>
                 <Button
                   color="inherit"
@@ -92,7 +92,7 @@ const Navbar: React.FC = () => {
                   startIcon={<Route />}
                   variant={location.pathname === "/routes" ? "outlined" : "text"}
                 >
-                  Routes
+                  5. Routes
                 </Button>
                 <Button
                   color="inherit"
@@ -101,11 +101,11 @@ const Navbar: React.FC = () => {
                   startIcon={<People />}
                   variant={location.pathname === "/users" ? "outlined" : "text"}
                 >
-                  Users
-                </Button>
+                  6. Users
+                </Button>    
               </>
             )}
-
+            <p>&lt;&lt;</p>
             <Button color="inherit" startIcon={<AccountCircle />} onClick={handleUserMenuOpen}>
               {user?.name}
             </Button>
