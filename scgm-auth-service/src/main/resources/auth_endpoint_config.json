@@ -11,6 +11,12 @@
       "enabled": true,
       "requireCustomerId": false
     },
+    "GET::/api/v1/users/by-customer/([0-9]+)": {
+      "allowAllProfiles": false,
+      "allowProfiles": ["SUPERVISOR", "ADMIN"],
+      "enabled": true,
+      "requireCustomerId": false
+    },
     "GET::/api/v1/users/by-customer/([0-9]+)/profile-operator": {
       "allowAllProfiles": false,
       "allowProfiles": ["OPERATOR", "ADMIN"],

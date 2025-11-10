@@ -1,5 +1,6 @@
 import {
 	Alert,
+	Autocomplete,
 	Box,
 	Button,
 	Dialog,
@@ -14,13 +15,25 @@ import {
 import React, { useState } from 'react'
 import { useAuth } from '../contexts/AuthContext'
 import { userApi } from '../services/api'
-import { Profile } from '../types'
+import { Profile, Customer } from '../types'
 
 interface CreateUserFormProps {
 	open: boolean
 	onClose: () => void
 	onSuccess: () => void
 }
+
+const CUSTOMERS: Customer[] = [
+	{
+		id: 1,
+		name: "Admin Customer",
+		description: "Admin Customer",
+		cityId: 1,
+		active: true,
+		createdAt: "2024-01-01T00:00:00Z",
+		updatedAt: "2024-01-01T00:00:00Z"
+	}
+]
 
 const CreateUserForm: React.FC<CreateUserFormProps> = ({
 	open,
@@ -31,16 +44,17 @@ const CreateUserForm: React.FC<CreateUserFormProps> = ({
 	const [email, setEmail] = useState('')
 	const [password, setPassword] = useState('')
 	const [profile, setProfile] = useState<Profile>(Profile.OPERATOR)
+	const [customerId, setCustomerId] = useState<number>(0)
 	const [error, setError] = useState('')
 	const [loading, setLoading] = useState(false)
 	const { user, canManage } = useAuth()
 
 	const availableProfiles = () => {
 		if (user?.profile === Profile.ADMIN) {
-			return [Profile.SUPERVISOR, Profile.OPERATOR]
+			return [Profile.ADMIN, Profile.SUPERVISOR, Profile.OPERATOR]
 		}
 		if (user?.profile === Profile.SUPERVISOR) {
-			return [Profile.OPERATOR]
+			return [Profile.SUPERVISOR, Profile.OPERATOR]
 		}
 		return []
 	}
@@ -53,12 +67,15 @@ const CreateUserForm: React.FC<CreateUserFormProps> = ({
 			return
 		}
 
+		if (!customerId) {
+			setError('Please select a customer')
+			return
+		}
+
 		setLoading(true)
 		setError('')
 
 		try {
-			//TODO: Add customerId
-			const customerId = 1
 			await userApi.create({ name, email, password, profile, customerId }, user)
 			onSuccess()
 			onClose()
@@ -66,6 +83,7 @@ const CreateUserForm: React.FC<CreateUserFormProps> = ({
 			setEmail('')
 			setPassword('')
 			setProfile(Profile.OPERATOR)
+			setCustomerId(0)
 		} catch (err) {
 			setError('Failed to create user')
 		} finally {
@@ -127,6 +145,26 @@ const CreateUserForm: React.FC<CreateUserFormProps> = ({
 							))}
 						</Select>
 					</FormControl>
+
+					<Autocomplete
+						options={CUSTOMERS}
+						getOptionLabel={(customer) => customer.name}
+						value={CUSTOMERS.find(c => c.id === customerId) || null}
+						onChange={(_, newValue) => {
+							setCustomerId(newValue ? newValue.id : 0)
+						}}
+						renderInput={(params) => (
+							<TextField
+								{...params}
+								label="Customer *"
+								margin="normal"
+								fullWidth
+								required
+								error={!customerId}
+								helperText={!customerId ? 'Customer is required' : ''}
+							/>
+						)}
+					/>
 
 					<Box sx={{ mt: 3, display: 'flex', gap: 2 }}>
 						<Button

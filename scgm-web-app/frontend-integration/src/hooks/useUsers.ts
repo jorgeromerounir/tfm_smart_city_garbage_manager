@@ -3,6 +3,19 @@ import { useAuth } from '../contexts/AuthContext.tsx'
 import { userApi } from '../services/api.ts'
 import { Profile, User } from '../types/index.ts'
 
+
+const CUSTOMERS: Customer[] = [
+	{
+		id: 1,
+		name: "Admin Customer",
+		description: "Admin Customer",
+		cityId: 1,
+		active: true,
+		createdAt: "2024-01-01T00:00:00Z",
+		updatedAt: "2024-01-01T00:00:00Z"
+	}
+]
+
 export default function useUsers() {
 	const [users, setUsers] = useState<User[]>([])
 	const [createFormOpen, setCreateFormOpen] = useState(false)
@@ -15,9 +28,13 @@ export default function useUsers() {
 
 	const fetchUsers = async () => {
 		try {
-			//const allUsers = await userApi.getAll()
-			const allUsers:any[] = []
+			const allUsers = await userApi.findByCustomerId(1)
+			//const allUsers:any[] = []
 			// Filter users based on role permissions
+			if (!allUsers) {
+				setUsers([])
+				return
+			}
 			const filteredUsers = allUsers.filter(u => {
 				if (user?.profile === Profile.ADMIN) {
 					return true // Admins can see all users

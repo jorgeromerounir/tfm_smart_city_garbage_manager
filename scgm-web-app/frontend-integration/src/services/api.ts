@@ -197,6 +197,9 @@ export const customersApi = {
 export const userApi = {
 	getByProfileOperator: (customerId: number): Promise<User[]> =>
 		customersApiAxios.post(`/api/v1/users/by-customer/${customerId}/profile-operator}`, {targetMethod: 'GET'}).then(res => res.data),
+	
+	findByCustomerId: (customerId: number): Promise<User[]> =>
+		customersApiAxios.post(`/api/v1/users/by-customer/${customerId}`, {targetMethod: 'GET'}).then(res => res.data),
 
 	getByEmail: (email: string): Promise<User> =>
 		customersApiAxios.post(`/api/v1/users/by-email`, {targetMethod: 'GET', queryParams: {email:[email]}}).then(res => res.data),
